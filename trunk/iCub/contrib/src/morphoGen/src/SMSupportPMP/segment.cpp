@@ -230,7 +230,7 @@ unsigned connected_components( // returns the number of components excl. backgro
             J0 = ++newlabel[I0];
             if ( J0 >= MAXLABEL ) {
               fprintf(stderr,"Error: MAXLABEL exceeded, increase it.\n");
-              exit(1);
+	      //exit(1);  //Rea Change 10.1.13 : avoided direct call to exit 
             }
           } else J0 = J2;
         } else {

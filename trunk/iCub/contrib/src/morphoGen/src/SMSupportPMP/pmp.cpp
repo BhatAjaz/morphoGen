@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+// #include <windows.h> //Rea change 10/1/13
 #include <yarp/os/Network.h>
 #include <yarp/os/Port.h>
 #include <yarp/os/Bottle.h>
@@ -498,84 +498,97 @@ void PassiveMotionParadigm::PredictReachability(int whichOb)
 
 void PassiveMotionParadigm::GraspDetectVisionR()
  {
-              int GrdetR=V1.colSegMainR();
-		        if(GrdetR==-1)
-				{
-		         printf("\n\n Simulations sucessfull, Initiating Action execution with goal coupled to the left arm-torso network");
-                 Sleep(1000);
-				}
-			     if(GrdetR==1)
-				{
-					printf("\n\n There is a grasp failiure: Help me position my hand appropirately");
-					
-					CubRelease();
-					MessagePassR();
-        	        Sleep(10000);
-					printf("\n\n Reattempting the reach/grasp Goal");
-					Kompliance(1);
-					MiniGoal[0]=PlaceMap[Obj1ID][5]-40; MiniGoal[1]=PlaceMap[Obj1ID][6]; MiniGoal[2]=PlaceMap[Obj1ID][7]; MiniGoal[6]=0; MiniGoal[7]=0; MiniGoal[8]=0;
-					int recOb1R=VTGS(MiniGoal,0,0,1,90);
-					Sleep(4000);
-					CubGrazp3();
-       	   if(((ang4>-99)&&(ang4<-15))&&((ang5>10)&&(ang5<100)))
-	    	{
-		    	MessagePassR();
-			}
-	   Sleep(4000);
-	   CubGrazp4();
-	   	   if(((ang4>-99)&&(ang4<-15))&&((ang5>10)&&(ang5<100)))
-	    	{
-		    	MessagePassR();
-			}
-            Sleep(10000);
-            initiCubUp();
-	        MessagePassT();
-	        Sleep(2000);
-	        MessagePassR();
-	        Sleep(2000);
-				}
-      }; 
+   int GrdetR=V1.colSegMainR();
+   if(GrdetR==-1)
+     {
+       printf("\n\n Simulations sucessfull, Initiating Action execution with goal coupled to the left arm-torso network");
+       Time::delay(1);
+       //Sleep(1000); //Rea change 10/1/13
+     }
+   if(GrdetR==1)
+     {
+       printf("\n\n There is a grasp failiure: Help me position my hand appropirately");
+       
+       CubRelease();
+       MessagePassR();
+       Time::delay(10);
+       //Sleep(10000); //Rea change 10/1/13
+       printf("\n\n Reattempting the reach/grasp Goal");
+       Kompliance(1);
+       MiniGoal[0]=PlaceMap[Obj1ID][5]-40; MiniGoal[1]=PlaceMap[Obj1ID][6]; MiniGoal[2]=PlaceMap[Obj1ID][7]; MiniGoal[6]=0; MiniGoal[7]=0; MiniGoal[8]=0;
+       int recOb1R=VTGS(MiniGoal,0,0,1,90);
+       Time::delay(4);
+       //Sleep(4000); //Rea change 10/1/13
+       CubGrazp3();
+       if(((ang4>-99)&&(ang4<-15))&&((ang5>10)&&(ang5<100)))
+	 {
+	   MessagePassR();
+	 }
+       Time::delay(4);
+       //Sleep(4000); //Rea change 10/1/13
+       CubGrazp4();
+       if(((ang4>-99)&&(ang4<-15))&&((ang5>10)&&(ang5<100)))
+	 {
+	   MessagePassR();
+	 }
+       Time::delay(10);
+       //Sleep(10000); //Rea change 10/1/13
+       initiCubUp();
+       MessagePassT();
+       Time::delay(2);
+       //Sleep(2000); //Rea change 10/1/13
+       MessagePassR();
+       Time::delay(2);
+       //Sleep(2000); //Rea change 10/1/13
+     }
+ }; 
 
 
 void PassiveMotionParadigm::GraspDetectVisionL()
  {
-			int Grdet2L=V1.colSegMainR();
-		        if(Grdet2L==-1)
-				{
-		         printf("\n\n Object in hands, inititing inserting action");
-				}
-	         
-			if(Grdet2L==1)
-				{
-					printf("\n\n There is a grasp failiure: Help me position my hand appropirately");
-					CubRelease();
-					MessagePassL();
-        	        Sleep(10000);
-					printf("\n\n Reattempting the reach/grasp Goal");
-					
-					 printf("\n\n Reaching Goal");
-					 Kompliance(1);
-	      MiniGoal[6]=PlaceMap[Obj1ID][5]+30; MiniGoal[7]=PlaceMap[Obj1ID][6]; MiniGoal[8]=PlaceMap[Obj1ID][7]; MiniGoal[0]=0; MiniGoal[1]=0; MiniGoal[2]=0;
-          int recOb1L=VTGS(MiniGoal,0,1,1,90);
-	      Sleep(4000);
-          CubGrazpL3();
-       	   if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>10)&&(ang5L<100)))
-	    	{
-		    	MessagePassL();
-			}
-	       Sleep(4000);
-	       CubGrazpL4();
-	   	   if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>10)&&(ang5L<100)))
-	    	{
-		    	MessagePassL();
-			}
-		    Sleep(10000);
-            initiCubUp();
-	        MessagePassT();
-	        Sleep(2000);
-	        MessagePassL();
-	        Sleep(2000);
-    	    }
+   int Grdet2L=V1.colSegMainR();
+   if(Grdet2L==-1)
+     {
+       printf("\n\n Object in hands, inititing inserting action");
+     }
+   
+   if(Grdet2L==1)
+     {
+       printf("\n\n There is a grasp failiure: Help me position my hand appropirately");
+       CubRelease();
+       MessagePassL();
+       Time::delay(10);
+       //Sleep(10000); //Rea change 10/1/13
+       printf("\n\n Reattempting the reach/grasp Goal");
+       
+       printf("\n\n Reaching Goal");
+       Kompliance(1);
+       MiniGoal[6]=PlaceMap[Obj1ID][5]+30; MiniGoal[7]=PlaceMap[Obj1ID][6]; MiniGoal[8]=PlaceMap[Obj1ID][7]; MiniGoal[0]=0; MiniGoal[1]=0; MiniGoal[2]=0;
+       int recOb1L=VTGS(MiniGoal,0,1,1,90);
+       Time::delay(4);
+       //Sleep(4000); //Rea change 10/1/13
+       CubGrazpL3();
+       if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>10)&&(ang5L<100)))
+	 {
+	   MessagePassL();
+	 }
+       Time::delay(4);
+       //Sleep(4000); //Rea change 10/1/13
+       CubGrazpL4();
+       if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>10)&&(ang5L<100)))
+	 {
+	   MessagePassL();
+	 }
+       Time::delay(10);
+       //Sleep(10000); //Rea change 10/1/13
+       initiCubUp();
+       MessagePassT();
+       Time::delay(2);
+       //Sleep(2000); //Rea change 10/1/13
+       MessagePassL();
+       Time::delay(2);
+       //Sleep(2000); //Rea change 10/1/13
+     }
 };
 
 void PassiveMotionParadigm::PandP()
@@ -588,44 +601,58 @@ void PassiveMotionParadigm::PandP()
 	{
 	    MiniGoal[0]=PickX; MiniGoal[1]=PickY; MiniGoal[2]=PickZ; MiniGoal[6]=0; MiniGoal[7]=0; MiniGoal[8]=0;
 		recOb1=VTGS(MiniGoal,0,0,1,0); 
-		Sleep(5000);
+		Time::delay(5);
+		//Sleep(5000);
 		GraspR();
-		Sleep(10000);
+		Time::delay(10);
+		//Sleep(10000);
 		initiCubUp();
 		MessagePassR();
-		Sleep(5000);
+		Time::delay(5);
+		//Sleep(5000);
 		MiniGoal[0]=PlacX; MiniGoal[1]=PlacY; MiniGoal[2]=PlacZ; MiniGoal[6]=0; MiniGoal[7]=0; MiniGoal[8]=0;
 		recOb1=VTGS(MiniGoal,0,0,1,0); 
-		Sleep(5000);
+		Time::delay(5);
+		//Sleep(5000);
 		CubReleaseSoft(); 
 		MessagePassR();
-		Sleep(15000);
+		Time::delay(15);
+		//Sleep(15000);
 		initiCubUp();
 		MessagePassR();
-		Sleep(5000); 
-		Sleep(50000); //optional
+		Time::delay(5);
+		//Sleep(5000); 
+		Time::delay(50);
+		//Sleep(50000); //optional
 	}
 
 	if(PickX>0)
 	{
 	    MiniGoal[0]=0; MiniGoal[1]=0; MiniGoal[2]=0; MiniGoal[6]=PickX; MiniGoal[7]=PickY; MiniGoal[8]=PickZ;
 		recOb1=VTGS(MiniGoal,0,1,1,0); 
-		Sleep(5000);
+		Time::delay(5);
+		//Sleep(5000);
 		GraspL();
-		Sleep(10000);
+		Time::delay(10);
+		//Sleep(10000);
 		initiCubUp();
 		MessagePassL();
-		Sleep(5000);
+		Time::delay(5);
+		//Sleep(5000);
 		MiniGoal[0]=0; MiniGoal[1]=0; MiniGoal[2]=0; MiniGoal[6]=PlacX; MiniGoal[7]=PlacY; MiniGoal[8]=PlacZ;
 		recOb1=VTGS(MiniGoal,0,1,1,0); 
-		Sleep(5000);
+		Time::delay(5);
+		//Sleep(5000);
 		CubReleaseSoft(); 
 		MessagePassL();
-		Sleep(15000);
+		Time::delay(15);
+		//Sleep(15000);
 		initiCubUp();
 		MessagePassL();
-		Sleep(5000); 
-		Sleep(50000); //optional
+		Time::delay(5);
+		//Sleep(5000); 
+		Time::delay(50);
+		//Sleep(50000); //optional
 	}
 };
 
@@ -635,11 +662,14 @@ void PassiveMotionParadigm::PandP()
 	 InitializeJan();
 	 initiCubUp();
 	 MessagePassR();
-	 Sleep(2000);
+	 Time::delay(2);
+	 //Sleep(2000);
 	 MessagePassL();
-	 Sleep(2000); 
+	 Time::delay(2);
+	 //Sleep(2000); 
 	 MessagePassT();
-	 Sleep(2000);
+	 Time::delay(2);
+	 //Sleep(2000);
 	//=============================== This should come from random choice and placemap ==============================
    /*  PickX=-100;
 	 PickY=-300;
@@ -859,7 +889,8 @@ if((HandAct==1)||(HandAct==2))
 	 
 	
     printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],X_posL[1],X_posL[2]);
-    Sleep(5000);
+    Time::delay(5);
+    //Sleep(5000);
 	if(MSim==0)
 		{
 		  InitializeJan();
@@ -908,17 +939,19 @@ if((HandAct==1)||(HandAct==2))
 					{
 						if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))>=70))
 						{
-						retvalue=0;
-						printf("\n\n Target Unreachable");
+						  retvalue=0;
+						  printf("\n\n Target Unreachable");
 						}
 						if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))<70))
-						{
-						retvalue=1;
-						MessagePassR();
-					    Sleep(2000);
-						MessagePassT();
-					    Sleep(2000);
-						}
+						  {
+						    retvalue=1;
+						    MessagePassR();
+						    Time::delay(2);
+						    //Sleep(2000);
+						    MessagePassT();
+						    Time::delay(2);
+						    //Sleep(2000);
+						  }
 				
 					}
 				 //MessageDevDriverT();
@@ -931,16 +964,18 @@ if((HandAct==1)||(HandAct==2))
 					{
 						if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))>=70))
 						{
-						retvalue=0;
-						printf("\n\n Target Unreachable");
+						  retvalue=0;
+						  printf("\n\n Target Unreachable");
 						}
 						if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))<70))
-						{
-						retvalue=1;
-						MessagePassL();
-					    Sleep(2000);
-						MessagePassT();
-					    Sleep(2000);
+						  {
+						    retvalue=1;
+						    MessagePassL();
+						    Time::delay(2);
+						    //Sleep(2000);
+						    MessagePassT();
+						    Time::delay(2);
+						    //Sleep(2000);
 						}
 					}
 				 }
@@ -1165,20 +1200,22 @@ if((MiniGoal[0]==0)&&(MiniGoal[1]==0)&&(MiniGoal[2]==0)) //note this is for iCub
 						if(((ang4>-99)&&(ang4<-15))&&((ang5>9)&&(ang5<100)))
 						{
 								
-						retvalue=1;
-						MessagePassT();
-					    Sleep(2000);
-						MessagePassR();
-					    Sleep(2000);
-					    Proprioceptive[0]=X_pos[0];
-                        Proprioceptive[1]=X_pos[1];
+						  retvalue=1;
+						  MessagePassT();
+						  Time::delay(2);
+						  //Sleep(2000);
+						  MessagePassR();
+						  Time::delay(2);
+						  //Sleep(2000);
+						  Proprioceptive[0]=X_pos[0];
+						  Proprioceptive[1]=X_pos[1];
 						}
-							if((time%(3*dividen))==0) 
-							 {
-								int loopV=V1.colSegMainR();
-							}
-							// VisionSystem V2;
-							 //V2.colSegMainR();
+						if((time%(3*dividen))==0) 
+						  {
+						    int loopV=V1.colSegMainR();
+						  }
+						// VisionSystem V2;
+						//V2.colSegMainR();
 						 }
 				 }
 
@@ -1218,9 +1255,11 @@ if((MiniGoal[0]==0)&&(MiniGoal[1]==0)&&(MiniGoal[2]==0)) //note this is for iCub
 									
 						retvalue=1;
 						MessagePassT();
-					    Sleep(2000);
+						Time::delay(2);
+ 						//Sleep(2000);
 						MessagePassL();
-					    Sleep(2000);
+						Time::delay(2);
+						//Sleep(2000);
 						Proprioceptive[0]=X_posL[0];
                         Proprioceptive[1]=X_posL[1];
 						 printf("\n\n Proprioceptive prediction  %f \t %f \t",Proprioceptive[0],Proprioceptive[1]);
@@ -1247,13 +1286,15 @@ if((MiniGoal[0]==0)&&(MiniGoal[1]==0)&&(MiniGoal[2]==0)) //note this is for iCub
   };
           void PassiveMotionParadigm::GraspR()  
 			 {
-                      Sleep(4000);
+			   Time::delay(4);
+			   //Sleep(4000);
 					  CubGrazp3();
        				   if(((ang4>-99)&&(ang4<-15))&&((ang5>5)&&(ang5<100)))
 	    				{
 		    				MessagePassR();
 						}
-						   Sleep(4000);
+				   Time::delay(4);
+				   //Sleep(4000);
 						   CubGrazp4();
 	   				   if(((ang4>-99)&&(ang4<-15))&&((ang5>5)&&(ang5<100)))
 	    				{
@@ -1264,13 +1305,15 @@ if((MiniGoal[0]==0)&&(MiniGoal[1]==0)&&(MiniGoal[2]==0)) //note this is for iCub
 
 		   void PassiveMotionParadigm::GraspL()  
 			 {
-                      Sleep(4000);
+			   Time::delay(4);
+			   //Sleep(4000);
 					  CubGrazpL3();
        				  if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>5)&&(ang5L<100)))
 					   {
 		    				MessagePassL();
 						}
-						   Sleep(4000);
+				  Time::delay(4);
+				  //Sleep(4000);
 						   CubGrazpL4();
 	   				   if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>5)&&(ang5L<100)))
 						{

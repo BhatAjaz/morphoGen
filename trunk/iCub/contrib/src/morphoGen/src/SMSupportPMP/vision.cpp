@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
-#include <windows.h>
+// #include <windows.h> //Rea change 10/1/13
 #include <yarp/os/Network.h>
 #include <yarp/os/Port.h>
 #include <yarp/os/Bottle.h>
@@ -119,8 +119,8 @@ double tdGpmp[41];
     // FILE *model,*colorMaper;
 	// model=fopen("w1.txt","r");//input file to be given to the program	
      //colorMaper=fopen("w2.txt","r");
-
-	char* modelPtr ="model.txt";
+  string str ("model.txt");
+  char* modelPtr = (char*) str.c_str();
 	int nDim;
 	load_numeric_array(modelPtr,&nK,&nDim,&W);
 	if ( nDim!=8 ) {
@@ -136,8 +136,8 @@ double tdGpmp[41];
 	}
 
 	//string colormapFile = rf.find("colormapFile").asString();
-
-	char* colormapPtr ="colormap.txt";
+	string colormapstr("colormap.txt");
+	char* colormapPtr = (char*) colormapstr.c_str();
 	int n3, nK_;
 	load_numeric_array(colormapPtr,&nK_,&n3,&colormap);
 	if ( n3!=3 || nK_<nK ) {
@@ -644,7 +644,8 @@ for (j = 0 ; j < n-1 ; j++)
   FinXpos[1]=FinXpos[1]-246;
   //FinXpos[2]=FinXpos[2]+5;
   printf("\n FINALPOSITION %f  %f  %f  \t ", FinXpos[0],FinXpos[1]);
-Sleep(45000);			  
+  Time::delay(45);
+  //Sleep(45000);			  
  }
      
 
@@ -932,7 +933,8 @@ printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
 				   imagePortR.prepare() = *imgR;
                   
 				   imagePortR.write();
-				   Sleep(3000);
+				   Time::delay(3);
+				   //Sleep(3000);
 //                   ImageOf<PixelRgb> *img = imagePort.write();
      // write the image to a file
      //write(*imgR, "img5R.ppm");
@@ -1016,7 +1018,8 @@ printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
 				   imagePortL.prepare() = *imgL;
                   
 				   imagePortL.write();
-				   Sleep(3000);
+				   Time::delay(3);
+				   //Sleep(3000);
 //                   ImageOf<PixelRgb> *img = imagePort.write();
      // write the image to a file
      //write(*imgR, "img5R.ppm");
@@ -1101,7 +1104,8 @@ printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
 				   imagePortR.prepare() = *imgR;
                   
 				   imagePortR.write();
-				   Sleep(2000);
+				   Time::delay(2);
+				   //Sleep(2000);
 //                   ImageOf<PixelRgb> *img = imagePort.write();
      // write the image to a file
      //write(*imgR, "img5R.ppm");
@@ -1185,7 +1189,8 @@ printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
 				   imagePortL.prepare() = *imgL;
                   
 				   imagePortL.write();
-				   Sleep(3000);
+				   Time::delay(3);
+				   //Sleep(3000);
 //                   ImageOf<PixelRgb> *img = imagePort.write();
      // write the image to a file
      //write(*imgR, "img5R.ppm");
