@@ -40,12 +40,19 @@ private:
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
+    
 
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot event
     std::string name;                                                                // rootname of all the ports opened by this thread
+
+    //add your private stuff here ...
+
+
+
+
     
 public:
     /**
@@ -102,7 +109,7 @@ public:
     */
     void setInputPortName(std::string inpPrtName);
 
-
+    // add your public stuff ...
 
 };
 
