@@ -1,3 +1,27 @@
+// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
+
+/* 
+ # Copyright (C) 2012 Department of Robotics Brain and Cognitive Sciences - Istituto Italiano di Tecnologia
+ * Authors: 
+ * email:   
+ * Permission is granted to copy, distribute, and/or modify this program
+ * under the terms of the GNU General Public License, version 2 or any
+ * later version published by the Free Software Foundation.
+ *
+ * A copy of the license can be found at
+ * http://www.robotcub.org/icub/license/gpl.txt
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details
+ */
+  
+/**
+ * @file grasper.cpp
+ * @brief main code for the grasper module
+ */
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -85,7 +109,9 @@ Vector Grasper::readConfig(const string& path){
 }
 
 Matrix Grasper::readMatrix(const string& filename,int cols){
-	ifstream myfile(filename);
+  // ifstream myfile(filename); #Rea correction 9/01/13
+    ifstream myfile(filename.c_str(), ifstream::in  );
+
 
 	Matrix res(2,cols);		//MAGIC NUMBER
 
@@ -160,7 +186,8 @@ void Grasper::squeeze(Port& touch, Port& hand){
 			Vector data;
 			
 			//scanning all hand's joints to get encoders' value
-			for(int j=Joints::thumb_oppose;j<Joints::JointsNum;j++){			// - 8: thumb flexion, 15: ring+pinky flexion - joint 9: suggest to jump it (flex the thumb to the fingers)
+			//for(int j= Joints::thumb_oppose;j<Joints::JointsNum;j++){   #Rea corrected
+			for(int j= thumb_oppose;j<JointsNum;j++){			// - 8: thumb flexion, 15: ring+pinky flexion - joint 9: suggest to jump it (flex the thumb to the fingers)
 			
 				Bottle request("get enc ");
 				request.addInt(j);
@@ -173,7 +200,8 @@ void Grasper::squeeze(Port& touch, Port& hand){
 				hand.write(request_lims,reply);
 				double max=reply.get(3).asDouble();
 
-				if(j!=Joints::thumb_proximal && val<(max-INCREMENT)){				// - 9
+                // Rea change 10/1/13 if(j!=Joints::thumb_proximal && val<(max-INCREMENT)){
+				if(j!=thumb_proximal && val<(max-INCREMENT)){				// - 9
 					val+=INCREMENT;
 				}else{
 					jointsMask[j-thumb_oppose]=1.0;		//joint has reached limit
@@ -280,7 +308,8 @@ void Grasper::grasp(PoseGenerator::Hands domHand,PoseGenerator::ObjectClass objT
 	ofstream myfile("grasp_output.txt");
 	cout << "\nGsp> Grasping";// << endl;
 	for(int i=0;i<joints.rows();i++){
-		move_fingers(Joints::wrist_prosup,JointsNum,joints.getRow(i),hand);		//everything before 4 is the arm
+        //Rea change 10/1/13 move_fingers(Joints::wrist_prosup,JointsNum,joints.getRow(i),hand);		//everything before 4 is the arm
+		move_fingers(wrist_prosup,JointsNum,joints.getRow(i),hand);		//everything before 4 is the arm
 		cout << ".";
 	}
 	cout << endl;

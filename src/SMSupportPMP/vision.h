@@ -28,27 +28,27 @@ class VisionSystem
 		int iLocX,iLocY,iLocXL,iLocYL;
 		
 public:
-		VisionSystem();
-		~VisionSystem();
-		double* Vision(int ObjectType);
-		bool ModelLoad();
+	VisionSystem();
+	~VisionSystem();
+	double* Vision(int ObjectType);
+	bool ModelLoad();
 	int colSegMainR();
 	void colSegMainL();
 	void threadRelease();
 	void init_onsize(int width_, int height_);
-		double Determinant(double **a,int n);
-		void CoFactor(double **a,int n,double **b);
-		void Transpose(double **a,int n);
-		void ConvImg(double UUC1,double UUV1,double UUC2,double UUV2);
-		void RBF(double UUC1,double UUV1,double UUC2,double UUV2);
-		void GCamSceneR(int ActCamsR);
-		void GCamSceneL(int ActCamsL);
-		void GCamSceneRred(int ActCamsRred);
-		void GCamSceneLred(int ActCamsLred);
-		void initHead(double headzero);
+	double Determinant(double **a,int n);
+	void CoFactor(double **a,int n,double **b);
+	void Transpose(double **a,int n);
+	void ConvImg(double UUC1,double UUV1,double UUC2,double UUV2);
+	void RBF(double UUC1,double UUV1,double UUC2,double UUV2);
+	void GCamSceneR(int ActCamsR);
+	void GCamSceneL(int ActCamsL);
+	void GCamSceneRred(int ActCamsRred);
+	void GCamSceneLred(int ActCamsLred);
+	void initHead(double headzero);
 
-		BufferedPort<ImageOf<PixelRgb>> cam_in;
-	BufferedPort<ImageOf<PixelRgb>> cam_out;
+	BufferedPort<ImageOf<PixelRgb> > cam_in;
+	BufferedPort<ImageOf<PixelRgb> > cam_out;
 	Port output;
 
 	ResourceFinder rf;

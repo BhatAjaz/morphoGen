@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+// #include <windows.h> //Rea change 10/1/13
 #include <yarp/os/Network.h>
 #include <yarp/os/Port.h>
 #include <yarp/os/Bottle.h>
@@ -30,9 +30,9 @@ for the pushing task*/
 {    
         Network yarp;
         Network::init();
-		PassiveMotionParadigm P1;
-		P1.Reason(1);
+	PassiveMotionParadigm P1;
+	P1.Reason(1);
 	//	Sleep(10000);
-	   	Network::fini();
-		return 0;
+	Network::fini();
+	return 0;
 }

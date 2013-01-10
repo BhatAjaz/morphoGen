@@ -62,7 +62,7 @@ class PassiveMotionParadigm
 		double* PMP(double *force,double *forceL);
 		double Gamma_Int(double *Gar,int n);
 		double Gamma(int _Time);
-		double PassiveMotionParadigm:: Gamma1(int _Time1);
+		double Gamma1(int _Time1);
 		void Reason(int typeGoal);
 		int VTGS(double *MiniGoal, int ChoiceAct,int HandAct,int MSim, double Wrist);
 		void MotCon(double T1, double T2, double T3,double TL1, double TL2, double TL3,int time, double Gam,int HAct);
