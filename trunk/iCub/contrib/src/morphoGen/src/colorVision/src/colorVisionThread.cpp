@@ -75,8 +75,11 @@ void colorVisionThread::setInputPortName(string InpPort) {
 
 void colorVisionThread::run() {    
     while (isStopping() != true) {
-        if (outputPort.getInputCount()) {
-            
+
+        
+        
+
+        if (outputPort.getInputCount()) {            
             outputPort.prepare() = *inputImage;
             outputPort.write();  
         }
