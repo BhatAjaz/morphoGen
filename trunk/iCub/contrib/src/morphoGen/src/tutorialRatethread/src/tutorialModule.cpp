@@ -87,7 +87,7 @@ bool tutorialModule::configure(yarp::os::ResourceFinder &rf) {
 
 
     /* create the thread and pass pointers to the module parameters */
-    rThread = new tutorialThread(robotName, configFile);
+    rThread = new tutorialRatethread(robotName, configFile);
     rThread->setName(getName().c_str());
     //rThread->setInputPortName(inputPortName.c_str());
     
