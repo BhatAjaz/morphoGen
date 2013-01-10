@@ -35,7 +35,7 @@
 #include <time.h>
 
 
-class tutorialRatethread : public yarp::os::Ratethread {
+class tutorialRatethread : public yarp::os::RateThread {
 private:
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set

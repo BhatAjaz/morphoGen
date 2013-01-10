@@ -32,11 +32,11 @@ using namespace std;
 
 #define THRATE 100 //ms
 
-tutorialRatethread::tutorialRatethread()::RateThread(THRATE) {
+tutorialRatethread::tutorialRatethread():RateThread(THRATE) {
     robot = "icub";        
 }
 
-tutorialRatethread::tutorialRatethread(string _robot, string _configFile){
+tutorialRatethread::tutorialRatethread(string _robot, string _configFile):RateThread(THRATE){
     robot = _robot;
     configFile = _configFile;
 }

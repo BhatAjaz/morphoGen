@@ -25,8 +25,6 @@
 #ifndef _TUTORIAL_MODULE_H_
 #define _TUTORIAL_MODULE_H_
 
-
-
 /** 
  *
  * \defgroup icub_tutorial tutorial
@@ -127,7 +125,7 @@
  * 
  * <tt>tutorial --name tutorial --context tutorial/conf --from tutorial.ini --robot icub</tt>
  *
- * \author Shashank
+ * \author Rea Francesco
  *
  * Copyright (C) 2011 RobotCub Consortium\n
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.\n
@@ -146,11 +144,9 @@
 #include <yarp/os/Thread.h>
  
 //within project includes  
-#include <iCub/tutorialThread.h>
-
+#include <iCub/tutorialRatethread.h>
 
 class tutorialModule:public yarp::os::RFModule {
-
     
     std::string moduleName;                  // name of the module
     std::string robotName;                   // name of the robot 
@@ -162,7 +158,7 @@ class tutorialModule:public yarp::os::RFModule {
     
     yarp::os::Port handlerPort;              // a port to handle messages 
     /*  */
-    tutorialThread *rThread;             // pointer to a new thread to be created and started in configure() and stopped in close()
+    tutorialRatethread *rThread;             // pointer to a new thread to be created and started in configure() and stopped in close()
 
 public:
     /**
@@ -202,7 +198,7 @@ public:
 };
 
 
-#endif // __R_MODULE_H__
+#endif // _TUTORIAL_MODULE_H__
 
 //----- end-of-file --- ( next line intentionally left blank ) ------------------
 

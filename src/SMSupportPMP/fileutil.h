@@ -1,5 +1,6 @@
 #include <fstream>
 
+//Rea change 10/1/13: defined 
 #define UCHAR_MAX 255
 
 /* Utilities for loading and saving a numeric matrix (array) in text format. */
