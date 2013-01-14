@@ -182,7 +182,8 @@ double* colorVisionThread::Vision(int ObjectType)
 	// model=fopen("w1.txt","r");//input file to be given to the program	
      //colorMaper=fopen("w2.txt","r");
 
-	char* modelPtr ="model.txt";
+	//char* modelPtr ="model.txt";
+    char* modelPtr = (char*) modelPath.c_str();
 	int nDim;
 	load_numeric_array(modelPtr,&nK,&nDim,&W);
 	if ( nDim!=8 ) {
@@ -199,7 +200,8 @@ double* colorVisionThread::Vision(int ObjectType)
 
 	//string colormapFile = rf.find("colormapFile").asString();
 
-	char* colormapPtr ="colormap.txt";
+	//char* colormapPtr ="colormap.txt";
+    char* colormapPtr = (char*) colorMapPath.c_str();
 	int n3, nK_;
 	load_numeric_array(colormapPtr,&nK_,&n3,&colormap);
 	if ( n3!=3 || nK_<nK ) {
@@ -640,31 +642,31 @@ for (j = 0 ; j < n-1 ; j++)
 			    bias2[u]=s[u];  
 	   		}*/ 
 
-   if(	we1==NULL)
-				{
-					printf("Cant read the input file\n");
-					exit(0);
-				}
-
-   i=0;
+    if(	we1==NULL)
+        {
+            printf("Cant read the input file\n");
+            //exit(0);
+        }
+    
+    i=0;
 	for(u=0;u<77;u++)  // load caliberation matrix for camera 1
 		{
-		
+            
 			for(j=0;j<2;j++)  // load caliberation matrix for camera 1
-		    {
-				we1 >> s[i];
-			    weight1[u][j]=s[i];  
-				i=i+1;
-	   		}
+                {
+                    we1 >> s[i];
+                    weight1[u][j]=s[i];  
+                    i=i+1;
+                }
 		}
-
-	   if(	we2==NULL)
-				{
-					printf("Cant read the input file\n");
-					exit(0);
-				}
-
-   i=0;
+    
+    if(	we2==NULL)
+        {
+            printf("Cant read the input file\n");
+            //exit(0);
+        }
+    
+    i=0;
 	for(u=0;u<2;u++)  // load caliberation matrix for camera 1
 		{
 		
@@ -683,31 +685,31 @@ for (j = 0 ; j < n-1 ; j++)
     
     for(u=0;u<77;u++)  // load caliberation matrix for camera 1
 		{
-	     mid[u]=(sqrt(pow((171-weight1[u][0]),2)+ pow((201-weight1[u][1]),2)))*0.8326;
-		 pintee=pow(mid[u],2);
-		 midrad[u]=(exp((-1*pintee)/50)); 
+            mid[u]=(sqrt(pow((171-weight1[u][0]),2)+ pow((201-weight1[u][1]),2)))*0.8326;
+            pintee=pow(mid[u],2);
+            midrad[u]=(exp((-1*pintee)/50)); 
 		 	printf("\n Midrad %f  %f \t ", pintee,midrad[u]);
-		    }
-      
-
+        }
+    
+    
 	for(u=0;u<2;u++)
 		{
-		tempj=0;
-		 for(j=0;j<77;j++)	
-		  {
-			  tempj=tempj+weight2[u][j]*midrad[j];
-		  }
-	 FinXpos[u]=tempj;
-	   }
-
+            tempj=0;
+            for(j=0;j<77;j++)	
+                {
+                    tempj=tempj+weight2[u][j]*midrad[j];
+                }
+            FinXpos[u]=tempj;
+        }
+    
 	printf("\n FINALPOSITION %f  %f  %f  \t ", FinXpos[0],FinXpos[1]);
-
-  FinXpos[0]=FinXpos[0]+45-226;
-  FinXpos[1]=FinXpos[1]-246;
-  //FinXpos[2]=FinXpos[2]+5;
-  printf("\n FINALPOSITION %f  %f  %f  \t ", FinXpos[0],FinXpos[1]);
-//Sleep(45000);		
-  }
+    
+    FinXpos[0]=FinXpos[0]+45-226;
+    FinXpos[1]=FinXpos[1]-246;
+    //FinXpos[2]=FinXpos[2]+5;
+    printf("\n FINALPOSITION %f  %f  %f  \t ", FinXpos[0],FinXpos[1]);
+    //Sleep(45000);		
+ }
      
 
 
@@ -747,7 +749,7 @@ for (j = 0 ; j < n-1 ; j++)
 	if(	calib1==NULL)
 				{
 					printf("Cant read the input file\n");
-					exit(0);
+					//exit(0);
 				}
 	for(u=0;u<11;u++)  // load caliberation matrix for camera 1
 		    {
@@ -760,7 +762,7 @@ for (j = 0 ; j < n-1 ; j++)
 if(	calib2==NULL)
 				{
 					printf("Cant read the input file\n");
-					exit(0);
+					//exit(0);
 				}
 	for(u=0;u<11;u++)   // load caliberation matrix for camera 2
 		    {
