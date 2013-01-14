@@ -91,6 +91,8 @@ bool colorVisionModule::configure(yarp::os::ResourceFinder &rf) {
 	if (modelFile=="") {
             return false;
         }
+    
+
 
 	colormapFile=rf.findFile(rf.find("colormap").asString().c_str());
 	if (colormapFile=="") {
@@ -100,6 +102,9 @@ bool colorVisionModule::configure(yarp::os::ResourceFinder &rf) {
 
     /* create the thread and pass pointers to the module parameters */
     rThread = new colorVisionThread(robotName, configFile);
+
+    rThread->setColorPath(colormapFile);
+    rThread->setModelPath(modelFile);
     rThread->setName(getName().c_str());
     //rThread->setInputPortName(inputPortName.c_str());
     
