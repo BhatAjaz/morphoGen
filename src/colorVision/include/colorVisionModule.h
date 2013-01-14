@@ -159,6 +159,8 @@ class colorVisionModule:public yarp::os::RFModule {
     std::string outputPortName;              // name of output port
     std::string handlerPortName;             // name of handler port
     std::string configFile;                  // name of the configFile that the resource Finder will seek
+	std::string modelFile;                  // name of the configFile that the resource Finder will seek
+    std::string colormapFile;
     
     yarp::os::Port handlerPort;              // a port to handle messages 
     /*  */

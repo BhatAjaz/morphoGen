@@ -84,6 +84,18 @@ bool colorVisionModule::configure(yarp::os::ResourceFinder &rf) {
     else {
         configFile.clear();
     }
+ 
+	/** find model and color map
+*/
+	modelFile=rf.findFile(rf.find("model").asString().c_str());
+	if (modelFile=="") {
+            return false;
+        }
+
+	colormapFile=rf.findFile(rf.find("colormap").asString().c_str());
+	if (colormapFile=="") {
+            return false;
+        }
 
 
     /* create the thread and pass pointers to the module parameters */
