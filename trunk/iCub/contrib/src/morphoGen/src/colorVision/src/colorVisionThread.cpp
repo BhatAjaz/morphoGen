@@ -381,7 +381,7 @@ void colorVisionThread::colSegMainL()
 	reparameterize_unary_potentials(E,nE,q,width*height,nK,f);
 	for ( int iter=0; iter<niter; iter++ ) {
 		float residL = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
-		printf("iter=%i resid=%g\n",iter,residL);
+		// printf("iter=%i resid=%g\n",iter,residL);
 	}
 	extract_labeling(q,nK,width*height,K);
 
@@ -393,7 +393,7 @@ void colorVisionThread::colSegMainL()
 	//printf("]\n");
 	delete[] histL;
 
-	printf("Finding connected components.\n");
+	//printf("Finding connected components.\n");
 	for ( int i=0; i<width; i++ ) K[i] = 0; // Set column 0 to background
 	for ( int j=0; j<height; j++ ) K[j*width] = 0; // Set row 0 to background
 	unsigned ncomponentsL = connected_components(K,width,height,minsize,J);
@@ -424,7 +424,7 @@ void colorVisionThread::colSegMainL()
 	for ( int i=0; i<5*ncomponents; i++ ) bot.addInt(bbox[i]);
 	output.write(bot);*/ 
 
-	printf("\n number of objects %d ", ncomponentsL);
+	//printf("\n number of objects %d ", ncomponentsL);
 	numobjectsL= ncomponentsL;
 	int tempVL;
     counteeL=0;
