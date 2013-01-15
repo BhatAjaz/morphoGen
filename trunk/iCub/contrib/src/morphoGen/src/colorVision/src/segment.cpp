@@ -244,9 +244,9 @@ unsigned connected_components( // returns the number of components excl. backgro
       J[i+width*j] = J0;
     }
 
-  printf("max labels = [");
-  for ( int k=0; k<=nlabels; k++ ) printf("%i ",(int)newlabel[k]);
-  printf("]\n");
+ // printf("max labels = [");
+ // for ( int k=0; k<=nlabels; k++ ) printf("%i ",(int)newlabel[k]);
+ // printf("]\n");
 
   // Transform J to representants of equivalence classes for each component.
   // Compute n[k] the number of pixels with label k.

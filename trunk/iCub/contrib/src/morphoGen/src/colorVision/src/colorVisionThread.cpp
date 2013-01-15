@@ -55,7 +55,7 @@ bool colorVisionThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }    
-
+    ModelLoad();
     return true;
     
 
@@ -345,7 +345,7 @@ free(W);
 
 void colorVisionThread::colSegMainL()
 {
-     ModelLoad();     
+     //ModelLoad();     
 	 BufferedPort<ImageOf<PixelRgb> > imagePortRTL;
      
 	 imagePortRTL.open("/v1/imagePortRTL");
@@ -356,20 +356,20 @@ void colorVisionThread::colSegMainL()
      ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
      
      if (imgRTL!=NULL) { // check we actually got something
-     printf("We got an image of size %dx%d\n", imgRTL->width(), imgRTL->height());
+     //printf("We got an image of size %dx%d\n", imgRTL->width(), imgRTL->height());
 
 	if ( q == NULL ) {
-		printf("Image size known, allocating MRF arrays.\n");
+	//	printf("Image size known, allocating MRF arrays.\n");
 		init_onsize(imgRTL->width(),imgRTL->height());
 	}
 	if ( (imgRTL->width()!=width) || (imgRTL->height()!=height) ) {
-		printf("Error: Image size changed during session.\n");
+	//	printf("Error: Image size changed during session.\n");
 		return;
 	}
 	
 	unsigned char *I = imgRTL->getRawImage();
 	
-	printf("Constructing and optimizing MRF.\n");
+	//printf("Constructing and optimizing MRF.\n");
 	compute_unary_potentials(I,W,nK,width*height,q);
 	reparameterize_unary_potentials(E,nE,q,width*height,nK,f);
 	for ( int iter=0; iter<niter; iter++ ) {
@@ -378,21 +378,21 @@ void colorVisionThread::colSegMainL()
 	}
 	extract_labeling(q,nK,width*height,K);
 
-	printf("Segmentation done. Label histogram=[");
+	//printf("Segmentation done. Label histogram=[");
 	int *histL = new int[nK];
 	for ( int k=0; k<nK; k++ ) histL[k]=0;
 	for ( int i=0; i<width*height; i++ ) histL[K[i]]++;
-	for ( int k=0; k<nK; k++ ) printf("%i ",histL[k]);
-	printf("]\n");
+	// for ( int k=0; k<nK; k++ ) printf("%i ",histL[k]);
+	//printf("]\n");
 	delete[] histL;
 
 	printf("Finding connected components.\n");
 	for ( int i=0; i<width; i++ ) K[i] = 0; // Set column 0 to background
 	for ( int j=0; j<height; j++ ) K[j*width] = 0; // Set row 0 to background
 	unsigned ncomponentsL = connected_components(K,width,height,minsize,J);
-	printf("No. of components (excl. background) = %i\n",ncomponentsL);
+	// printf("No. of components (excl. background) = %i\n",ncomponentsL);
 
-	printf("Computing bounding boxes.\n");
+	// printf("Computing bounding boxes.\n");
 	int *bboxL = new int[5*ncomponentsL];
 	bounding_boxes(J,K,width,height,ncomponentsL,bboxL);
 	for ( int k=0; k<ncomponentsL; k++ ) {
@@ -445,10 +445,10 @@ void colorVisionThread::colSegMainL()
 	{
 		counteeL=counteeL+1;
 	}
-	printf("\n bbvalL %d ", bbvalsL[i]);
+	//printf("\n bbvalL %d ", bbvalsL[i]);
 	}
     
-	printf("\n");
+	// printf("\n");
 }
 }
 

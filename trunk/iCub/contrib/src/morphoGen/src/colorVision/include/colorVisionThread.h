@@ -38,8 +38,6 @@
 #include <math.h>
 
 
-
-
 class colorVisionThread : public yarp::os::Thread {
 private:
     std::string robot;              // name of the robot
