@@ -50,7 +50,9 @@ private:
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imagePortRTL;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot event
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot RGB image
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputPort;      // input port to receive RGB image
+    yarp::os::BufferedPort<yarp::os::Bottle > dataPort;      // input port to receive RGB image
     std::string name;                                                                // rootname of all the ports opened by this thread
 
     //add your private stuff here ...
