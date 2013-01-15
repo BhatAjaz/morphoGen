@@ -58,7 +58,7 @@ bool colorVisionThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }    
-    //ModelLoad();
+     ModelLoad();
      imagePortRTL.open("/v1/imagePortRTL");
 	 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
 	 Network::connect("/v1/imagePortRTL","/v/l"); 
@@ -352,7 +352,7 @@ free(W);
 
 void colorVisionThread::colSegMainL()
 {
-     ModelLoad();     
+     //ModelLoad();     
 	 //BufferedPort<ImageOf<PixelRgb> > imagePortRTL;
      
 	// imagePortRTL.open("/v1/imagePortRTL");
