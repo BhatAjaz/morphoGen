@@ -35,6 +35,9 @@ using namespace yarp::sig;
 using namespace std;
 double tdGpmp[41];	
 
+
+     
+	
 colorVisionThread::colorVisionThread() {
     robot = "icub";        
 }
@@ -56,6 +59,10 @@ bool colorVisionThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }    
     ModelLoad();
+     imagePortRTL.open("/v1/imagePortRTL");
+	 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
+	 Network::connect("/v1/imagePortRTL","/v/l"); 
+
     return true;
     
 
@@ -346,11 +353,11 @@ free(W);
 void colorVisionThread::colSegMainL()
 {
      //ModelLoad();     
-	 BufferedPort<ImageOf<PixelRgb> > imagePortRTL;
+	 //BufferedPort<ImageOf<PixelRgb> > imagePortRTL;
      
-	 imagePortRTL.open("/v1/imagePortRTL");
-	 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
-	 Network::connect("/v1/imagePortRTL","/v/l"); 
+	// imagePortRTL.open("/v1/imagePortRTL");
+	// Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
+	// Network::connect("/v1/imagePortRTL","/v/l"); 
 	 
 	 // read an image from the port
      ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
