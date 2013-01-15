@@ -57,7 +57,15 @@ bool colorVisionThread::threadInit() {
     if (!outputPort.open(getName("/img:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
-    }    
+    }
+    if (!inputPort.open(getName("/img:i").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    } 
+    if (!dataPort.open(getName("/data:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }       
      ModelLoad();
      imagePortRTL.open("/v1/imagePortRTL");
 	 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
@@ -87,28 +95,38 @@ void colorVisionThread::setInputPortName(string InpPort) {
 void colorVisionThread::run() {    
     while (isStopping() != true) {
 
-//========================================================================================
-  colSegMainL();
-//========================================================================================  
 
-        if (outputPort.getInputCount()) {            
-            outputPort.prepare() = *inputImage;
-            outputPort.write();  
+
+        if (imagePortRTL.getInputCount()) {   
+//========================================================================================
+            colSegMainL();
+//========================================================================================     
         }
+
+        if(outputPort.getOutputCount()) {
+    
+            outputPort.prepare() = *inputImage;
+            outputPort.write();         
+        }
+    
     }               
 }
 
 void colorVisionThread::threadRelease() {
-    // nothing
-     
+    //nothing here
 }
 
 void colorVisionThread::onStop() {
-    
     outputPort.interrupt();
+    inputPort.interrupt();
+    dataPort.interrupt();
+    imagePortRTL.interrupt();
 
-    
+
     outputPort.close();
+    inputPort.close();
+    dataPort.close();
+    imagePortRTL.close(); 
 }
 
 double* colorVisionThread::Vision(int ObjectType)
