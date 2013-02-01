@@ -39,10 +39,11 @@ bool findBestCandi(Mat &mat_match, int nid_te,  int nmin_matches,
 	unsigned char cur_match;
 	int which_tr, n_tr = mat_match.cols;
 
-	const unsigned char * p_thisrow = mat_match.ptr<unsigned char>(nid_te,0);
+	//const unsigned char * p_thisrow = mat_match.ptr<unsigned char>(nid_te,0); //for higher opencv version
 	for (int which_tr=0;which_tr<n_tr;which_tr++)
 	{
-		cur_match = p_thisrow[which_tr];
+		//cur_match = p_thisrow[which_tr];                                  //for higher opencv version
+		cur_match = mat_match.at<unsigned char>(nid_te,which_tr);           //for lower opencv version
 		if (cur_match>=nmin_matches)
 		{
 				id_cur_label = vec_tr_id_labels[which_tr]; //no matlab index
