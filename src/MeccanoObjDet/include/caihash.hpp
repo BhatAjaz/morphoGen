@@ -863,25 +863,24 @@ void matchFromPlainTablesFromInt(std::vector<int> *ptable,int n_tr,unsigned char
 	for (j=1;j<D;j++)
 		p_j_table_size[j] = p_j_table_size[j-1] + table_size;
 
-    std::vector<int> cur_bin;
+    	std::vector<int> cur_bin;
 
-    unsigned char *pcur_int_dis_ori = pint_dis_ori;
-    out_mat_matches = Mat::zeros(n_te,n_tr,CV_8UC1);
+    	unsigned char *pcur_int_dis_ori = pint_dis_ori;
+    	out_mat_matches = Mat::zeros(n_te,n_tr,CV_8UC1);
 
-    //////////////////////////
-	unsigned char * p_thisrow;                      ///////////////////
-    //////////////////////////
-
+    	//////////////////////////
+	//unsigned char * p_thisrow;                       	      //for higher opencv version
+    	//////////////////////////
 	for (i=0;i<n_te;i++)
 	{
-		p_thisrow = out_mat_matches.ptr<unsigned char>(i,0);///////////////////
+		//p_thisrow = out_mat_matches.ptr<unsigned char>(i,0);//for higher opencv version
 		for (j=0;j<D;j++)
 		{
 			cur_bin = ptable[pcur_int_dis_ori[j]+p_j_table_size[j]];
 			nbin_size = cur_bin.size();
 			for (p=0;p<nbin_size;p++)
-				(p_thisrow[cur_bin.at(p)])++;                 ///////////////////
-				//out_mat_matches.at<unsigned char>(i,cur_bin.at(p))++;///// no matlab index /////
+				//(p_thisrow[cur_bin.at(p)])++;          //for higher opencv version
+				out_mat_matches.at<unsigned char>(i,cur_bin.at(p))++;///// no matlab index /////for lower opencv version
 
 		}
 		pcur_int_dis_ori = pcur_int_dis_ori + D; //to the next patch
