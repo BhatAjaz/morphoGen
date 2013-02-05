@@ -21,7 +21,6 @@ int main(char** argv, int argc)
     imageOutputPort->open("/img:o");
 	bbOutputPort->open("/bb:o");
 	network.connect("/icub/camcalib/left/out", "/img:i");
-
 	string para_yml_file = "data/para_cmp8toys.yml";
 	/////////////////////////////////////////////////
 	// STEP1: initiate
@@ -60,15 +59,14 @@ int main(char** argv, int argc)
 		//detector.dispDetObjs();
 		std::vector<DetObj> objects;
 		objects = detector.getDetObjs();
-    
-        
+          
     
         //sending out through image port the image out    
         if(imageOutputPort->getOutputCount()) {
             cv::Mat ppIm = detector.getPostProcessIm();            
             cv::cvtColor(ppIm, ppIm, CV_BGR2RGB);
     
-            printf("image %d %d \n", cvMatImage.cols, cvMatImage.rows);
+           // printf("image %d %d \n", cvMatImage.cols, cvMatImage.rows);
             ImageOf<PixelRgb>& tmpImage = imageOutputPort->prepare();  
             tmpImage.resize(img->width(),img->height());
             unsigned char* ptrd = tmpImage.getRawImage();
