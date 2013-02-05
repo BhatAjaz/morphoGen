@@ -13,12 +13,14 @@ using namespace yarp::sig;
 int main(char** argv, int argc)
 {
 	Network network;
-	BufferedPort<ImageOf<PixelRgb>>* imageInputPort = new BufferedPort<ImageOf<PixelRgb>>();
+	BufferedPort<ImageOf<PixelRgb> >* imageInputPort  = new BufferedPort<ImageOf<PixelRgb> >();
+    BufferedPort<ImageOf<PixelRgb> >* imageOutputPort = new BufferedPort<ImageOf<PixelRgb> >();
 	BufferedPort<Bottle>* bbOutputPort = new BufferedPort<Bottle>();
 
 	imageInputPort->open("/img:i");
+    imageOutputPort->open("/img:o");
 	bbOutputPort->open("/bb:o");
-	network.connect("/cam1:o", "/img:i");
+	network.connect("/icub/camcalib/left/out", "/img:i");
 
 	string para_yml_file = "data/para_cmp8toys.yml";
 	/////////////////////////////////////////////////
@@ -47,14 +49,36 @@ int main(char** argv, int argc)
 		cvMatImage.create(img->height(), img->width(), CV_8UC3);
 		unsigned char* ptr = img->getRawImage();
 		memcpy(cvMatImage.data, ptr, cvMatImage.cols * cvMatImage.rows * 3);
+
+
+
 		cv::cvtColor(cvMatImage, cvMatImage, CV_RGB2BGR);
 
 		detector.detect(cvMatImage);
-		detector.showDetObjs(cvMatImage,Scalar(0,255,0),Scalar(255,255,255),480);
+        //detector.showDetObjs(cvMatImage,Scalar(0,255,0),Scalar(255,255,255),480);  //chaged 3.2.2013 Rea changed to orinal size
+		detector.showDetObjs(cvMatImage,Scalar(0,255,0),Scalar(255,255,255),0);
 		//detector.dispDetObjs();
 		std::vector<DetObj> objects;
 		objects = detector.getDetObjs();
+    
+        
+    
+        //sending out through image port the image out    
+        if(imageOutputPort->getOutputCount()) {
+            cv::Mat ppIm = detector.getPostProcessIm();            
+            cv::cvtColor(ppIm, ppIm, CV_BGR2RGB);
+    
+            printf("image %d %d \n", cvMatImage.cols, cvMatImage.rows);
+            ImageOf<PixelRgb>& tmpImage = imageOutputPort->prepare();  
+            tmpImage.resize(img->width(),img->height());
+            unsigned char* ptrd = tmpImage.getRawImage();
+            unsigned char* ptrs = ppIm.data;
+            
+            memcpy(ptrd,ptrs, cvMatImage.cols * cvMatImage.rows * 3 );
+            imageOutputPort->write();
+        }
 
+        // preparing the bottle port out, sending information out
 		Bottle output = bbOutputPort->prepare();
 		for (int i = 0; i < objects.size(); i++)
 		{
@@ -75,6 +99,11 @@ int main(char** argv, int argc)
 		key = cv::waitKey(100);
 	}
 	cvMatImage.release();
+
+    imageInputPort->close();
+    imageOutputPort->close();
+	bbOutputPort->close();
+
 	std::cout<<"***Done."<<std::endl;
 	return 0;
 }

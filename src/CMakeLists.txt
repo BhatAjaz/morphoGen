@@ -15,7 +15,7 @@ add_subdirectory( tutorial           )
 add_subdirectory( tutorialThread     )
 add_subdirectory( tutorialRatethread )
 add_subdirectory( trajectVisualize   )
-
+add_subdirectory( MeccanoObjDet      )
 
 
 

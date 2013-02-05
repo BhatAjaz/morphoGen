@@ -22,17 +22,18 @@
 #undef __GXX_EXPERIMENTAL_CXX0X__
 #include "TLdetector.hpp"
 #include "caiMat.hpp"
-#include "caihash.hpp"       //table related
+#include "caihash.hpp"       // table related
 #include "dt.h"              // distance transform
-#include "verifyChamfer.hpp" //Chamfer verification
+#include "verifyChamfer.hpp" // Chamfer verification
 
-#include <opencv/highgui.h>
+#include </usr/local/src/robot/OpenCV-2.2.0/include/opencv/highgui.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 //#include <omp.h>
 //#include "time.h"
+
 
 using namespace cv;
 using namespace std;
@@ -79,8 +80,8 @@ bool CTLdetector::initiate(string yml_file)
 		cout<<"***Initial file "<<yml_file<<" doesn't exist."<<endl;
 		cout<<"   Initiate with default parameters."<<endl;
 		table_method = TABLE_GROUPPT;
-		tr_bin_file = "data/tr_data_cmp8toys.bin";
-		tr_yml_file = "data/tr_data_cmp8toys.yml";
+		tr_bin_file = "/usr/local/src/robot/iCub/app/morphoGenApp/conf/tr_data_cmp8toys.bin";
+		tr_yml_file = "/usr/local/src/robot/iCub/app/morphoGenApp/conf/tr_data_cmp8toys.yml";
 		cout<<" table_method:"<<table_method<<endl;
 		cout<<" tr_bin_file:"<<tr_bin_file<<endl;
 				
@@ -458,6 +459,7 @@ bool CTLdetector::loadTrainFileYml(string yml_file)
 		cout<< "ERROR: "<<yml_file<<" doesn't exist.";
 		return false;
 	}
+	/*
 	n_tr = (int)fs["n_tr"];
 	fs["mat_inds_grouppt"]>>mat_inds_grouppt;
 	fs["mat_tr_rect_tight"]>>mat_tr_rect_tight;
@@ -478,6 +480,7 @@ bool CTLdetector::loadTrainFileYml(string yml_file)
 	grouppt_para.n_table = mat_inds_grouppt.cols;
 	grouppt_para.n_pt    = mat_inds_grouppt.rows;
 	fs.release();
+	*/
 	return true;
 }
 /*
@@ -648,6 +651,10 @@ void CTLdetector::showDetObjs(Mat im,Scalar box_color,Scalar edge_color,int w_sh
 		}
 		namedWindow( "Texture-less object detection", CV_WINDOW_KEEPRATIO | CV_WINDOW_AUTOSIZE);
 		imshow("Texture-less object detection",im);
+        
+        
+        postProcessIm = im;
+    
 	}
 	else //resize the image
 	{
@@ -680,6 +687,8 @@ void CTLdetector::showDetObjs(Mat im,Scalar box_color,Scalar edge_color,int w_sh
 		}
 		namedWindow( "Texture-less object detection",CV_WINDOW_KEEPRATIO | CV_WINDOW_AUTOSIZE);
 		imshow("Texture-less object detection",outim);
+
+        
 	}
 	return;
 }
