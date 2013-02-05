@@ -24,8 +24,8 @@
 #define TLDETECTOR_HPP_
 
 #undef __GXX_EXPERIMENTAL_CXX0X__
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <cv.h>
+#include <highgui.h>
 #define BEPRINT   0
 #define BETIME    0
 #define BETIME_DETAIL 0
@@ -45,7 +45,7 @@ typedef struct {
 	int id_label;
 	float match_score;
 	int id_NN_tr;
-	Mat mat_edge_NN_tr;
+    Mat mat_edge_NN_tr;
 }DetObj;
 typedef struct {
 	int h_fix;
@@ -116,6 +116,7 @@ private:
 	vector<int> * ptables;
 	Mat mat_inds_grouppt;
 	Mat mat_tr_rect_tight;
+    Mat postProcessIm;
 	vector<int> vec_tr_id_labels;
 	vector<int> vec_tr_id_prototype;//used in TABLE_CLUSTER
 	vector<int> vec_tr_which_k;     //used in TABLE_CLUSTER
@@ -149,6 +150,7 @@ public:
 
 	bool train();//string tr_file,int which_method = 1);
 	bool detect(Mat im);//, int which_method = 1);
+    Mat  getPostProcessIm() { return postProcessIm;};
 
 	vector<DetObj> getDetObjs(void);
 	void showDetObjs(Mat im,Scalar box_color,Scalar edge_color,int w_show_wind=0);
