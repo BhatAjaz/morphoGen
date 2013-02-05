@@ -62,11 +62,10 @@ bool colorVisionThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     } 
-    if (!dataPort.open(getName("/data:o").c_str())) {
+    if (!dataPort.open(getName("/colordata:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }       
-     //ModelLoad();
      imagePortRTL.open("/v1/imagePortRTL");
 	 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
 	 Network::connect("/v1/imagePortRTL","/v/l"); 
@@ -95,11 +94,33 @@ void colorVisionThread::setInputPortName(string InpPort) {
 void colorVisionThread::run() {    
     while (isStopping() != true) {
 
-
-
         if (imagePortRTL.getInputCount()) {   
 //========================================================================================
-            colSegMainL();
+             colSegMainL();
+			 for ( int i=0; i<41; i++ )
+					   {
+						tdGpmp[i] = 0;
+		  				}
+    		 tdGpmp[0] = numobjectsL;
+			 int k=1;
+			 for (int i=0; i<numobjectsL; i++ )
+				{
+					 for (int j=0; j<8; j++ )
+					 {
+						tdGpmp[k] = imageDetailsL[i][j];
+						k=k+1;
+						}
+			    }
+
+				Bottle ColOp = dataPort->prepare();
+                ColOp.addInt(tdGpmp[0]);
+				for (int i = 1; i < 41; i++)
+					{
+                      ColOp.addDouble(tdGpmp[i]);
+					}
+                dataPort->write();
+		        Time::Delay(10);
+
 //========================================================================================     
         }
 
@@ -371,11 +392,6 @@ free(W);
 void colorVisionThread::colSegMainL()
 {
      ModelLoad();     
-	 //BufferedPort<ImageOf<PixelRgb> > imagePortRTL;
-     
-	// imagePortRTL.open("/v1/imagePortRTL");
-	// Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
-	// Network::connect("/v1/imagePortRTL","/v/l"); 
 	 
 	 // read an image from the port
      ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
