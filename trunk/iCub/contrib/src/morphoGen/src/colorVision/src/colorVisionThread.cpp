@@ -112,22 +112,23 @@ void colorVisionThread::run() {
 						}
 			    }
 
-				Bottle ColOp = dataPort->prepare();
+				Bottle ColOp = dataPort.prepare();
                 ColOp.addInt(tdGpmp[0]);
 				for (int i = 1; i < 41; i++)
 					{
                       ColOp.addDouble(tdGpmp[i]);
 					}
-                dataPort->write();
-		        Time::Delay(10);
-
+                
 //========================================================================================     
         }
 
         if(outputPort.getOutputCount()) {
     
             outputPort.prepare() = *inputImage;
-            outputPort.write();         
+            outputPort.write();   
+            dataPort.write();
+		       // Time::delay(10);
+      
         }
     
     }               
