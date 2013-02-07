@@ -16,13 +16,16 @@ int main(char** argv, int argc)
 	BufferedPort<ImageOf<PixelRgb> >* imageInputPort  = new BufferedPort<ImageOf<PixelRgb> >();
     BufferedPort<ImageOf<PixelRgb> >* imageOutputPort = new BufferedPort<ImageOf<PixelRgb> >();
 	BufferedPort<Bottle>* bbOutputPort = new BufferedPort<Bottle>();
+    yarp::os::BufferedPort<yarp::os::Bottle > dataPortMec; 
 
 	imageInputPort->open("/img:i");
     imageOutputPort->open("/img:o");
-	bbOutputPort->open("/bb:o");
+	//bbOutputPort->open("/bb:o"); editted VM
 	network.connect("/icub/camcalib/left/out", "/img:i");
+    dataPortMec.open("/Shapedata:o");
 	string para_yml_file = "data/para_cmp8toys.yml";
-	/////////////////////////////////////////////////
+
+   	/////////////////////////////////////////////////
 	// STEP1: initiate
 	/////////////////////////////////////////////////
 	bool flag;
@@ -77,14 +80,21 @@ int main(char** argv, int argc)
         }
 
         // preparing the bottle port out, sending information out
-		Bottle output = bbOutputPort->prepare();
+
+        Bottle& ShapOp = dataPortMec.prepare();
+        ShapOp.clear();   
+
+
+
+		//Bottle output = bbOutputPort->prepare();
 		for (int i = 0; i < objects.size(); i++)
 		{
-			output.addInt(objects[i].box_tight.x);
-			output.addInt(objects[i].box_tight.y);
-			output.addInt(objects[i].box_tight.width);
-			output.addInt(objects[i].box_tight.height);
-			output.addInt(objects[i].id_label);
+			ShapOp.addInt(objects[i].box_tight.x);
+			ShapOp.addInt(objects[i].box_tight.y);
+			ShapOp.addInt(objects[i].box_tight.width);
+			ShapOp.addInt(objects[i].box_tight.height);
+			ShapOp.addInt(objects[i].id_label);
+            //ShapOp.addInt(10);
 			//if want to know the object name: detector.all_obj_cls[objects[i].id_label]
 		}
 
@@ -93,15 +103,17 @@ int main(char** argv, int argc)
 			objects[i].mat_edge_NN_tr.release();
 		}
 		objects.clear();
-		bbOutputPort->write();
+		//bbOutputPort->write();
+        dataPortMec.write();
+
 		key = cv::waitKey(100);
 	}
 	cvMatImage.release();
 
     imageInputPort->close();
     imageOutputPort->close();
-	bbOutputPort->close();
-
+	//bbOutputPort->close();
+    dataPortMec.close();
 	std::cout<<"***Done."<<std::endl;
 	return 0;
 }
