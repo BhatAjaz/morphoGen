@@ -119,10 +119,10 @@ void colorVisionThread::run() {
     
                 cout << "ready to send data"<< endl;
 
-				Bottle& ColOp = dataPort.prepare();
+    			Bottle& ColOp = dataPort.prepare();
                 ColOp.clear();   
                 ColOp.addDouble(tdGpmp[0]);
-                
+               
 				for (int i = 1; i < 41; i++) {
                     ColOp.addDouble(tdGpmp[i]);
                     cout << " object Ids"<< tdGpmp[i] << endl;
@@ -141,9 +141,9 @@ void colorVisionThread::run() {
         if(dataPort.getOutputCount()) {
     
             dataPort.write();
+
 		    //Time::delay(5);
-        }
-    
+        }    
     }               
 }
 
