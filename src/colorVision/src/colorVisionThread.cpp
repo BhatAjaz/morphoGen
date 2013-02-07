@@ -33,7 +33,7 @@ using namespace yarp::dev;
 using namespace yarp::os;
 using namespace yarp::sig;
 using namespace std;
-double tdGpmp[41];	
+	
 
 
      
@@ -96,28 +96,37 @@ void colorVisionThread::run() {
 
         if (imagePortRTL.getInputCount()) {   
 //========================================================================================
+           
              colSegMainL();
+    
 			 for ( int i=0; i<41; i++ )
 					   {
 						tdGpmp[i] = 0;
 		  				}
     		 tdGpmp[0] = numobjectsL;
 			 int k=1;
+    
+
 			 for (int i=0; i<numobjectsL; i++ )
 				{
 					 for (int j=0; j<8; j++ )
 					 {
 						tdGpmp[k] = imageDetailsL[i][j];
+                        printf("%f \n", imageDetailsL[i][j]);
 						k=k+1;
-						}
+					 }
 			    }
+    
+                cout << "ready to send data"<< endl;
 
-				Bottle ColOp = dataPort.prepare();
-                ColOp.addInt(tdGpmp[0]);
-				for (int i = 1; i < 41; i++)
-					{
-                      ColOp.addDouble(tdGpmp[i]);
-					}
+				Bottle& ColOp = dataPort.prepare();
+                ColOp.clear();   
+                ColOp.addDouble(tdGpmp[0]);
+                
+				for (int i = 1; i < 41; i++) {
+                    ColOp.addDouble(tdGpmp[i]);
+                    cout << " object Ids"<< tdGpmp[i] << endl;
+				}
                 
 //========================================================================================     
         }
@@ -126,9 +135,13 @@ void colorVisionThread::run() {
     
             outputPort.prepare() = *inputImage;
             outputPort.write();   
+                 
+        }
+
+        if(dataPort.getOutputCount()) {
+    
             dataPort.write();
-		       // Time::delay(10);
-      
+		    //Time::delay(5);
         }
     
     }               
