@@ -2,8 +2,8 @@
 
 /*
   * Copyright (C)2013  Department of Robotics Brain and Cognitive Sciences - Istituto Italiano di Tecnologia
-  * Author:Francesco Rea
-  * email: francesco.reak@iit.it
+  * Author:	Ajaz Ahmad Bhat
+  * email:	ajaz.bhat@iit.it
   * Permission is granted to copy, distribute, and/or modify this program
   * under the terms of the GNU General Public License, version 2 or any
   * later version published by the Free Software Foundation.
@@ -19,10 +19,10 @@
   
 /**
  * @file main.cpp
- * @brief main code for the tutorial module.
+ * @brief main code for colorQuantizator module
  */
 
-#include "iCub/tutorialModule.h" 
+#include "iCub/colorQuantizatorModule.h" 
 
 using namespace yarp::os;
 using namespace yarp::sig;
@@ -32,7 +32,7 @@ int main(int argc, char * argv[])
 {
     
     Network yarp;
-    tutorialModule module; 
+    colorQuantizatorModule module; 
 
     ResourceFinder rf;
     rf.setVerbose(true);
