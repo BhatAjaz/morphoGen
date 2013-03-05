@@ -23,6 +23,7 @@ find_package(IPOPT)
 
 #include(iCubOptions) #removed because not longer necessary @Rea 20/11/12
 include(iCubHelpers)
+icub_install_with_rpath()
 
 SET(MORPHOGENLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/attentionLib/include)
 
