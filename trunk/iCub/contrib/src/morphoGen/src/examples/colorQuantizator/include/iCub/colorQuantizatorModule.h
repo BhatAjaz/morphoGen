@@ -160,9 +160,11 @@ class colorQuantizatorModule:public yarp::os::RFModule {
     std::string handlerPortName;             // name of handler port
     std::string configFile;                  // name of the configFile that the resource Finder will seek
     
+    
+    
     yarp::os::Port handlerPort;              // a port to handle messages 
     /*  */
-    colorQuantizatorThread *rThread;             // pointer to a new thread to be created and started in configure() and stopped in close()
+    colorQuantizatorThread *rThread;         // pointer to a new thread to be created and started in configure() and stopped in close()
 
 public:
     /**
