@@ -80,16 +80,54 @@ void colorQuantizatorThread::run() {
     while (isStopping() != true) {
 
 		if(inputPort.getInputCount()){
-			ImageOf<PixelRgb> inputImage = inputPort.read();
-		    //code here .....
-		}
+			ImageOf<PixelRgb>* inputImage = inputPort.read(false);
+		    	   
+            if (outputPort.getOutputCount()) {
 
-        
-        
+                ImageOf<PixelMono>& processedImage = outputPort.prepare();
 
-        if (outputPort.getOutputCount()) {
-            outputPort.prepare() = *inputImage;
-            outputPort.write();  
+                if(inputImage!=NULL){
+
+                    //processing
+                    int width   = inputImage->width();
+                    int height  = inputImage->height();
+
+                    processedImage.resize(width, height);
+
+                    int paddingInput = inputImage->getPadding();
+                    int paddingProc  = processedImage.getPadding();
+
+                    unsigned char* pinput = inputImage->getRawImage();
+                    unsigned char* pproc  = processedImage.getRawImage();
+
+                    //printf("input %d processed %d \n", paddingInput, paddingProc);
+                    //printf("width %d height %d \n", width, height);
+ 
+                    
+                    //processedImage.zero();
+
+                    
+                    for (int r = 0; r < height; r++) {
+                        for (int c = 0; c < width; c++) {
+                            
+                            *pproc = *pinput;
+                            //*pproc = (unsigned char) 0;
+                            //pproc[c] = 0;
+                            pinput+=3; //pinput++; pinput++; pinput++;
+                            
+                            pproc++;
+                            
+                        }
+                        pinput += paddingInput;
+                        pproc  += paddingProc;
+                    }
+                    
+                                        
+                    
+                    //outputPort.prepare() = *processedImage;
+                    outputPort.write();  
+                }
+            }
         }
     }               
 }
