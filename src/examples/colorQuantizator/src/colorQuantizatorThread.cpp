@@ -89,10 +89,12 @@ void colorQuantizatorThread::run() {
                 if(inputImage!=NULL){
 
                     //processing
-                    int width   = inputImage->width();
-                    int height  = inputImage->height();
-
-                    processedImage.resize(width, height);
+                    int width	   = inputImage->width();
+                    int height     = inputImage->height();
+					int widthCntr  = width/2;
+					int heightCntr = height/2;
+					int scaleVal = 10;
+                    processedImage.resize(width/scaleVal, height/scaleVal);
 
                     int paddingInput = inputImage->getPadding();
                     int paddingProc  = processedImage.getPadding();
