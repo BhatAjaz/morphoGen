@@ -42,12 +42,12 @@ private:
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
 
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
-    //yarp::sig::ImageOf<yarp::sig::PixelMono>* processedImage;  //processed image in the run
+    yarp::sig::ImageOf<yarp::sig::PixelRgb>* processedImage;  //processed image in the run
 
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
 
-	yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >  inputPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >  inputPort;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputPort;     // output port to plot event
     
     std::string name;                                                                // rootname of all the ports opened by this thread
