@@ -26,7 +26,7 @@
 #include "dt.h"              // distance transform
 #include "verifyChamfer.hpp" // Chamfer verification
 
-#include </usr/local/src/robot/OpenCV-2.2.0/include/opencv/highgui.h>
+#include <highgui.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
