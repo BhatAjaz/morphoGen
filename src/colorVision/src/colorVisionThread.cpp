@@ -66,10 +66,7 @@ bool colorVisionThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }       
-     imagePortRTL.open("/v1/imagePortRTL");
-	 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
-	 Network::connect("/v1/imagePortRTL","/v/l"); 
-
+     	
     return true;
     
 
@@ -97,22 +94,42 @@ void colorVisionThread::run() {
         if (imagePortRTL.getInputCount()) {   
 //========================================================================================
            
-             colSegMainL();
-    
-			 for ( int i=0; i<41; i++ )
+			 for ( int i=0; i<52; i++ )
 					   {
 						tdGpmp[i] = 0;
 		  				}
-    		 tdGpmp[0] = numobjectsL;
-			 int k=1;
+    		 
+			 imagePortRTL.open("/v1/imagePortRTL");
+			 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
+	         Network::connect("/v1/imagePortRTL","/v/l"); 
+ 
+             colSegMainL();
+			 tdGpmp[0] = numobjectsL;
+
+			 imagePortRT.open("/v1/imagePortRT");
+	         Network::connect("/icub/camcalib/right/out","/v1/imagePortRT");
+			 colSegMainR();
+			 tdGpmp[1] = numobjectsR;
+    
+			 
+			 int k=2;
     
 
 			 for (int i=0; i<numobjectsL; i++ )
 				{
-					 for (int j=0; j<8; j++ )
+					 for (int j=0; j<5; j++ )
 					 {
 						tdGpmp[k] = imageDetailsL[i][j];
                         printf("%f \n", imageDetailsL[i][j]);
+						k=k+1;
+					 }
+			    }
+			 for (int i=0; i<numobjectsR; i++ )
+				{
+					 for (int j=0; j<5; j++ )
+					 {
+						tdGpmp[k] = imageDetails[i][j];
+                        printf("%f \n", imageDetails[i][j]);
 						k=k+1;
 					 }
 			    }
@@ -123,7 +140,7 @@ void colorVisionThread::run() {
                 ColOp.clear();   
                 ColOp.addDouble(tdGpmp[0]);
                
-				for (int i = 1; i < 41; i++) {
+				for (int i = 1; i < 52; i++) {
                     ColOp.addDouble(tdGpmp[i]);
                     cout << " object Ids"<< tdGpmp[i] << endl;
 				}
@@ -294,14 +311,10 @@ int colorVisionThread::colSegMainR()
 {
 	ModelLoad(); 
      int greendetect=-1;
-	 BufferedPort<ImageOf<PixelRgb> > imagePortRT;
-     
-		//BufferedPort<Bottle> out1;
-        // Name the ports
+	 //BufferedPort<Bottle> out1;
+     // Name the ports
 	 int averager=0;       
-	 imagePortRT.open("/v1/imagePortRT");
-	 Network::connect("/icub/camcalib/right/out","/v1/imagePortRT");
-	 Network::connect("/v1/imagePortRT","/v/r"); 
+	 
 	 double xMean = 0;
      double yMean = 0;
  // read an image from the port

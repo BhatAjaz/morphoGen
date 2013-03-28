@@ -49,6 +49,7 @@ private:
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imagePortRTL;
+	yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imagePortRT;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot RGB image
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputPort;      // input port to receive RGB image
@@ -63,7 +64,7 @@ private:
 	float s[5000];
 	int iLocX,iLocY,iLocXL,iLocYL;
 
-    double tdGpmp[41];                                                                 // data trasmitted from this module
+    double tdGpmp[52];                                                                 // data trasmitted from this module
 
 public:
     /**
