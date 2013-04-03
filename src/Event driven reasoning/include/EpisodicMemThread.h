@@ -52,6 +52,11 @@ private:
 	yarp::os::Port AckObs; 
     yarp::os::RpcServer ObserverResponse;  //acknowleges snapshot and gives strategy
 	yarp::os::Semaphore mutex;
+	yarp::os::BufferedPort<yarp::os::Bottle >  RememberedMemories;
+	yarp::os::BufferedPort<yarp::os::Bottle >  PlanorXplore;
+	yarp::os::RpcClient HubBottomup;
+	yarp::os::BufferedPort<yarp::os::Bottle >  UsefulPastXperiences;
+	yarp::os::BufferedPort<yarp::os::Bottle >  HumTopDownCompete;
 	
 	std::string name;           // rootname of all the ports opened by this thread
 
@@ -60,7 +65,7 @@ private:
 		int **data; 
 		int **WhubEp;
 		int N;
-		double Uini[1000];
+		double Uini[1000],SunhiDiff;
 		int VnetAct[1000];
 		int WHub2Epim[1000][42];
 		int WHub2EpimT[42][1000];
@@ -70,11 +75,11 @@ private:
 		int VSSP[42], SumVSSP;
 		int Action[9];
 		int IndexM[5],PEnd;
-		int NRelPast[5][1000];
+		int NRelPast[5][1000],NRelEp,noverl;
 		int NowObAcSeq[5][1000];
 		double HubTopDown[5][42],SumTopDown;
 		int PlanPastExp[1000];
-		int NoB;
+		int NoB,Largeness;
 		bool idle;
    
 public:

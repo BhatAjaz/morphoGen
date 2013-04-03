@@ -31,7 +31,6 @@ bool EpisodicMemThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }   
 	
-
 	if (!PlanF.open(getName("/Strategy:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
@@ -42,6 +41,28 @@ bool EpisodicMemThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }   
 
+	if (!RememberedMemories.open(getName("/MyRemembered:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }   
+
+	if (!HubBottomup.open(getName("/HubBottomup:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }   
+	if (!UsefulPastXperiences.open(getName("/Useful/PastXperiences:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }   
+	if (!HumTopDownCompete.open(getName("/HubTopdownCompete:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }   
+	if (!PlanorXplore.open(getName("/PlanXplore:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }   
+	
 	N=1000;
 	Network::connect("/what-to-do:o", "/world/analysis:i"); 
 	//Network::connect("/Strategy:o", "/strategy:i");  //check this
@@ -86,7 +107,7 @@ void EpisodicMemThread::run()
 				cout<<cmd<<endl;
                 NoB=request.get(1).asDouble();
 				cout<<"There are " << NoB << "objects to play with" <<endl;
-				int Largeness=request.get(2).asInt();
+				Largeness=request.get(2).asInt();
                 cout << Largeness << endl;
 			   //=================================================================================
 
@@ -110,6 +131,7 @@ void EpisodicMemThread::run()
                      if(Largeness == 1)
 						  {
 							 OHub[37]=1;  //size related neural activation
+							 cout<<"Largeness"<<Largeness<<endl;
 						  }  
 					 if(Largeness == 0)
 						  {
@@ -125,6 +147,8 @@ void EpisodicMemThread::run()
 					   }
 					cout << "Visuo Spatial sketch pad cumulative activity" << "\t" << SumVSSP << endl ;
 			        cout << "Remembering and Planning" << endl ;
+					//make bottle to command VSSP bottom up activations to GUI here... 
+
 				//	Time::delay(30); Just To check...Xlator...VM 04 March 2013
 					MemControl(); 
             //=================================================================================
@@ -140,10 +164,25 @@ void EpisodicMemThread::run()
 				ObserverResponse.reply(response);
 		
                 ofstream PXper("PXper.txt");
-                for(int i=0; i<1000; i++)
+
+				Bottle& Plan = PlanorXplore.prepare();
+				Plan.clear();
+				Plan.addString("plan1");
+				Bottle& planvalues = Plan.addList();
+				planvalues.clear();
+				for(int i=0; i<1000; i++)
 					{
 					 PXper<< PlanPastExp[i] <<endl;
+                     planvalues.addInt(PlanPastExp[i]);
 					}
+				
+			    cout<<"Sending Plan to DARWIN GUI"<<endl;
+             	PlanorXplore.write();
+				//printf("%s \n",PlanResponse.toString().c_str());
+
+				//int Planresponsecode = PlanResponse.get(0).asInt();
+					
+
 				yarp::os::Semaphore mutex;
 				mutex.wait();	
 				idle = true;
@@ -179,9 +218,13 @@ void EpisodicMemThread:: MemControl()
 	{
      InitializeAM();
      int Nrelevent=RememberPast();  //remember my past episodic experiences based on the present context
-     int nwinner=TDMemCompHub(Nrelevent); // find which memories out of all those rememebred are msot valuable	 
+     int nwinner=TDMemCompHub(Nrelevent); // find which memories out of all those rememebred are msot valuable	
+	 //make bottle to tell GUI about the result of top down comeptition here.........
+	 cout<<"Sending result of top down comepetition between remembered memories to DARWIN GUI"<<endl;
 	 int noverl=FindOverlap(nwinner); // find how various rememebred expereinces overlap in the knowledge they encode
-     RipRealSequence(nwinner); // Take out useful object action sequnces that can be enacted in the present from these memories
+	 RipRealSequence(nwinner); // Take out useful object action sequnces that can be enacted in the present from these memories
+	 //Make bottle to communicate Useful past experiences to GUI..
+     cout<<"Sending useful past Xperiences to DARWIN GUI"<<endl;	
 	 PlanFromPastXP(nwinner,noverl);   // synthesize a novel behaviour or combine past experience with exploration
     };
 
@@ -217,10 +260,10 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 
 						if(NWine==2)
 							{
-						      cout << "need to combine nonoverlapping chunks of knowledge by exploration " << endl;
+						      cout << "need to combine nonoverlapping chunks of knowledge " << endl;
 								// here u have to copy paste first action seq in usefulacseq as the plan
                             //=================================================================
-				for(composi=0; composi<2; composi++)
+				for(composi=Largeness; composi<2; composi++)
 						{
 							Pctrr=0;
 							Pctrr2=0;
@@ -289,7 +332,7 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
                                 if((SumVSSP-SumTopDown)<0.5)
 									  {
 										  cout << "Full knowledge exists in past experiences: Plan Synthesized! " << endl;
-										  cout << "Trigger explorative action sequence 2 ? " << endl;
+										//  cout << "Trigger explorative action sequence 2 ? " << endl;
 									  } 
 								   if((SumVSSP-SumTopDown)>0.5)
 									  {
@@ -327,18 +370,23 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 		{
 		  int NovObID, iCo,jCo;
 		  NovObID=Ola;
-         
-
-		  for(iCo=0; iCo<2; iCo++)
-			{ 
-		      for(jCo=0; jCo<50; jCo++)
+		  cout<<"entered Xplore mode: New object"<< Ola <<endl;
+		  for(jCo=0; jCo<42; jCo++)
 				{
-
+					if((jCo==NovObID)||(jCo==36)){
+						PlanPastExp[PEnd]=1;
+						PEnd=PEnd+1;
 					}
-		  }
-
-
-		  // take the past plan and append the novelty before or after: there will be 2 explorative plans
+					else {
+					  PlanPastExp[PEnd]=0;
+					  PEnd=PEnd+1;
+					}
+				}
+            PlanPastExp[PEnd]=1; //42
+			PlanPastExp[PEnd+13]=1; 
+			PlanPastExp[PEnd+51]=1; 
+			
+		  // make sure u now say to Observer this is not a plan but exploration with a new object detected and wait for reward
 		};
 
 
@@ -545,7 +593,11 @@ void EpisodicMemThread:: RipRealSequence(int nme)
 int EpisodicMemThread::FindOverlap(int NW)
 	{
       int iCo,  Overl=0;
-	  double memul, vssptddiff=0;
+	  double memul, vssptddiff=0,vsspThresh=0.5;
+	 // if(Largeness==1)
+	  //{
+	    //vsspThresh=1.1;
+	  //}
 	  NNovobs=0;
 	  if(NW==1)
 		  {
@@ -553,7 +605,8 @@ int EpisodicMemThread::FindOverlap(int NW)
            for(iCo=0; iCo<36; iCo++)
 				{
 					vssptddiff=VSSP[iCo]-HubTopDown[MemID[0]][iCo];
-					if(vssptddiff>0.5)
+                 
+					if(vssptddiff>vsspThresh)
 						{
 							cout << "There is a novel object in VSSP that is not there in TD Hub activity" << endl;
 							NovelObID[NNovobs]=iCo;
@@ -584,7 +637,7 @@ int EpisodicMemThread::FindOverlap(int NW)
 							//a unique ID that codes for both size and shape, only large objects need to be reassigned a new neuron
 						} 
 			    }
-			cout << "No of overlaps" << "   " <<  Overl  << "Element in Hub" << "   " << OLap[0] <<endl;
+			cout << "No of overlaps" << "   " <<  Overl <<endl;
 			cout << "Novel obejcts" << NNovobs <<endl;
 		   }
 return Overl;
@@ -595,6 +648,8 @@ int EpisodicMemThread:: TDMemCompHub(int Nrelev)
 	{
 		int InstMk=0,iCo,jCo,Nmemos=0,Hubu[42],nom,comprel=0,UnfR[20][50],rewno;
 		double SunHI[6];
+	    SunhiDiff=0.4;
+					 
 		SumTopDown=0;
 		ofstream HeeHu("HubTDownCont.txt");
 		ofstream HeeHoo("HubTDCom.txt");
@@ -646,7 +701,7 @@ int EpisodicMemThread:: TDMemCompHub(int Nrelev)
 												nom=(jCo+1)/(0.5*InstMk);
 											}
 									}  
-        
+                   
                    cout << "Anticipated reward for memory"  << "\t" << comprel+1 << "is" << "\t" << nom << "\t"  << InstMk << "\t" << rewno  << endl;
 				//   HubActNote[comprel][6]=nom;
 				  				   
@@ -671,7 +726,11 @@ int EpisodicMemThread:: TDMemCompHub(int Nrelev)
 
 				// loop ends here
 			}
-
+       //    if(Largeness==1)
+		//			 {
+		//			   SunhiDiff=0.95;
+		//			   cout<<"Setting sunhiDiff"<<SunhiDiff<<endl;
+		//			 }
 if(Nrelev>1)
 		{
 			 int iterComp, iterHub,iterHubM;
@@ -719,17 +778,19 @@ for(iCo=0; iCo<Nrelev; iCo++)
 					   SunHI[Nrelev]=SunHI[Nrelev]+HubTopDown[iCo][jCo];
 					 }
 					 HeeHoo << "    " << endl;
-					 if(SunHI[Nrelev]<0.4) // was 0.9
+					
+					 if(SunHI[Nrelev]<SunhiDiff) // was 0.9
 					 {
 					  SunHI[Nrelev]=0;
 					 }
-                     if(SunHI[Nrelev]>0.4)
+                     if(SunHI[Nrelev]>SunhiDiff)
 					 {
 					  Nmemos=Nmemos+1;
 					  MemID[Nmemos-1]=iCo;
+					  cout << "Winning MemID"  << "  " << MemID[Nmemos-1] << " power " << SunHI[Nrelev] << " No of winners so far " << Nmemos  <<endl ;
+                      cout<<SunhiDiff<<endl; 					
 					 }
-					 cout << "Winning MemID"  << "  " << MemID[Nmemos-1] << " power " << SunHI[Nrelev] << " No of winners so far " << Nmemos  <<endl ;
-				     SumTopDown=SumTopDown+SunHI[Nrelev];
+					 SumTopDown=SumTopDown+SunHI[Nrelev];
     }
 //here we get the final result of competing memories, know how many survived Nmemos, who all are they...
 cout << "Top Down Sum"  << "  " << SumTopDown << endl ;
@@ -765,6 +826,7 @@ int EpisodicMemThread::RememberPast() // loops from the present to partial cue t
     if(tempHE>0)
 		{
 			NRelEp=NRelEp+1;
+			cout<<"generating Partial cue"<<NRelEp<<"  "<<icn<< tempHE <<endl;
 		//=====================Add Acn==============================================
 			for(iCo=0; iCo<1000; iCo++)
 					{
@@ -830,11 +892,16 @@ int EpisodicMemThread::RememberPast() // loops from the present to partial cue t
 //========================Partical cue is generated and written==========================================
 // Retrieve full experience from partial cue in the present context, store it in appropriate location in NrELeP
         RetrievalFromCue(NRelEp-1);
+        
 
 		//==========================change momo=====================
 		 for(iCo=0; iCo<1000; iCo++)
 			 {
-				 Hee<< NRelPast[NRelEp-1][iCo]<< "    ";
+				 if(NRelEp==2)
+				 {
+				  NRelPast[NRelEp-1][iCo]=Episodes[1][iCo];
+				 }
+			     Hee<< NRelPast[NRelEp-1][iCo]<< "    ";
 			 }
 			 Hee << "    " << endl;
 	}
@@ -844,7 +911,22 @@ int EpisodicMemThread::RememberPast() // loops from the present to partial cue t
      // cout << "sum potential" <<sumhe << endl ;
 
 	}
-	
+    //Make bottle to command to GUI about plotting remembered experiences /VM
+	cout<<"Sending Remembered past experiences to DARWIN GUI"<<endl;
+	Bottle& Remembered = RememberedMemories.prepare();
+	Remembered.addInt(NRelEp-1);
+    for(iCo=0; iCo<NRelEp; iCo++)
+	  {
+		string name("rem");
+		sprintf((char*)name.c_str(),"%d",iCo);
+		printf("%s \n",name.c_str()); // rem0, rem1, rem2, rem3
+	   for(jCo=0; jCo<1000; jCo++)
+			 {
+               Remembered.addInt(NRelPast[iCo][jCo]);
+	         }
+	  }
+	RememberedMemories.write();
+	//cout<<"Number of relevant memories"<<NRelEp<<endl;
 	return NRelEp; //here u get all remembered experiences from the past, related to the current situation at hand 
 };
 
@@ -971,7 +1053,7 @@ void EpisodicMemThread::InitializeAM()
     ifstream NEp("Numepi.txt");
     NEp>> NumEpi;
 	cout << "Number of episodes experiences in memory" << "\t" <<NumEpi << endl ;
-	if(NoB<4)
+	if(Largeness==0)
 	{
 	  NumEpi=3;
 	}

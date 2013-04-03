@@ -72,14 +72,14 @@ private:
 	int Strata[1000];
 	int GiD; //this can be transformed into a shared vocabulary between user and observer
 	double NumberofObs, NumberofObsE;
-	int SeqAc[6], SeqAcP[10],numcu,numcy,PastPlan[10], Replan,numberpast;
+	int SeqAc[6], SeqAcP[10],numcu,numcy,nummu,PastPlan[10], Replan,numberpast;
 	int SeqAcXl[2];
-	int PickMicro, PlaceMicro, NPiCs,findsuccess,findsuccess2;
+	int PickMicro, PlaceMicro, NPiCs,findsuccess,findsuccess2,PPiCo;
 	double PlaceMap[10][18]; //col-shap-x-y-z-constraint
 	double ObjIDEE[10], ObjIDEEEpim[10], XPosition[3];
 	double NumObjectsinScene;
-	int GetObjIDs[2], largeness,cannotfindXLoc;
-	double PMPresp[12],cannotfindX,NumCubID[3],NumCylID[2];
+	int GetObjIDs[2], largeness,cannotfindXLoc,CannotFind,Cumulate;
+	double PMPresp[12],cannotfindX,NumCubID[3],NumCylID[2],NumMushID[2];
 	double XlatTrackP[10],XlatTrackPl[10],StaticLoc[3];
 	int PtOfReplan;
 
@@ -143,7 +143,7 @@ public:
 
 	double RefreshPlacemap(); // speak with vision
 
-	double PrimBodySchema(int PMPGoalCode,int OIDinPM,int PIdentifier);
+	double PrimBodySchema(int PMPGoalCode,int OIDinPM,int PIdentifier, int ObjectIDPMP);
 
 	int PrimGrasp(int GraspReq );
 
