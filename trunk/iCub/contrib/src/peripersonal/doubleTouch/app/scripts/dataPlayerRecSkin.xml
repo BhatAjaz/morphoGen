@@ -1,0 +1,19 @@
+<application>
+<name>dataSetPlayer Recording Skin Values</name>
+<dependencies>
+    <port>/skinManager/skin_events:o</port>
+</dependencies>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/skin</parameters>
+        <node>alecive</node>
+        <stdio></stdio>
+        <tag>dataDumper</tag>
+    </module>
+
+    <connection>
+        <from>/skinManager/skin_events:o</from>
+        <to>/data/skin</to>
+        <protocol>udp</protocol>
+    </connection>
+</application>

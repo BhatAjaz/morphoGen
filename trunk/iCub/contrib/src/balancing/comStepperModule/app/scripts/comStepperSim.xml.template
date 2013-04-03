@@ -1,0 +1,23 @@
+<application>
+  <name>comStepperSim</name>
+  <dependencies>
+    <port>/icubSim/inertial</port>
+  </dependencies>
+  <module>
+    <name>comStepper</name>
+    <parameters>--display_only on --robot icubSim --ankle_sens off --no_sens on</parameters>
+    <node>node1</node>
+    <tag>ComStepper</tag>
+  </module>
+  <module>
+    <name>wholeBodyDynamics</name>
+    <parameters>--robot icubSim --dummy_ft --experimental_com_vel --autoconnect</parameters>
+    <node>node1</node>
+    <tag>wholeBoDyDynamicsSim</tag>
+  </module>
+  <connection>
+    <from>/icubSim/inertial</from>
+    <to>/wholeBodyDynamics/inertial:i</to>
+    <protocol>udp</protocol>
+  </connection>
+</application>

@@ -1,0 +1,113 @@
+<application>
+<name>doubleTouch noSkin</name>
+
+<dependencies>
+</dependencies>
+
+    <module>
+        <name>iCubGui</name>
+        <node>alecive</node>
+        <tag>iCubGui</tag>
+    </module>
+    <module>
+        <name>dataSetPlayer</name>
+        <node>alecive</node>
+        <stdio></stdio>
+        <tag>dataSetPlayer</tag>
+    </module>
+    <module>
+        <name>pmpServer</name>
+        <parameters>--robot icub --part right_arm --name right_pmp_server</parameters>
+        <node>alecive</node>
+        <tag>pmpServerRight</tag>
+    </module>
+    <module>
+        <name>pmpServer</name>
+        <parameters>--robot icub --part left_arm --name left_pmp_server</parameters>
+        <node>alecive</node>
+        <tag>pmpServerLeft</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/FTr</parameters>
+        <node>alecive</node>
+        <tag>dataDumper</tag>
+    </module>
+    <module>
+        <name>dataDumper</name>
+        <parameters>--name /data/FTl</parameters>
+        <node>alecive</node>
+        <tag>dataDumper</tag>
+    </module>
+
+    <connection>
+        <from>/skinManager/skin_events:o</from>
+        <to>/doubleTouch/contacts:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_arm/state:o</from>
+        <to>/doubleTouch/left_arm/encoders:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_arm/state:o</from>
+        <to>/doubleTouch/right_arm/encoders:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/torso/state:o</from>
+        <to>/doubleTouch/torso:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/doubleTouch/icubgui_objects:o</from>
+        <to>/iCubGui/objects</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_arm/analog:o</from>
+        <to>/data/FTr</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_arm/analog:o</from>
+        <to>/data/FTl</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/right_pmp_server/gui:o</from>
+        <to>/iCubGui/objects</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/left_pmp_server/gui:o</from>
+        <to>/iCubGui/objects</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/inertial</from>
+        <to>/iCubGui/inertial:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/left_arm/state:o</from>
+        <to>/iCubGui/left_arm:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/right_arm/state:o</from>
+        <to>/iCubGui/right_arm:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/torso/state:o</from>
+        <to>/iCubGui/torso:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/head/state:o</from>
+        <to>/iCubGui/head:i</to>
+        <protocol>udp</protocol>
+    </connection>
+</application>
