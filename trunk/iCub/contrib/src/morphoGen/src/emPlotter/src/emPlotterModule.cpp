@@ -114,7 +114,9 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
      
     
     remThread = new rememberedxThread();
+    remThread->setName(getName().c_str());
     hThread   = new hubThread();
+    hThread->setName(getName().c_str());
     
     /* share the resources and semaphores between the threads*/ 
     rThread->setSharingBottle(partialBottle, remBottle, hubTop, hubBottom, planA, planB);
@@ -134,8 +136,8 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
     for (int i = 0; i < 5; i++){
         
         pt[i] = new partialThread();
-        std::string tempName = pt[i]->getName("/partialQ");
-        //tempName.append("/partialQ");
+        std::string tempName = pt[i]->getName(getName().c_str());
+        tempName.append("/partialQ");
         
         tempName.append(static_cast<ostringstream*>( &(ostringstream() << i ) )->str());
         pt[i]->setName(tempName.c_str());
