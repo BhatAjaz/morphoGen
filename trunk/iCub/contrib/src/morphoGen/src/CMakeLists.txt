@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 2.6)
 
 add_subdirectory( AssocMem           )
 add_subdirectory( colorVision        )
+add_subdirectory( emPlotter          )
 add_subdirectory( examples           )
 add_subdirectory( Grasper            )
 add_subdirectory( SmallWorlds        )
