@@ -80,7 +80,7 @@ bool emPlotterRatethread::threadInit() {
     //if (!Network::connect("/Hub:o","/emPlotter/hub:i"))
     //   return false;
     */
-    //Network::connect("/PlanXplore:o","/emPlotter/plan:i");
+    Network::connect("/PlanXplore:o","/emPlotter/plan:i");
         //printf("connection NOT successful\n");
        
        

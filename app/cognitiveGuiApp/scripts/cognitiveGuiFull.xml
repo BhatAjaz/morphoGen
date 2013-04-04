@@ -153,6 +153,7 @@
 </module>
 
 
+<!----------------------------- Core Processing Modules ----------------------------->
 <module>
   <name>DarwinObserver</name>
   <parameters>--name /DarwinObserver </parameters>

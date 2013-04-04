@@ -152,7 +152,7 @@
   <tag>plan2View</tag>
 </module>
 
-
+<!----------------------------- Core Processing Modules ----------------------------->
 <module>
   <name>emPlotter</name>
   <parameters>--name /emPlotter </parameters>
