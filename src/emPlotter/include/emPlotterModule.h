@@ -150,6 +150,7 @@
 #include <partialThread.h>
 #include <rememberedxThread.h>
 #include <hubThread.h>
+#include <planThread.h>
 
 class emPlotterModule:public yarp::os::RFModule {
     
@@ -165,8 +166,9 @@ class emPlotterModule:public yarp::os::RFModule {
     emPlotterRatethread* rThread;           // pointer to a new thread to be created and started in configure() and stopped in... 
                                             // close(). This thread opens input ports and communicates with the other threads
     rememberedxThread*  remThread;          // pointer to a new thread that generates gui of incoming bottles-- from remembered Experiences
-    partialThread* pt[5];                   // pointer to a new thread that generates gui of incoming bottles-- from partial cues
-    hubThread*     hThread;                 // pointer to a new thread that generates gui of incoming bottles-- from hubThread
+    partialThread*      pt[5];              // pointer to a new thread that generates gui of incoming bottles-- from partial cues
+    hubThread*          hThread;            // pointer to a new thread that generates gui of incoming bottles-- from hubThread
+    planThread*         pThread;            // pointer to a new thread that generates gui of incoming bottles-- from planThread
         
 public:
     /**

@@ -47,9 +47,9 @@ private:
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot event
     
                                                                
-    yarp::os::BufferedPort<yarp::os::Bottle> inputPortcue, inputPortrem, inputPorthub; // input recieving ports
-    yarp::os::Bottle *cueIncoming, *remIncoming, *hubIncoming, *pbot[5], *rbot[5], *hubTop, *hubBottom, *planA, *planB;
-    yarp::os::Semaphore *pmutex[5], *rmutex[5], *mutexTop, *mutexBottom, *mutexA, *mutexB;
+    yarp::os::BufferedPort<yarp::os::Bottle> inputPortcue, inputPortrem, inputPorthub, inputPortplan; // input recieving ports
+    yarp::os::Bottle *cueIncoming, *remIncoming, *hubIncoming, *planIncoming, *pbot[5], *rbot[5], *hbot[5], *hubTop, *hubBottomAll, *planA, *planB;
+    yarp::os::Semaphore *pmutex[5], *rmutex[5],*hmutex[5], *mutexTop, *mutexBottomAll, *mutexA, *mutexB;
     std::string name;
     bool idle;
 
@@ -106,11 +106,11 @@ public:
     /* 
     * function that receives the input bottles and assigns them to the corresponding thread
     */
-    void setSharingBottle(yarp::os::Bottle *bottle1[], yarp::os::Bottle *bottle2[], yarp::os::Bottle * a, yarp::os::Bottle *b, yarp::os::Bottle *c, yarp::os::Bottle *d);
+    void setSharingBottle(yarp::os::Bottle *bottle1[], yarp::os::Bottle *bottle2[], yarp::os::Bottle *bottle3[], yarp::os::Bottle * a,  yarp::os::Bottle *b, yarp::os::Bottle *c, yarp::os::Bottle *d);
     /*
     * Function that associates semaphores to the correct bottles
     */
-    void setSemaphore(yarp::os::Semaphore *mutex1[], yarp::os::Semaphore *mutex2[], yarp::os::Semaphore *a, yarp::os::Semaphore *b, yarp::os::Semaphore *c, yarp::os::Semaphore *d);
+    void setSemaphore(yarp::os::Semaphore *mutex1[], yarp::os::Semaphore *mutex2[], yarp::os::Semaphore *mutex3[], yarp::os::Semaphore *a, yarp::os::Semaphore *b, yarp::os::Semaphore *c, yarp::os::Semaphore *d);
 
 
 

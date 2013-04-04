@@ -45,10 +45,10 @@ private:
     
     
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputPort;     // output port to plot event
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputPort[7];     // output port to plot event
   
-    yarp::os::Bottle *hubTop1, *hubBottom1, *planA1, *planB1;
-    yarp::os::Semaphore *mutexTop1, *mutexBottom1, *mutexA1, *mutexB1;
+    yarp::os::Bottle *hubTop1, *hubBottomAll1, *hubBottom[5];
+    yarp::os::Semaphore *mutexTop1, *mutexBottomAll1, *mutexBottom[5];
     double hub[6][7];            // matrix to represent the hub or plan
 
     bool idle;                      // flag that indicates whether the thread is active
@@ -106,13 +106,13 @@ public:
     /* 
     * function that receives the input bottles and assigns them to the corresponding thread
     */
-    void setSharingBottle(yarp::os::Bottle *c, yarp::os::Bottle *d, yarp::os::Bottle *a, yarp::os::Bottle *b);
+    void setSharingBottle(yarp::os::Bottle *c, yarp::os::Bottle *d, yarp::os::Bottle *a[]);
     
     
     /*
     * function that sets the semaphores to the corresponding thread
     */
-    void setSemaphore(yarp::os::Semaphore *a, yarp::os::Semaphore *b, yarp::os::Semaphore *c, yarp::os::Semaphore *d);
+    void setSemaphore(yarp::os::Semaphore *a, yarp::os::Semaphore *b, yarp::os::Semaphore *c[]);
 
     /*
     * function that updates when every new cue comes in
@@ -122,7 +122,7 @@ public:
     /*
     * function that plots the contents of the cue
     */
-    void hubPlotting();
+    void hubPlotting(int i);
 };
 
 #endif  //_HUB_THREAD_H_

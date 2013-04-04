@@ -86,24 +86,26 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
         configFile.clear();
     }
 
-    Bottle* partialBottle[5], *remBottle[5], *hubTop, *hubBottom, *planA, *planB;
-    Semaphore* pmutex[5], *rmutex[5], *mutexTop, *mutexBottom, *mutexA, *mutexB;
+    Bottle*     partialBottle[5], *remBottle[5], *hubTop,*hubBottomAll, *hubBottom[5], *planA, *planB;
+    Semaphore*  pmutex[5], *rmutex[5], *mutexTop, *mutexBottomAll, *mutexBottom[5], *mutexA, *mutexB;
     
-    for (int i = 0; i<5; i++) {
+    for (int i = 0; i < 5; i++) {
         partialBottle[i]    = new Bottle();
         remBottle[i]        = new Bottle();
+        hubBottom[i]        = new Bottle();
         pmutex[i]           = new Semaphore();
         rmutex[i]           = new Semaphore();
+        mutexBottom[i]      = new Semaphore();
     }
     
-    hubTop      = new Bottle();
-    hubBottom   = new Bottle();
-    planA       = new Bottle();
-    planB       = new Bottle();
-    mutexTop    = new Semaphore();
-    mutexBottom = new Semaphore();
-    mutexA      = new Semaphore();
-    mutexB      = new Semaphore();
+    hubTop          = new Bottle();
+    hubBottomAll    = new Bottle();
+    planA           = new Bottle();
+    planB           = new Bottle();
+    mutexTop        = new Semaphore();
+    mutexBottomAll  = new Semaphore();
+    mutexA          = new Semaphore();
+    mutexB          = new Semaphore();
        
  
 
@@ -115,23 +117,30 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
     
     remThread = new rememberedxThread();
     remThread->setName(getName().c_str());
+    
     hThread   = new hubThread();
     hThread->setName(getName().c_str());
     
+    pThread   = new planThread();
+    pThread->setName(getName().c_str());
+    
     /* share the resources and semaphores between the threads*/ 
-    rThread->setSharingBottle(partialBottle, remBottle, hubTop, hubBottom, planA, planB);
-    rThread->setSemaphore(pmutex, rmutex, mutexTop, mutexBottom, mutexA, mutexB);
+    rThread->setSharingBottle(partialBottle, remBottle, hubBottom, hubTop, hubBottomAll, planA, planB);
+    rThread->setSemaphore(pmutex, rmutex, mutexBottom, mutexTop, mutexBottomAll, mutexA, mutexB);
     
     remThread->setSharingBottle(remBottle);
     remThread->setSemaphore(rmutex);
     
-    hThread->setSharingBottle(hubTop, hubBottom, planA, planB);
-    hThread->setSemaphore(mutexTop, mutexBottom, mutexA, mutexB);
+    hThread->setSharingBottle(hubTop, hubBottomAll, hubBottom);
+    hThread->setSemaphore(mutexTop, mutexBottomAll, mutexBottom);
     
-    /* now start the thread to do the work */
+    pThread->setSharingBottle(planA, planB);
+    pThread->setSemaphore(mutexA, mutexB);
+    
     rThread->start(); // this calls threadInit() and it if returns true, it then calls run()
     remThread->start(); 
     hThread->start();
+    pThread->start();
     
     for (int i = 0; i < 5; i++){
         
@@ -145,6 +154,7 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
         pt[i]->setSemaphore(pmutex[i]);
         pt[i]->start();
     }
+    /* now start the thread to do the work */
     
     Time::delay(5);
 
@@ -169,6 +179,8 @@ bool emPlotterModule::close() {
     }
     remThread->stop();
     rThread->stop();
+    hThread->stop();
+    pThread->stop();
     return true;
 }
 

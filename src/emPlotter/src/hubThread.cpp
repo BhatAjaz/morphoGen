@@ -52,10 +52,41 @@ bool hubThread::threadInit() {
         for (int j = 0; j < 7; j++)
             hub[i][j]=0.0;
             
-    if (!outputPort.open(getName("/hub/img:o").c_str())) {
+    if (!outputPort[0].open(getName("/hub0/img:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
-    }    
+    }
+    
+    if (!outputPort[1].open(getName("/hub1/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    if (!outputPort[2].open(getName("/hub2/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    
+    if (!outputPort[3].open(getName("/hub3/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    
+    if (!outputPort[4].open(getName("/hub4/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    
+    if (!outputPort[5].open(getName("/hubTop/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    
+    if (!outputPort[6].open(getName("/hubBottom/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    
+       
 
     return true;
     
@@ -78,20 +109,23 @@ void hubThread::setInputPortName(string InpPort) {
     
 }
 
-void hubThread::setSharingBottle(Bottle *top, Bottle *bottom, Bottle *a, Bottle *b) {
+void hubThread::setSharingBottle(Bottle *top, Bottle *bottom, Bottle *a[]) {
 
-    hubTop1      = top;
-    hubBottom1   = bottom;
-    planA1       = a;
-    planB1       = b;
+    for (int i = 0; i < 5; i++)
+        hubBottom[i]    =   a[i];
+        
+    hubTop1         = top;
+    hubBottomAll1   = bottom;
 }
 
 
-void hubThread::setSemaphore(Semaphore *top, Semaphore *bottom, Semaphore *a, Semaphore *b) {
-    mutexTop1    =   top;
-    mutexBottom1 =   bottom;
-    mutexA1      =   a;
-    mutexB1      =   b; 
+void hubThread::setSemaphore(Semaphore *top, Semaphore *bottom, Semaphore *a[]) {
+
+    for (int i = 0; i < 5; i++)
+        mutexBottom[i]    =   a[i];
+        
+    mutexTop1       =   top;
+    mutexBottomAll1 =   bottom;
 }
 
 void hubThread::updateHub(Bottle* hubBottle) {
@@ -103,7 +137,7 @@ void hubThread::updateHub(Bottle* hubBottle) {
         for (int j = 0; j < 7; j++) {
             int index = i * 7 + j;
             double x  = hubBottle->get(index).asDouble();
-            if(x == 1 || x == 0) {
+            if(x <= 1 && x >= 0) {
                 hub[i][j] = x;
             }
             else {
@@ -117,10 +151,10 @@ void hubThread::updateHub(Bottle* hubBottle) {
         
 }
 
-void hubThread::hubPlotting() {
+void hubThread::hubPlotting(int i) {
 
-    if (outputPort.getOutputCount()) {
-        yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = outputPort.prepare();
+    if (outputPort[i].getOutputCount()) {
+        yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = outputPort[i].prepare();
         
         // processing of the outputImage
         int height = 6;
@@ -148,76 +182,70 @@ void hubThread::hubPlotting() {
                 oproc+=padding;
             }                                   
         }
-   //outputPort.prepare() = *outputImage;
+   //outputPort[i].prepare() = *outputImage;
             
                 
-        outputPort.write();  
+        outputPort[i].write();  
     } 
  
 }
 
 void hubThread::run() {    
        
-        if (!idle) {
+  /*      if (!idle) {
              printf(" hubTop pointer is %08x \n", hubTop1);
              idle = true;
         }
+  */      
         
-            mutexTop1->wait();          
-            if(hubTop1->size() > 0){
-                printf("received not null function as hub \n");  
-                this->updateHub(hubTop1);
-            }
-            hubTop1->clear();
-            if(hubTop1->size() != 0){
-                printf("Error\n");
-            }
-            mutexTop1->post();
-            this->hubPlotting();
-            
-            
-            
-            mutexBottom1->wait();          
-            if(hubBottom1->size() > 0){
-                printf("received not null function as hub \n");  
-                this->updateHub(hubBottom1);
-            }
-            hubBottom1->clear();
-            if(hubBottom1->size() != 0){
-                printf("Error\n");
-            }
-            mutexBottom1->post();
-            this->hubPlotting();
-            
-            
-             mutexA1->wait();          
-            if(planA1->size() > 0){
-                printf("received not null function as hub \n");  
-                this->updateHub(planA1);
-            }
-            planA1->clear();
-            if(planA1->size() != 0){
-                printf("Error\n");
-            }
-            mutexA1->post();
-            this->hubPlotting();
+        for (int i = 0; i < 5; i++) {
         
+        mutexBottom[i]->wait();          
+        if(hubBottom[i]->size() > 0){
+            printf("received not null function as hub \n");  
+            this->updateHub(hubBottom[i]);
+        }
+        hubBottom[i]->clear();
+        if(hubBottom[i]->size() != 0){
+            printf("Error\n");
+        }
+        mutexBottom[i]->post();
+        this->hubPlotting(i);
             
-            mutexB1->wait();          
-            if(planB1->size() > 0){
-                printf("received not null function as hub \n");  
-                this->updateHub(planB1);
-            }
-            planB1->clear();
-            if(planB1->size() != 0){
-                printf("Error\n");
-            }
-            mutexB1->post();
-            this->hubPlotting();      
+        }
+        
+        
+        mutexTop1->wait();          
+        if(hubTop1->size() > 0){
+            printf("received not null function as hubTop \n");  
+            this->updateHub(hubTop1);
+        }
+        hubTop1->clear();
+        if(hubTop1->size() != 0){
+            printf("Error\n");
+        }
+        mutexTop1->post();
+        this->hubPlotting(5);
+            
+                  
+        mutexBottomAll1->wait();          
+        if(hubBottomAll1->size() > 0){
+            printf("received not null function as hubBottom \n");  
+            this->updateHub(hubBottomAll1);
+        }
+        hubBottomAll1->clear();
+        if(hubBottomAll1->size() != 0){
+           printf("Error\n");
+        }
+        mutexBottomAll1->post();
+        this->hubPlotting(6);  
 }
 
 void hubThread::threadRelease() {
-    outputPort.interrupt();
-    outputPort.close();
+    
+    for (int i = 0; i < 7; i++) {
+        outputPort[i].interrupt();
+        outputPort[i].close();
+    }
 }
 

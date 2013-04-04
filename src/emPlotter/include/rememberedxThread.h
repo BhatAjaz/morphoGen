@@ -43,7 +43,7 @@ private:
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
 
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputPort;     // output port to plot event
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputPort[5]; // output port to plot event
     std::string name;  
                                                               // rootname of all the ports opened by this thread
     //yarp::os::Bottle* bottleIn;
@@ -122,7 +122,7 @@ public:
     /*
     * function that plots the contents of the cue
     */
-    void cuePlotting();
+    void cuePlotting(int i);
 };
 
 #endif  //_REMEMBEREDX_THREAD_H_

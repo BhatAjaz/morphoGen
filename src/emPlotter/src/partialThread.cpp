@@ -97,11 +97,11 @@ void partialThread::updateCue(Bottle* cueBottle) {
         for (int j = 0; j < 50; j++) {
             int index = i * 50 + j;
             double x  = cueBottle->get(index).asDouble();
-            if(x == 1 || x == 0) {
+            if(x <= 1 || x >= 0) {
                 pCue[i][j] = x;
             }
             else {
-                printf("bad input bottle");
+                printf("bad input bottle    \n");
                 return;
                 }
               //printf("%f is the value of pCue \n",*pCue[i][j]);
@@ -153,11 +153,6 @@ void partialThread::cuePlotting() {
 }
 
 void partialThread::run() {    
-       
-        if (!idle) {
-             printf("%08x \n", bottleReceiving);
-             idle = true;
-        }
              
         mute->wait();
         if(bottleReceiving->size() > 0){
