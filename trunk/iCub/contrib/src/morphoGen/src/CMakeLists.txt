@@ -18,6 +18,7 @@ add_subdirectory( tutorialRatethread )
 add_subdirectory( trajectVisualize   )
 add_subdirectory( MeccanoObjDet      )
 add_subdirectory( EpisodicMem        )
+add_subdirectory( DarwinObserver     )
 
 
 

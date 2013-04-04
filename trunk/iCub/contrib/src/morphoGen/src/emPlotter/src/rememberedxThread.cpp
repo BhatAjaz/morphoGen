@@ -52,10 +52,30 @@ bool rememberedxThread::threadInit() {
         for (int j = 0; j < 50; j++)
             pCue[i][j]=0.0;
             
-    if (!outputPort.open(getName("/rememberedx/img:o").c_str())) {
+    if (!outputPort[0].open(getName("/rem0/img:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
-    }    
+    }
+    
+    if (!outputPort[1].open(getName("/rem1/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    } 
+    
+    if (!outputPort[2].open(getName("/rem2/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    } 
+    
+    if (!outputPort[3].open(getName("/rem3/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    } 
+    
+    if (!outputPort[4].open(getName("/rem4/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }     
 
     return true;
     
@@ -104,7 +124,7 @@ void rememberedxThread::updateCue(Bottle* remBottle) {
         for (int j = 0; j < 50; j++) {
             int index = i * 50 + j;
             double x  = remBottle->get(index).asDouble();
-            if(x == 1 || x == 0) {
+            if(x <= 1 && x >= 0) {
                 pCue[i][j] = x;
             }
             else {
@@ -118,10 +138,10 @@ void rememberedxThread::updateCue(Bottle* remBottle) {
         
 }
 
-void rememberedxThread::cuePlotting() {
+void rememberedxThread::cuePlotting(int i) {
 
-    if (outputPort.getOutputCount()) {
-        yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = outputPort.prepare();
+    if (outputPort[i].getOutputCount()) {
+        yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = outputPort[i].prepare();
         
         // processing of the outputImage
         int width  = 50;
@@ -152,17 +172,18 @@ void rememberedxThread::cuePlotting() {
    //outputPort.prepare() = *outputImage;
             
                 
-        outputPort.write();  
+        outputPort[i].write();  
     } 
  
 }
 
 void rememberedxThread::run() {    
-       
+  /*     
         if (!idle) {
              printf(" rememberedxThread pointer is %08x \n", bottleReceiving[0]);
              idle = true;
         }
+  */      
         for (int i = 1; i < 5; i++) {     
             mute[i]->wait();
             if(bottleReceiving[i]->size() > 0){
@@ -175,15 +196,18 @@ void rememberedxThread::run() {
                 printf("Error\n");
             }
             mute[i]->post();
+            this->cuePlotting(i); 
         }
-        this->cuePlotting();
+        
              
         
                   
 }
 
 void rememberedxThread::threadRelease() {
-    outputPort.interrupt();
-    outputPort.close();
+    for (int i = 0; i < 5; i++) {
+        outputPort[i].interrupt();
+        outputPort[i].close();
+    }
 }
 
