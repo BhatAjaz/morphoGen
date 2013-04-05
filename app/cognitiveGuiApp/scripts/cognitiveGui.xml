@@ -147,7 +147,7 @@
 </module>
 
 <module>
-  <name>emPlotter</name>d
+  <name>emPlotter</name>
   <parameters>--name /emPlotter </parameters>
   <tag>emPlotter</tag>
   <node>icub14</node>
