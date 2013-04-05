@@ -191,12 +191,12 @@
 <connection>
   <from>/emPlotter/partialQ2/img:o</from>
   <to>/partialCueView2</to>
-  <protocol>tcp</protocol>
+  <protocol>udp</protocol>
 </connection>
 <connection>
   <from>/emPlotter/partialQ3/img:o</from>
   <to>/partialCueView3</to>
-  <protocol>tcp</protocol>
+  <protocol>udp</protocol>
 </connection>
 <connection>
   <from>/emPlotter/partialQ4/img:o</from>
