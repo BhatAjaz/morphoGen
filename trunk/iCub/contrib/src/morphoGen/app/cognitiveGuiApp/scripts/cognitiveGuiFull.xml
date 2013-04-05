@@ -1,15 +1,15 @@
 <application>
 <name>cognitiveGui</name>
 <dependencies>
-<!--
+
   <port>/PlanXplore:o</port>
   <port>/Hub:o</port>
   <port>/Useful/PastXperiences:o</port>
   <port>/MyRemembered:o</port>
-  -->	
+
 </dependencies>
 
-<!---------------------------- Viewers for partial Cues--------------------- -->
+
 <module>
   <name>yarpview</name>
   <parameters>--name /partialCueView0 --x 000 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
@@ -48,7 +48,7 @@
 
 
 
-<!-- -------------------------- Viewers for Remembered Experiences --------------------- -->
+
 <module>
   <name>yarpview</name>
   <parameters>--name /rememberedView0 --x 000 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
@@ -85,7 +85,8 @@
 </module>
 
 
-<!---------------------------- Viewers for Hubs --------------------- -->
+
+
 
 <module>
   <name>yarpview</name>
@@ -137,7 +138,7 @@
 </module>
 
 
-<!---------------------------- Viewers for Plans --------------------- -->
+
 
 <module>
   <name>yarpview</name>
@@ -153,7 +154,7 @@
 </module>
 
 
-<!----------------------------- Core Processing Modules ----------------------------->
+
 <module>
   <name>DarwinObserver</name>
   <parameters>--name /DarwinObserver </parameters>
@@ -174,10 +175,10 @@
 </module>
 
 
-<!---------------------- CONNECTIONS ------------------------>
 
 
-<!-- Connecting the input ports -->
+
+
 <connection>
   <from>/PlanXplore:o</from>
   <to>/emPlotter/plan:i</to>
@@ -200,10 +201,9 @@
 </connection>
 
 
-<!--  Connecting the output ports -->
-<!--  Connecting the partial cues -->
+
 <connection>
-  <from>/emPlotter/patialQ0/img:o</from>
+  <from>/emPlotter/partialQ0/img:o</from>
   <to>/partialCueView0</to>
   <protocol>udp</protocol>
 </connection>
@@ -228,7 +228,9 @@
   <protocol>udp</protocol>
 </connection>
 
-<!-- Connecting the remembered experiences -->
+
+
+
 <connection>
   <from>/emPlotter/rem0/img:o</from>
   <to>/rememberedView0</to>
@@ -255,7 +257,9 @@
   <protocol>udp</protocol>
 </connection> 
 
-<!-- Connecting the hubs -->
+
+
+
 <connection>
   <from>/emPlotter/hub0/img:o</from>
   <to>/hubView0</to>
@@ -292,7 +296,9 @@
   <protocol>udp</protocol>
 </connection>
 
-<!-- Connecting the plans -->
+
+
+
 <connection>
   <from>/emPlotter/plan1/img:o</from>
   <to>/plan1View</to>
