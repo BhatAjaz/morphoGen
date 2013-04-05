@@ -177,9 +177,8 @@
   <protocol>udp</protocol>
 </connection>
 
-
 <connection>
-  <from>/emPlotter/patialQ0/img:o</from>
+  <from>/emPlotter/partialQ0/img:o</from>
   <to>/partialCueView0</to>
   <protocol>udp</protocol>
 </connection>
