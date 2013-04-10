@@ -184,7 +184,7 @@ void rememberedxThread::run() {
              idle = true;
         }
   */      
-        for (int i = 1; i < 5; i++) {     
+        for (int i = 0; i < 5; i++) {     
             mute[i]->wait();
             if(bottleReceiving[i]->size() > 0){
                 printf("received not null function as remembered experience \n");
