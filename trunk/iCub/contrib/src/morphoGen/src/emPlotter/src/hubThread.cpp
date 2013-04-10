@@ -204,13 +204,14 @@ void hubThread::run() {
         if(hubBottom[i]->size() > 0){
             printf("received not null function as hub \n");  
             this->updateHub(hubBottom[i]);
+            this->hubPlotting(i);
         }
         hubBottom[i]->clear();
         if(hubBottom[i]->size() != 0){
             printf("Error\n");
         }
         mutexBottom[i]->post();
-        this->hubPlotting(i);
+
             
         }
         
