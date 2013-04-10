@@ -190,13 +190,14 @@ void rememberedxThread::run() {
                 printf("received not null function as remembered experience \n");
                
                 this->updateCue(bottleReceiving[i]);
+                this->cuePlotting(i);
             }
             bottleReceiving[i]->clear();
             if(bottleReceiving[i]->size() != 0){
                 printf("Error\n");
             }
             mute[i]->post();
-            this->cuePlotting(i); 
+ 
         }
         
              
