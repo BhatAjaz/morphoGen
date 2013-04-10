@@ -74,7 +74,7 @@ bool emPlotterRatethread::threadInit() {
     
     /*if (!Network::connect("/MyRemembered:o","/emPlotter/rememberedX:i"))
         return false;    
-   //printf("Conncetion to rememberedX");
+   //printf("Connection to rememberedX");
     if (!Network::connect("/Useful/PastXperiences:o","/emPlotter/cue:i"))
         return false;
     //if (!Network::connect("/Hub:o","/emPlotter/hub:i"))
