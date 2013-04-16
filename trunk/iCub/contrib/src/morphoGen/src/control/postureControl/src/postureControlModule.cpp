@@ -40,7 +40,7 @@ bool postureControlModule::configure(yarp::os::ResourceFinder &rf) {
 
     /* get the module name which will form the stem of all module port names */
     moduleName            = rf.check("name", 
-                           Value("/tutorial"), 
+                           Value("/psControl"), 
                            "module name (string)").asString();
     /*
     * before continuing, set the module name before getting any other parameters, 
@@ -89,6 +89,7 @@ bool postureControlModule::configure(yarp::os::ResourceFinder &rf) {
     /* create the thread and pass pointers to the module parameters */
     rThread = new postureControlThread(robotName, configFile);
     rThread->setName(getName().c_str());
+    rThread->setRobot(robotName);
     //rThread->setInputPortName(inputPortName.c_str());
     
     /* now start the thread to do the work */

@@ -40,6 +40,14 @@ private:
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
+    
+    yarp::sig::Vector encodersRightArm;      // encoders position
+
+    yarp::dev::IPositionControl *posRightArm;          // position control of the robot RightArm
+    yarp::dev::IEncoders *encsRightArm;                // encoders readings from the robot RightArm
+    yarp::dev::IControlMode *ictrlRightArm;            // sets the modality of the control RightArm
+    yarp::dev::IImpedanceControl *iimpRightArm;        // impedence control of the robot RightArm
+    yarp::dev::ITorqueControl *itrqRightArm;           // torque control of the robot RightArm
 
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
 
@@ -102,6 +110,15 @@ public:
     */
     void setInputPortName(std::string inpPrtName);
 
+    /*
+    * function that sets the robotName
+    */
+    void setRobot(std::string robotName){robot = robotName;};
+
+    /*
+    * function that initialises the controller of all the bodyparts
+    */
+    bool initController();
 
 
 };
