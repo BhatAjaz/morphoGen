@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 
 #add here the name of the directory you want to build
 
-
+add_subdirectory ( trajectVisualize )
 
 
 # single modules that are going to be sorted into subsection
