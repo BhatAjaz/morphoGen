@@ -106,8 +106,8 @@ bool shapeSelectorRatethread::threadInit() {
         for(int i = 0; i < 3; i++)  {        // initialize the coordinates
             xLeft[j][i]     =   -1;
             yTop[j][i]      =   -1;
-            xWidth[j][i]    =   -1;
-            yHeight[j][i]   =   -1;
+            xWidth[j][i]    =   0;
+            yHeight[j][i]   =   0;
             objectID[j][i]  =   -1;
         }
          
@@ -187,8 +187,8 @@ void shapeSelectorRatethread::run() {
                 for(int i = 0; i < 3; i++)  {        // initialize the coordinates for every new bottle
                     xLeft[j][i]     =   -1;
                     yTop[j][i]      =   -1;
-                    xWidth[j][i]    =   -1;
-                    yHeight[j][i]   =   -1;
+                    xWidth[j][i]    =   0;
+                    yHeight[j][i]   =   0;
                     objectID[j][i]  =   -1;
                     
                     
@@ -201,8 +201,8 @@ void shapeSelectorRatethread::run() {
                         if(tempBottle != NULL){
                             xLeft[j][i]         =   tempBottle->get(0).asInt();
                             yTop[j][i]          =   tempBottle->get(1).asInt();
-                            xWidth[j][i]        =   tempBottle->get(2).asInt();
-                            yHeight[j][i]       =   tempBottle->get(3).asInt();
+                            xWidth[j][i]        =   abs(tempBottle->get(2).asInt());
+                            yHeight[j][i]       =   abs(tempBottle->get(3).asInt());
                             objectID[j][i]      =   tempBottle->get(4).asInt();
                         }
                         printf("handling object %d: %d %d %d %d with ID %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i], objectID[j][i]);                   
@@ -218,8 +218,8 @@ void shapeSelectorRatethread::run() {
             for(int i = 0; i < 3; i++)  {        // initialize in case of no input bottle ports
                 xLeft[j][i]     =   -1;
                 yTop[j][i]      =   -1;
-                xWidth[j][i]    =   -1;
-                yHeight[j][i]   =   -1;
+                xWidth[j][i]    =   0;
+                yHeight[j][i]   =   0;
                 objectID[j][i]  =   -1;
                 }
         } 
