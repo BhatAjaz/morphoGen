@@ -6,19 +6,12 @@ cmake_minimum_required(VERSION 2.6)
 
 #add here the name of the directory you want to build
 
-add_subdirectory( AssocMem           )
-add_subdirectory( colorVision        )
-add_subdirectory( emPlotter          )
-add_subdirectory( examples           )
-add_subdirectory( Grasper            )
-add_subdirectory( SmallWorlds        )
-add_subdirectory( SMSupportPMP       )
-add_subdirectory( tutorialThread     )
-add_subdirectory( tutorialRatethread )
-add_subdirectory( trajectVisualize   )
-add_subdirectory( MeccanoObjDet      )
-add_subdirectory( EpisodicMem        )
-add_subdirectory( DarwinObserver     )
+add_subdirectory( control         )
+add_subdirectory( gui             )
+add_subdirectory( reasoning       )
+add_subdirectory( tutorials       )
+add_subdirectory( vision          )
+
 
 
 
