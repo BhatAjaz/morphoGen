@@ -155,6 +155,8 @@ public:
 	vector<DetObj> getDetObjs(void);
 	void showDetObjs(Mat im,Scalar box_color,Scalar edge_color,int w_show_wind=0);
 	void dispDetObjs(void);
+    
+    void setTraining(string str){  tr_bin_file =  str;};      
 
 	//string *getTrainObjs(void);{ return obj_para.all_cls};
 

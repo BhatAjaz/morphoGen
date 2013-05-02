@@ -51,7 +51,8 @@ private:
     yarp::os::BufferedPort<yarp::os::Bottle >                        dataPortMec;       // port for the output of the features out    
 
     std::string name;                                                                   // rootname of all the ports opened by this thread
-    std::string para_yml_file;    // file contains training data
+    std::string para_yml_file;     // file contains training data
+    std::string tr_bin_file;       // file that contains the training data
 
     CTLdetector* detector;         // reference to the class CTLdetector
 
@@ -92,6 +93,18 @@ public:
     * @param str rootnma
     */
     void setName(std::string str);
+
+    /*
+    * function that sets the parametric file path
+    * @param str path of the file
+    */
+    void setParaFile(std::string path) {para_yml_file = path; };
+
+    /*
+    * function that sets the training file path
+    * @param str path of the file
+    */
+    void setTrainFile(std::string path) {tr_bin_file = path; };
     
     /**
     * function that returns the original root name and appends another string iff passed as parameter

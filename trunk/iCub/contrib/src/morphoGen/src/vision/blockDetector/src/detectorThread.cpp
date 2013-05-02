@@ -39,6 +39,8 @@ detectorThread::detectorThread():Thread() {
 detectorThread::detectorThread(string _robot, string _configFile):Thread(){
     robot = _robot;
     configFile = _configFile;
+
+    
 }
 
 detectorThread::~detectorThread() {
@@ -47,18 +49,23 @@ detectorThread::~detectorThread() {
 
 bool detectorThread::threadInit() {
 
-    para_yml_file = "data_blocks/para_blocks.yml";
-
+    //para_yml_file = "data_blocks/para_blocks.yml";
+    
+    printf("\n trying to open ports from %s \n", getName("/img:i").c_str());
+    imageInputPort = new BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >;
+    
+    
     if (!imageInputPort->open(getName("/img:i").c_str())) {
         cout << ": unable to open input image port  "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }    
-   
+
+    imageOutputPort = new BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >;
     if (!imageOutputPort->open(getName("/img:o").c_str())) {
         cout << ": unable to open port output image port "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }    
-
+    
     if (!dataPortMec.open(getName("/shapeData:o").c_str())) {
         cout << ": unable to open port for the stream data out "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
@@ -69,19 +76,28 @@ bool detectorThread::threadInit() {
 	/////////////////////////////////////////////////
     bool flag;
 	detector = new CTLdetector();
+    printf("trying to upload paraFile from %s \n", para_yml_file.c_str());
 	flag = detector->initiate(para_yml_file);
 	if (!flag){		
         cout<< "detector initialization failed "<<endl;
         return false;
     }
+    else {
+        cout<<" detector initialization success"<<endl;
+    }
 
     /////////////////////////////////////////////////
 	// STEP2: train
 	/////////////////////////////////////////////////
+    printf("trying to upload training file from %s \n", tr_bin_file.c_str());
+    detector->setTraining(tr_bin_file);
 	flag = detector->train();
 	if (!flag) {
         cout<< "detector training failed "<<endl;
 		return false;
+    }
+    else {
+        cout<< "detector training success"<<endl;
     }
 
     return true;
