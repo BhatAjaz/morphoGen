@@ -10,7 +10,8 @@
 
 using namespace yarp::os;
 using namespace yarp::sig;
-int main(char** argv, int argc)
+
+int main_backup(char** argv, int argc)
 {
     Network network;
     BufferedPort<ImageOf<PixelRgb> >* imageInputPort  = new BufferedPort<ImageOf<PixelRgb> >();
