@@ -33,13 +33,14 @@ using namespace std;
 #define THRATE 100 //ms
 
 detectorThread::detectorThread():Thread() {
-    robot = "icub";        
+    robot = "icub"; 
+    firstRun = true;
 }
 
 detectorThread::detectorThread(string _robot, string _configFile):Thread(){
     robot = _robot;
     configFile = _configFile;
-
+    firstRun = true;
     
 }
 
@@ -124,12 +125,20 @@ void detectorThread::setInputPortName(string InpPort) {
 void detectorThread::run() {
     cout<< "Detecting mode active.... \n"<<endl;
     cv::Mat cvMatImage;
+    int key = 0;
+    
 
     while (isStopping() != true) {
         
-        if (imageInputPort->getOutputCount()) {
+        if (imageInputPort->getInputCount()) {
             ImageOf<PixelRgb> *img = imageInputPort->read(true);
-            cvMatImage.create(img->height(), img->width(), CV_8UC3);
+            
+            if(firstRun) {
+                cvMatImage.create(img->height(), img->width(), CV_8UC3);
+                firstRun = false;
+            }
+            
+            double start = Time::now();
             unsigned char* ptr = img->getRawImage();
             memcpy(cvMatImage.data, ptr, cvMatImage.cols * cvMatImage.rows * 3);
             cv::cvtColor(cvMatImage, cvMatImage, CV_RGB2BGR);
@@ -141,13 +150,20 @@ void detectorThread::run() {
             std::vector<DetObj> objects;
             objects = detector->getDetObjs();
 
+            double end = Time::now();
+            
+            double interval = end - start;
+            printf("processing time interval %f sec \n", interval);
+
+            //key = cv::waitKey(30);
+
             //============================================
             //sending out through image port the image out    
             //============================================
             
             if(imageOutputPort->getOutputCount()) {
                 cv::Mat ppIm = detector->getPostProcessIm();            
-                //cv::cvtColor(ppIm, ppIm, CV_BGR2RGB);
+                cv::cvtColor(ppIm, ppIm, CV_BGR2RGB);
                 
                 // printf("image %d %d \n", cvMatImage.cols, cvMatImage.rows);
                 ImageOf<PixelRgb>& tmpImage = imageOutputPort->prepare();  
@@ -159,22 +175,22 @@ void detectorThread::run() {
                 
                 for (int row = 0; row <  img->height(); row++) {
                     for(int col = 0; col < img->width(); col++) {
-                        *ptrd = 255;
+                        *ptrd = *ptrs;
                         ptrd++; 
                         ptrs++;
-                        *ptrd = 255;
+                        *ptrd = *ptrs;
                         ptrd++; 
                         ptrs++;
-                        *ptrd = 255;
+                        *ptrd = *ptrs;
                         ptrd++; 
                         ptrs++;
-                        //ptrs++;    
+                            
                     }
                     ptrd += padding;
                     
                 }
                 
-                
+                    //memcpy(tmpImage.getRawImage(), ppIm.data, cvMatImage.cols * cvMatImage.rows * 3);
                 //memcpy(ptrd,ptrs, cvMatImage.cols * cvMatImage.rows * 3 );
                 imageOutputPort->write();
             }
@@ -219,6 +235,12 @@ void detectorThread::run() {
 
 void detectorThread::onStop(){
     // code for the stopping session in detector Thread
+    printf("detectorThread::onStop() \n");
+    imageInputPort->close();
+    imageOutputPort->close();    
+    dataPortMec.close();
+    printf("detectorThread::onStop() end! \n");
+      
 }
 
 void detectorThread::threadRelease() {

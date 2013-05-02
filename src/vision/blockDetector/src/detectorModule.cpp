@@ -74,7 +74,7 @@ bool detectorModule::configure(yarp::os::ResourceFinder &rf) {
     //handlerPortName += getName();         // use getName() rather than a literal 
     printf("opening the defined port name %s \n", getName().c_str());
     
-    
+    Port handlerPort;
     handlerPort.open("/detector");
     
     //if (!handlerPort.open(handlerPortName.c_str())) {           
@@ -113,15 +113,24 @@ bool detectorModule::configure(yarp::os::ResourceFinder &rf) {
     trainPath              = rf.check("train", 
                            Value("tr_data_blocks.bin"), 
                            "train_data_blocks path (string)").asString();
-    trainFile = rf.findFile(trainPath.c_str());
+    printf("name of the trainPath known %s \n", trainPath.c_str());
+    ConstString trainF = rf.findFile(trainPath.c_str());
+    printf("Found training file %s \n", trainF.c_str());
+    
+    std::string trainFile;
+    trainFile.append(trainF.c_str());
+    
+    
+    /*
     if (trainFile=="") {
         printf("the trainFile was not found. Sorry. \n");
         return false;
     }
     else {
-        printf("Found trainFile %s \n", trainFile.c_str());
+        printf("Found trainFile \n");
     }
-
+    */
+    
 
     /* create the thread and pass pointers to the module parameters */
     printf("Starting the detector thread ... \n");
@@ -141,15 +150,21 @@ bool detectorModule::configure(yarp::os::ResourceFinder &rf) {
 }
 
 bool detectorModule::interruptModule() {
-    handlerPort.interrupt();
+    printf("interrupting the thread \n");
+    
+    printf("portInterrupted \n");
+    dThread->stop();
+    
+    //handlerPort.interrupt();
     return true;
 }
 
 bool detectorModule::close() {
-    handlerPort.close();
-    /* stop the thread */
     printf("stopping the thread \n");
-    dThread->stop();
+    //handlerPort.close();
+    /* stop the thread */
+    
+    //dThread->stop();
     return true;
 }
 

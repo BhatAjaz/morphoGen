@@ -1,3 +1,6 @@
+// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
+
+
 /*
  * TLdetector.hpp
  * Texture-less object detection class.
@@ -668,7 +671,8 @@ void CTLdetector::showDetObjs(Mat im,Scalar box_color,Scalar edge_color,int w_sh
 	char buf[100];
 	if ((w_show_wind<1)||(w_show_wind==im.cols)) //show the original image size
 	{
-		for (int i=0;i<vec_detobj.size();i++)
+        
+        for (int i=0;i<vec_detobj.size();i++)
 		{
 			Rect rt = vec_detobj[i].box;
 			Rect rt_tight = vec_detobj[i].box_tight;
@@ -679,8 +683,10 @@ void CTLdetector::showDetObjs(Mat im,Scalar box_color,Scalar edge_color,int w_sh
 			putText(im, text, rt_tight.tl()+Point(0,-3), fontFace, fontScale,box_color);
 			drawEdgePatch(im, vec_detobj[i].mat_edge_NN_tr, rt, edge_color);
 		}
-		namedWindow( "Texture-less object detection", CV_WINDOW_KEEPRATIO | CV_WINDOW_AUTOSIZE);
-		imshow("Texture-less object detection",im);
+		//namedWindow( "Texture-less object detection", CV_WINDOW_KEEPRATIO | CV_WINDOW_AUTOSIZE);
+		//imshow("Texture-less object detection",im);
+
+        postProcessIm = im;
 	}
 	else //resize the image
 	{

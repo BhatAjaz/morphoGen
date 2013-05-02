@@ -151,7 +151,7 @@ public:
 
 	bool train();
 	bool detect(Mat im);
-    Mat  getPostProcessIm() { return postProcessIm;};
+  Mat  getPostProcessIm() { return postProcessIm;};
 	vector<DetObj> getDetObjs(void);
 	void showDetObjs(Mat im,Scalar box_color,Scalar edge_color,int w_show_wind=0);
 	void dispDetObjs(void);

@@ -55,6 +55,8 @@ private:
     std::string tr_bin_file;       // file that contains the training data
 
     CTLdetector* detector;         // reference to the class CTLdetector
+    
+    bool firstRun;                 // first run for initialization
 
 public:
     /**
