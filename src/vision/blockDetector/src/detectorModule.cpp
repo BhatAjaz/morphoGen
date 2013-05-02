@@ -37,7 +37,8 @@ using namespace std;
 
 bool detectorModule::configure(yarp::os::ResourceFinder &rf) {
     /* Process all parameters from both command-line and .ini file */
-
+    printf("detectorModule::configure.... \n");
+    
     /* get the module name which will form the stem of all module port names */
     moduleName            = rf.check("name", 
                            Value("/detector"), 
@@ -46,12 +47,14 @@ bool detectorModule::configure(yarp::os::ResourceFinder &rf) {
     * before continuing, set the module name before getting any other parameters, 
     * specifically the port names which are dependent on the module name
     */
+    printf("generated moduleName: %s \n", moduleName.c_str());
     setName(moduleName.c_str());
 
     /*
     * get the robot name which will form the stem of the robot ports names
     * and append the specific part and device required
     */
+    printf("extracting the parameters ... \n");
     robotName             = rf.check("robot", 
                            Value("icub"), 
                            "Robot name (string)").asString();
@@ -66,15 +69,24 @@ bool detectorModule::configure(yarp::os::ResourceFinder &rf) {
     * attach a port of the same name as the module (prefixed with a /) to the module
     * so that messages received from the port are redirected to the respond method
     */
-    handlerPortName =  "";
-    handlerPortName += getName();         // use getName() rather than a literal 
-
-    if (!handlerPort.open(handlerPortName.c_str())) {           
-        cout << getName() << ": Unable to open port " << handlerPortName << endl;  
-        return false;
-    }
-
+    printf("attaching the handler port.... \n");
+    handlerPortName =  moduleName;
+    //handlerPortName += getName();         // use getName() rather than a literal 
+    printf("opening the defined port name %s \n", getName().c_str());
+    
+    
+    handlerPort.open("/detector");
+    
+    //if (!handlerPort.open(handlerPortName.c_str())) {           
+    //    cout << "opening port error" <<endl;
+        //cout << getName() << ": Unable to open port " << handlerPortName << endl;  
+    //    return false;
+    //}
+    printf("attaching the port \n");
     attach(handlerPort);                  // attach to port
+    printf("success in attaching the handler port \n");
+    
+    
     if (rf.check("config")) {
         configFile=rf.findFile(rf.find("config").asString().c_str());
         if (configFile=="") {
@@ -84,15 +96,45 @@ bool detectorModule::configure(yarp::os::ResourceFinder &rf) {
     else {
         configFile.clear();
     }
+    printf("checking the param file path ...");
+    
+    paramPath              = rf.check("param", 
+                           Value("para_blocks.yml"), 
+                           "para_blocks path (string)").asString();
+    paramFile = rf.findFile(paramPath.c_str());
+    if (paramFile=="") {
+        printf("the paramFile was not found. Sorry. \n");
+        return false;
+    }
+    else {
+        printf("Found paramFile %s \n", paramFile.c_str());
+    }
+
+    trainPath              = rf.check("train", 
+                           Value("tr_data_blocks.bin"), 
+                           "train_data_blocks path (string)").asString();
+    trainFile = rf.findFile(trainPath.c_str());
+    if (trainFile=="") {
+        printf("the trainFile was not found. Sorry. \n");
+        return false;
+    }
+    else {
+        printf("Found trainFile %s \n", trainFile.c_str());
+    }
 
 
     /* create the thread and pass pointers to the module parameters */
-    rThread = new detectorThread(robotName, configFile);
-    rThread->setName(getName().c_str());
+    printf("Starting the detector thread ... \n");
+    dThread = new detectorThread(robotName, configFile);
+    dThread->setName(moduleName.c_str());
+    dThread->setParaFile(paramFile);
+    dThread->setTrainFile(trainFile);
     //rThread->setInputPortName(inputPortName.c_str());
     
     /* now start the thread to do the work */
-    rThread->start(); // this calls threadInit() and it if returns true, it then calls run()
+    bool res = dThread->start(); // this calls threadInit() and it if returns true, it then calls run()
+    if(!res)
+        return false;
 
     return true ;       // let the RFModule know everything went well
                         // so that it will then run the module
@@ -107,7 +149,7 @@ bool detectorModule::close() {
     handlerPort.close();
     /* stop the thread */
     printf("stopping the thread \n");
-    rThread->stop();
+    dThread->stop();
     return true;
 }
 

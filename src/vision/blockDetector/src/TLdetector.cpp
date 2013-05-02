@@ -63,6 +63,10 @@ CTLdetector::~CTLdetector()
 	}
 	vec_detobj.clear();
 }
+
+
+
+
 /*
  * Initiate the parameters from *.yml file
  * if input "", then use default valuables
@@ -79,8 +83,14 @@ bool CTLdetector::initiate(string yml_file)
 		cout<<"******************************************************"<<endl;
 		cout<<"******************************************************"<<endl;
 		table_method = TABLE_GROUPPT;
-                tr_bin_file = "/usr/local/src/robot/iCub/app/morphoGenApp/conf/tr_data_blocks.bin";
-                tr_yml_file = "/usr/local/src/robot/iCub/app/morphoGenApp/conf/para_blocks.yml";
+
+        //*************************************************************************************
+        // hard coded file must be removed
+        tr_bin_file = "/usr/local/src/robot/iCub/app/morphoGenApp/conf/tr_data_blocks.bin";
+        tr_yml_file = "/usr/local/src/robot/iCub/app/morphoGenApp/conf/para_blocks.yml";
+        //
+        //************************************************************************************
+        
 		cout<<" table_method:"<<table_method<<endl;
 		cout<<" tr_bin_file:"<<tr_bin_file<<endl;
 
