@@ -100,8 +100,8 @@ bool shapeSelectorRatethread::threadInit() {
 
     
     
-    height = 240; //default value;
-    width  = 320; //default value;
+//    height = 240; //default value;
+//    width  = 320; //default value;
     for (int j = 0; j < 2; j++)
         for(int i = 0; i < 3; i++)  {        // initialize the coordinates
             xLeft[j][i]     =   -1;
