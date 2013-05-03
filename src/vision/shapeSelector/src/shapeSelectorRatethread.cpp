@@ -199,8 +199,8 @@ void shapeSelectorRatethread::run() {
                     for (int i = 0; i < 3; i++) {
                         Bottle * tempBottle =   incomingBottle->get(i+1).asList();
                         if(tempBottle != NULL){
-                            xLeft[j][i]         =   tempBottle->get(0).asInt();
-                            yTop[j][i]          =   tempBottle->get(1).asInt();
+                            xLeft[j][i]         =   abs(tempBottle->get(0).asInt());
+                            yTop[j][i]          =   abs(tempBottle->get(1).asInt());
                             xWidth[j][i]        =   abs(tempBottle->get(2).asInt());
                             yHeight[j][i]       =   abs(tempBottle->get(3).asInt());
                             objectID[j][i]      =   tempBottle->get(4).asInt();
@@ -230,6 +230,8 @@ void shapeSelectorRatethread::run() {
         if (outputImagePort[j].getOutputCount()) {
             //printf("%d\n",foreground.at<int>(0, 0));                           
             ImageOf<PixelMono>& outputImage =  outputImagePort[j].prepare();
+            outputImage.resize(width, height);
+            padding = outputImage.getPadding();
             int x   =   inputImagePort[j].getInputCount();
             if (x)  {
                 tempImage  =   inputImagePort[j].read(false);
@@ -281,14 +283,29 @@ void shapeSelectorRatethread::run() {
                     outputImagePort[j].write();
                 }
             }
-            else{
-                outputImage.resize(width, height);
-                padding = outputImage.getPadding();   
+            else{   
                 outputImage.zero();
+                for (int i = 0; i < 3; i++) {
+                    oproc       =   outputImage.getRawImage();
+                    for (int r = 0; r < height; r++) {
+                        for (int c = 0; c < width; c++) {
+                            if ( ( r >= yTop[j][i]) && (r <= (yTop[j][i] + yHeight[j][i])) && (c >= xLeft[j][i]) && (c <= (xLeft[j][i] + xWidth[j][i] )) ) {
+                                *oproc = 255;
+                            }    
+                            oproc++;                 
+                        }
+                        oproc+=padding;                                
+                    }
+                }
                 outputImagePort[j].write();
+                oproc = NULL;
             }
             
         }
+        
+        
+        
+
          
     }// for loop ends here                   
     //printf("Finishing the rate thread run \n");
