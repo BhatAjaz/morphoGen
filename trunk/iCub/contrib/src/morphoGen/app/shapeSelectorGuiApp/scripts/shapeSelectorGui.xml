@@ -1,10 +1,10 @@
 <application>
 <name>shapeSelectorGui</name>
 <dependencies>
-
+<!--
   <port>/icub/camcalib/left/out</port>
   <port>/icub/camcalib/right/out</port>
-
+-->
 </dependencies>
 
 <module>
