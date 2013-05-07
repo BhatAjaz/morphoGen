@@ -1,0 +1,154 @@
+<application>
+<name>shapeSelectorGui</name>
+<dependencies>
+
+  <port>/icub/camcalib/left/out</port>
+  <port>/icub/camcalib/right/out</port>
+
+</dependencies>
+
+<module>
+ <name>yarpview</name>
+  <parameters>--name /objectsViewLeft --RefreshTime 33</parameters>
+  <node>icub03</node>
+  <tag>objectsViewLeft</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /objectsViewRight --RefreshTime 33</parameters>
+  <node>icub03</node>
+  <tag>objectsViewRight</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /earlyVisionOutputImageLeft --RefreshTime 33</parameters>
+  <node>icub03</node>
+  <tag>earlyVisionOutputImageLeft</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /earlyVisionOutputImageRight --RefreshTime 33</parameters>
+  <tag>earlyVisionOutputImageRight</tag>
+  <node>icub03</node>
+</module>
+
+
+
+<module>
+  <name>earlyVision</name>
+  <parameters>--name /leftVision </parameters>
+  <tag>leftVision</tag>
+  <node>icub03</node>
+</module>
+<module>
+  <name>earlyVision</name>
+  <parameters>--name /rightVision </parameters>
+  <tag>rightVision</tag>
+  <node>icub03</node>
+</module>
+
+<module>
+  <name>blockDetector</name>
+  <parameters>--name /leftDetector </parameters>
+  <tag>leftDetector</tag>
+  <node>icub03</node>
+</module>
+<module>
+  <name>blockDetector</name>
+  <parameters>--name /rightDetector </parameters>
+  <tag>rightDetector</tag>
+  <node>icub03</node>
+</module>
+
+
+<module>
+  <name>shapeSelector</name>
+  <parameters>--name /shapeSelector </parameters>
+  <tag>shapeSelector</tag>
+  <node>icub03</node>
+</module>
+
+<module>
+  <name>vergence</name>
+  <parameters>--name /vergence </parameters>
+  <tag>vergence</tag>
+  <node>icub03</node>
+</module>
+
+
+
+
+
+
+
+<connection>
+  <from>/leftVision/edges/edges:o</from>
+  <to>/earlyVisionOutputImageLeft</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/rightVision/edges/edges:o</from>
+  <to>/earlyVisionOutputImageRight</to>
+  <protocol>udp</protocol>
+</connection>
+
+
+<connection>
+  <from>/icub/camcalib/left/out</from>
+  <to>/leftVision/imageRGB:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/icub/camcalib/right/out</from>
+  <to>/rightVision/imageRGB:i</to>
+  <protocol>udp</protocol>
+</connection>
+
+<connection>
+  <from>/leftVision/edges/edges:o</from>
+  <to>/shapeSelector/leftImage:i</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/rightVision/edges/edges:o</from>
+  <to>/shapeSelector/rightImage:i</to>
+  <protocol>udp</protocol>
+</connection> 
+
+<connection>
+  <from>/leftDetector/shapeData:o</from>
+  <to>/shapeSelector/leftBottle:i</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/rightDetector/shapeData:o</from>
+  <to>/shapeSelector/rightBottle:i</to>
+  <protocol>udp</protocol>
+</connection> 
+<!--
+<connection> FOR VERGENCE
+  <from>/shapeSelector/leftImage:o</from>
+  <to>/vergence/</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/shapeSelector/rightImage:o</from>
+  <to>/vergence</to>
+  <protocol>udp</protocol>
+</connection> 
+-->
+<connection>
+  <from>/shapeSelector/leftImage:o</from>
+  <to>/objectsViewLeft</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/shapeSelector/rightImage:o</from>
+  <to>/objectsViewRight</to>
+  <protocol>udp</protocol>
+</connection> 
+
+</application>
