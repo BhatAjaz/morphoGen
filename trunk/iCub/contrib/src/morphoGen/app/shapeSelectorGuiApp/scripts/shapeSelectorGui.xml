@@ -9,28 +9,28 @@
 
 <module>
  <name>yarpview</name>
-  <parameters>--name /objectsViewLeft --RefreshTime 33</parameters>
+  <parameters>--name /objectsViewLeft --x 000 --y 360 --w 320 --h 280 --RefreshTime 33</parameters>
   <node>icub14</node>
   <tag>objectsViewLeft</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /objectsViewRight --RefreshTime 33</parameters>
+  <parameters>--name /objectsViewRight --x 400 --y 360 --w 320 --h 280 --RefreshTime 33</parameters>
   <node>icub14</node>
   <tag>objectsViewRight</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /earlyVisionOutputImageLeft --RefreshTime 33</parameters>
+  <parameters>--name /earlyVisionOutputImageLeft --x 000 --y 000 --w 320 --h 280 --RefreshTime 33</parameters>
   <node>icub14</node>
   <tag>earlyVisionOutputImageLeft</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /earlyVisionOutputImageRight --RefreshTime 33</parameters>
+  <parameters>--name /earlyVisionOutputImageRight --x 400 --y 000 --w 320 --h 280  --RefreshTime 33</parameters>
   <tag>earlyVisionOutputImageRight</tag>
   <node>icub14</node>
 </module>
