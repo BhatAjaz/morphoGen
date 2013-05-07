@@ -10,21 +10,21 @@
 <module>
  <name>yarpview</name>
   <parameters>--name /objectsViewLeft --RefreshTime 33</parameters>
-  <node>icub17</node>
+  <node>icub14</node>
   <tag>objectsViewLeft</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /objectsViewRight --RefreshTime 33</parameters>
-  <node>icub17</node>
+  <node>icub14</node>
   <tag>objectsViewRight</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /earlyVisionOutputImageLeft --RefreshTime 33</parameters>
-  <node>icub17</node>
+  <node>icub14</node>
   <tag>earlyVisionOutputImageLeft</tag>
 </module>
 
@@ -32,7 +32,7 @@
   <name>yarpview</name>
   <parameters>--name /earlyVisionOutputImageRight --RefreshTime 33</parameters>
   <tag>earlyVisionOutputImageRight</tag>
-  <node>icub17</node>
+  <node>icub14</node>
 </module>
 
 
@@ -41,26 +41,26 @@
   <name>earlyVision</name>
   <parameters>--name /leftVision </parameters>
   <tag>leftVision</tag>
-  <node>icub17</node>
+  <node>icub14</node>
 </module>
 <module>
   <name>earlyVision</name>
   <parameters>--name /rightVision </parameters>
   <tag>rightVision</tag>
-  <node>icub17</node>
+  <node>icub14</node>
 </module>
 
 <module>
   <name>blockDetector</name>
   <parameters>--name /leftDetector </parameters>
   <tag>leftDetector</tag>
-  <node>icub17</node>
+  <node>icub14</node>
 </module>
 <module>
   <name>blockDetector</name>
   <parameters>--name /rightDetector </parameters>
   <tag>rightDetector</tag>
-  <node>icub17</node>
+  <node>icub14</node>
 </module>
 
 
@@ -68,14 +68,14 @@
   <name>shapeSelector</name>
   <parameters>--name /shapeSelector </parameters>
   <tag>shapeSelector</tag>
-  <node>icub17</node>
+  <node>icub14</node>
 </module>
 
 <module>
   <name>vergence</name>
   <parameters>--name /vergence </parameters>
   <tag>vergence</tag>
-  <node>icub17</node>
+  <node>icub14</node>
 </module>
 
 
