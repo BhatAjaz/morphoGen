@@ -272,14 +272,12 @@ void shapeSelectorRatethread::run() {
                     outputImage.resize(width, height);
                     //padding = outputImage.getPadding();   
                     outputImage.zero();
-                    /* if(!foreground.empty()) {
-                        outputIplImage = foreground;
-                        //IplImage *im_gray = cvCreateImage(cvGetSize(&outputIplImage),IPL_DEPTH_8U,1);
-                        //cvCvtColor(&outputIplImage,im_gray,CV_RGB2GRAY);
-                        outputImage.wrapIplImage(&outputIplImage);
                     
-                    }*/
-                    //this->updateObjects(inputImage[j], &outputImage, j, x); //update while keeping the previous
+                    
+                    if(&outputIplImage != NULL){
+                        outputImage.wrapIplImage(&outputIplImage);
+                    }
+                    
                     outputImagePort[j].write();
                 }
             }
