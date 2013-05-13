@@ -31,7 +31,7 @@ using namespace yarp::sig;
 using namespace std;
 using namespace cv;
 
-#define THRATE 100 //ms
+#define THRATE 33 //ms
 
 shapeSelectorRatethread::shapeSelectorRatethread():RateThread(THRATE) {
     robot = "icub";        
@@ -237,6 +237,8 @@ void shapeSelectorRatethread::run() {
                 tempImage  =   inputImagePort[j].read(false);
                 if (tempImage  !=  NULL)   {
                     inputImage[j]   =   tempImage; 
+                }
+                if (inputImage[j]  !=  NULL)   {
                     width           =   inputImage[j]->width();
                     height          =   inputImage[j]->height();
                     outputImage.resize(width, height);
@@ -253,7 +255,7 @@ void shapeSelectorRatethread::run() {
                         rect = Rect (xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i]);
                         //printf("rect values %d: %d %d %d %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i]);
                         if (rect.area() > 0)    {
-                            grabCut( img0, mask, rect, bgdModel, fgdModel, 10 ,cv::GC_INIT_WITH_RECT);
+                            grabCut( img0, mask, rect, bgdModel, fgdModel, 5 ,cv::GC_INIT_WITH_RECT);
                             // Get the pixels marked as likely foreground
                             //cv::compare(mask,cv::GC_PR_FGD,mask,cv::CMP_EQ);
                             // Generate output image                        
@@ -268,18 +270,7 @@ void shapeSelectorRatethread::run() {
                     }
                     outputImagePort[j].write();               
                 }
-                else {
-                    outputImage.resize(width, height);
-                    //padding = outputImage.getPadding();   
-                    outputImage.zero();
-                    
-                    
-                    if(&outputIplImage != NULL){
-                        outputImage.wrapIplImage(&outputIplImage);
-                    }
-                    
-                    outputImagePort[j].write();
-                }
+                
             }
             else{   
                 outputImage.zero();
