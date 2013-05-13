@@ -1,43 +1,41 @@
 <application>
 <name>shapeSelectorGui</name>
 <dependencies>
-<!--
   <port>/icub/camcalib/left/out</port>
   <port>/icub/camcalib/right/out</port>
--->
 </dependencies>
 
 <module>
  <name>yarpview</name>
-  <parameters>--name /objectsViewLeft --x 000 --y 400 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <parameters>--name /objectsViewLeft --x 000 --y 400  --RefreshTime 33</parameters>
+  <node>termBhat</node>
   <tag>objectsViewLeft</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /objectsViewRight --x 500 --y 400  --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>termBhat</node>
   <tag>objectsViewRight</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /earlyVisionOutputImageLeft --x 000 --y 000  --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>termBhat</node>
   <tag>earlyVisionOutputImageLeft</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /earlyVisionOutputImageRight --x 500 --y 000  --RefreshTime 33</parameters>
+  <parameters>--name /earlyVisionOutputImageRight --x 400 --y 000  --RefreshTime 33</parameters>
   <tag>earlyVisionOutputImageRight</tag>
-  <node>icub14</node>
+  <node>termBhat</node>
 </module>
 <module>
   <name>yarpview</name>
   <parameters>--name /histogramView --x 900 --y 000  --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>termBhat</node>
   <tag>histogramView</tag>
 </module>
 
@@ -71,16 +69,31 @@
 
 <module>
   <name>shapeSelector</name>
-  <parameters>--name /shapeSelector </parameters>
+  <parameters>--name /shapeSelector --width 640 --height 480</parameters>
   <tag>shapeSelector</tag>
-  <node>icub-b17</node>
+  <node>termBhat</node>
 </module>
+
+<module>
+  <name>logpolarTransform</name>
+  <parameters>--name leftTransform --xsize 640 --ysize 480</parameters>
+  <tag>leftTransform</tag>
+  <node>termBhat</node>
+</module>
+
+<module>
+  <name>logpolarTransform</name>
+  <parameters>--name rightTransform --xsize 640 --ysize 480</parameters>
+  <tag>rightTransform</tag>
+  <node>termBhat</node>
+</module>
+
 
 <module>
   <name>vergence</name>
   <parameters>--name /vergence --ctrl arbitrer </parameters>
   <tag>vergence</tag>
-  <node>icub-b17</node>
+  <node>termBhat</node>
 </module>
 
 
@@ -90,12 +103,12 @@
 
 
 <connection>
-  <from>/leftVision/edges/edges:o</from>
+  <from>/leftDetector/img:o</from>
   <to>/earlyVisionOutputImageLeft</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/rightVision/edges/edges:o</from>
+  <from>/rightDetector/img:o</from>
   <to>/earlyVisionOutputImageRight</to>
   <protocol>udp</protocol>
 </connection>
@@ -146,11 +159,22 @@
 
 <connection>
   <from>/shapeSelector/leftImage:o</from>
-  <to>/vergence/left:i</to>
+  <to>/leftTransform/image:i</to>
   <protocol>udp</protocol>
 </connection> 
 <connection>
   <from>/shapeSelector/rightImage:o</from>
+  <to>/rightTransform/image:i</to>
+  <protocol>udp</protocol>
+</connection> 
+
+<connection>
+  <from>/leftTransform/image:o</from>
+  <to>/vergence/left:i</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/rightTransform/image:o</from>
   <to>/vergence/right:i</to>
   <protocol>udp</protocol>
 </connection> 
