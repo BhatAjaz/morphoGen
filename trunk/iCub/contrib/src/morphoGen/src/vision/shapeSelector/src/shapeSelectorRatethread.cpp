@@ -52,22 +52,22 @@ bool shapeSelectorRatethread::threadInit() {
         
 
     if (!inputBottlePort[0].open(getName("/leftBottle:i").c_str())) {
-        cout << ": unable to open port to receive left input "  << endl;
+        cout << ": unable to open port to receive coordinates for left camera image\n"  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }    
     
     if (!inputBottlePort[1].open(getName("/rightBottle:i").c_str())) {
-        cout << ": unable to open port to receive right input image"  << endl;
+        cout << ": unable to open port to receive coordinates for right camera image\n"  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }   
     
     if (!inputImagePort[0].open(getName("/leftImage:i").c_str())) {
-        cout << ": unable to open port to receive left input image"  << endl;
+        cout << ": unable to open port to receive left camera input image\n"  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }    
     
     if (!inputImagePort[1].open(getName("/rightImage:i").c_str())) {
-        cout << ": unable to open port to receive right input "  << endl;
+        cout << ": unable to open port to receive right camera input image\n"  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
      
@@ -144,14 +144,14 @@ void shapeSelectorRatethread::setSharingBottle(Bottle *lBot, Bottle *rBot) {
 void shapeSelectorRatethread::updateObjects(ImageOf<PixelMono>* inputImage, ImageOf<PixelMono>* outputImage, int k, int x) {
     
      
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {   // for each bouning rectangle
         oproc       =   outputImage->getRawImage();   
         if (x) {
             inproc      =   inputImage->getRawImage();
             for (int r = 0; r < height; r++) {
                     for (int c = 0; c < width; c++) {
                         if ( ( r >= yTop[k][i]) && (r <= yHeight[k][i]) && (c >= xLeft[k][i]) && (c <= xWidth[k][i] ) ) {
-                            *oproc = *inproc;
+                            *oproc = *inproc;       // copy the data from input image 
                             
                         }    
                         oproc++;
@@ -166,7 +166,7 @@ void shapeSelectorRatethread::updateObjects(ImageOf<PixelMono>* inputImage, Imag
             for (int r = 0; r < height; r++) {
                     for (int c = 0; c < width; c++) {
                         if ( ( r >= yTop[k][i]) && (r <= yHeight[k][i]) && (c >= xLeft[k][i]) && (c <= xWidth[k][i] ) ) {
-                            *oproc = 255;
+                            *oproc = 255;           // set the pixels in the rectangle to white
                         }    
                         oproc++;                 
                     }
@@ -178,7 +178,7 @@ void shapeSelectorRatethread::updateObjects(ImageOf<PixelMono>* inputImage, Imag
 
 void shapeSelectorRatethread::run() {
     
-    for (int j = 0 ; j < 2; j++)  {
+    for (int j = 0 ; j < 2; j++)  {                 // left case (0) and right case (1) 
     
         // Bottle handling
         if( inputBottlePort[j].getInputCount()){
@@ -233,10 +233,10 @@ void shapeSelectorRatethread::run() {
             outputImage.resize(width, height);
             padding = outputImage.getPadding();
             int x   =   inputImagePort[j].getInputCount();
-            if (x)  {
+            if (x)  {   // if any input ports are connected
                 tempImage  =   inputImagePort[j].read(false);
                 if (tempImage  !=  NULL)   {
-                    inputImage[j]   =   tempImage; 
+                    inputImage[j]   =   tempImage; // to save data from previous run tempImage is introduced
                 }
                 if (inputImage[j]  !=  NULL)   {
                     width           =   inputImage[j]->width();
@@ -272,7 +272,7 @@ void shapeSelectorRatethread::run() {
                 }
                 
             }
-            else{   
+            else{   // set white patches into the rectangles
                 outputImage.zero();
                 for (int i = 0; i < 3; i++) {
                     oproc       =   outputImage.getRawImage();
