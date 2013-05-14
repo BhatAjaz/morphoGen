@@ -33,9 +33,9 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
-#include <cv.h>
-#include <cvaux.h>
-#include <highgui.h>
+#include <cv.h>                     // These header files include openCV libraries
+#include <cvaux.h>                  //
+#include <highgui.h>                //
 
 class shapeSelectorRatethread : public yarp::os::RateThread {
 private:
@@ -48,9 +48,12 @@ private:
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot event
 
-                                                               
-    yarp::os::BufferedPort<yarp::os::Bottle> inputBottlePort[2]; // input recieving ports
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >  inputImagePort[2], outputImagePort[2]; // ports for recieving and sending
+     // input recieving ports  "recieve coordinates of objects' bounding rectangles"                                                         
+    yarp::os::BufferedPort<yarp::os::Bottle> inputBottlePort[2];
+    
+    // ports for recieving and sending image data
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >  inputImagePort[2], outputImagePort[2]; 
+    
     
     yarp::sig::ImageOf<yarp::sig::PixelMono> *outputImage,*tempImage, *inputImage[2];
     yarp::os::Bottle *incomingBottle, *leftBot, *rightBot;
