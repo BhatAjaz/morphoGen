@@ -5,8 +5,12 @@
 cmake_minimum_required(VERSION 2.6)
 
 #add here the name of the directory you want to build
-
-
+add_subdirectory( AssocMem             )
+add_subdirectory( DarwinObserver       )
+add_subdirectory( EpisodicMem          )
+add_subdirectory( EventDrivenReasoning )
+add_subdirectory( SmallWorldOPC        )
+add_subdirectory( SmallWorlds          )
 
 
 # single modules that are going to be sorted into subsection

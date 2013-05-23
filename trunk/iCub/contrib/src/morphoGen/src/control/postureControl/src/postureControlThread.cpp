@@ -49,7 +49,7 @@ bool postureControlThread::threadInit() {
     initController();
     
    
-    if (!inputPort.open(getName("/posture:i").c_str())) {
+    if (!inputPort.open(getName("/rightArm:i").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
@@ -69,19 +69,20 @@ bool postureControlThread::initController() {
     remoteRightArm.append("/right_arm");
     options.put("remote",(const char*)remoteRightArm.c_str());         //where we connect to
     
-    PolyDriver robotDevice(options);
-    if (!robotDevice.isValid()) {
+    robotDevice = new PolyDriver(options);
+   
+    if (!robotDevice->isValid()) {
       printf("Device not available.  Here are the known devices:\n");
       printf("%s", Drivers::factory().toString().c_str());
       return 0;
     }
 
     bool ok;
-    ok = robotDevice.view(posRightArm);
-    ok = ok && robotDevice.view(encsRightArm);
-    ok = ok && robotDevice.view(ictrlRightArm);
-    ok = ok && robotDevice.view(iimpRightArm);
-    ok = ok && robotDevice.view(itrqRightArm);
+    ok = robotDevice->view(posRightArm);
+    ok = ok && robotDevice->view(encsRightArm);
+    ok = ok && robotDevice->view(ictrlRightArm);
+    ok = ok && robotDevice->view(iimpRightArm);
+    ok = ok && robotDevice->view(itrqRightArm);
 
     if (!ok) {
         printf("Problems acquiring interfaces\n");
@@ -90,26 +91,56 @@ bool postureControlThread::initController() {
 
     int jnts = 0;
     posRightArm->getAxes(&jnts);
+    jntsRightArm = jnts;
     
     Vector tmp;
-    
-    
     Vector command_velocity;
 
     tmp.resize(jnts);
     encodersRightArm.resize(jnts);
 
+    // setting reference acceleration
     int i;
     for (i = 0; i < jnts; i++) {
         tmp[i] = 50.0;
     }    
     posRightArm->setRefAccelerations(tmp.data());
+    // setting reference speed
     for (i = 0; i < jnts; i++) {
         tmp[i] = 10.0;
         posRightArm->setRefSpeed(i, tmp[i]);
     }
-    
+    //checking the encoders readings
     encsRightArm->getEncoders(encodersRightArm.data());
+    printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
+
+    
+    Vector command_position;
+    //posRightArm->getAxes(&jnts);
+    command_position.resize(jntsRightArm);
+    command_position[0]  = -30;
+    command_position[1]  = 30;
+    command_position[2]  = 0;
+    command_position[3]  = 45;
+    command_position[4]  = 0;
+    command_position[5]  = 0;
+    command_position[6]  = 0;
+    command_position[7]  = 15;
+    command_position[8]  = 30;
+    command_position[9]  = 4;
+    command_position[10] = 1;
+    command_position[11] = 9;
+    command_position[12] = 0;
+    command_position[13] = 4;
+    command_position[14] = 1;
+    command_position[15] = 1;
+    
+    printf("sending command %s \n", command_position.toString().c_str());
+    
+    
+    posRightArm->positionMove(command_position.data());
+    
+    
 }
 
 void postureControlThread::setName(string str) {
@@ -124,27 +155,79 @@ std::string postureControlThread::getName(const char* p) {
     return str;
 }
 
+bool checkArm(Bottle b) {
+    if (b.size() > 16) {
+        return false;
+    }
+    
+    if((b[0] < -70) || (b > -20)) {
+        return false;
+    }
+}
+
 void postureControlThread::setInputPortName(string InpPort) {
     
 }
 
-void postureControlThread::run() {    
+void postureControlThread::run() {
     while (isStopping() != true) {
-        if (inputPort.getInputCount()) {
-            printf("Checking the port \n");
-            Bottle* receivedBottle = inputPort.read(true);
+
+        Bottle* receivedBottle;
+
+        //**********************************************************
+        if (inputRightArm.getInputCount()) {
+            
+            receivedBottle = inputRightArm.read(false);
             if(receivedBottle!=NULL){
                 printf("Bottle %s \n", receivedBottle->toString().c_str());
-                Vector command_position;
-                //bool ok = posRightArm->positionMove(command_position.data());
+
+                bool rightArmOk = checkArm(receivedBottle);
+
+                if(rightArmOk) {
+
+                    int jnts = 0;
+                    Vector command_position;
+                    command_position.resize(jntsRightArm);
+                    
+                    printf("jnt dimension %d \n", jntsRightArm);
+                    
+                    command_position[0]  = -45;
+                    command_position[1]  = 65;
+                    command_position[2]  = 0;
+                    command_position[3]  = 15;
+                    command_position[4]  = 0;
+                    command_position[5]  = 0;
+                    command_position[6]  = 0;
+                    command_position[7]  = 15;
+                    command_position[8]  = 30;
+                    command_position[9]  = 4;
+                    command_position[10] = 1;
+                    command_position[11] = 9;
+                    command_position[12] = 0;
+                    command_position[13] = 4;
+                    command_position[14] = 1;
+                    command_position[15] = 1;
+                    
+                    printf("sending command %s \n", command_position.toString().c_str());
+                
+
+                    //bool ok = posRightArm->positionMove(command_position.data());
+                    //if(!ok){
+                    //    break;
+                    //}
+                } 
             }
         }
+
+        //**************************************************************
+
+
         Time::delay(0.1);
     }               
 }
 
 void postureControlThread::threadRelease() {
-    // nothing
+    robotDevice->close();
     printf("postureControlThread::threadRelease \n");
      
 }
