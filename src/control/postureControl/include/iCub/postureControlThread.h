@@ -37,22 +37,25 @@
 
 class postureControlThread : public yarp::os::Thread {
 private:
+    int jntsRightArm;              // number of jointRight leg
+    
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
     
     yarp::sig::Vector encodersRightArm;      // encoders position
 
-    yarp::dev::IPositionControl *posRightArm;          // position control of the robot RightArm
-    yarp::dev::IEncoders *encsRightArm;                // encoders readings from the robot RightArm
-    yarp::dev::IControlMode *ictrlRightArm;            // sets the modality of the control RightArm
+    yarp::dev::PolyDriver        *robotDevice;
+    yarp::dev::IPositionControl  *posRightArm;          // position control of the robot RightArm
+    yarp::dev::IEncoders         *encsRightArm;                // encoders readings from the robot RightArm
+    yarp::dev::IControlMode      *ictrlRightArm;            // sets the modality of the control RightArm
     yarp::dev::IImpedanceControl *iimpRightArm;        // impedence control of the robot RightArm
-    yarp::dev::ITorqueControl *itrqRightArm;           // torque control of the robot RightArm
+    yarp::dev::ITorqueControl    *itrqRightArm;           // torque control of the robot RightArm
 
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
-    yarp::os::BufferedPort<yarp::os::Bottle > inputPort;                             // output port to plot event
+    yarp::os::BufferedPort<yarp::os::Bottle > inputRightArm;                             // output port to plot event
     std::string name;                                                                // rootname of all the ports opened by this thread
     
 public:
@@ -119,6 +122,11 @@ public:
     * function that initialises the controller of all the bodyparts
     */
     bool initController();
+
+    /*
+    * function that checks the validity of the content of  the arm bottle
+    */
+    bool checkArm();
 
 
 };

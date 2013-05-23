@@ -207,12 +207,14 @@ void detectorThread::run() {
                 Bottle objectBottle;
 
                 for (int i = 0; i < objects.size(); i++){
-                    
+                    Bottle& objectBottle = ShapOp.addList();
+                    objectBottle.clear();
                     objectBottle.addInt(objects[i].box_tight.x);
                     objectBottle.addInt(objects[i].box_tight.y);
                     objectBottle.addInt(objects[i].box_tight.width);
                     objectBottle.addInt(objects[i].box_tight.height);
                     objectBottle.addInt(objects[i].id_label);
+                    
                     //ShapOp.addInt(10);
                     //if want to know the object name: detector->all_obj_cls[objects[i].id_label]
                 }
