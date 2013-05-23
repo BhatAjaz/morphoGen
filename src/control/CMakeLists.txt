@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 add_subdirectory( Grasper         )
-add_subdirectory( postureControl  )
+#add_subdirectory( postureControl  )
 add_subdirectory( SMSupportPMP    )
 
 
