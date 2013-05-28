@@ -49,7 +49,7 @@ bool postureControlThread::threadInit() {
     initController();
     
    
-    if (!inputPort.open(getName("/rightArm:i").c_str())) {
+    if (!inputRightArm.open(getName("/rightArm:i").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
@@ -155,14 +155,16 @@ std::string postureControlThread::getName(const char* p) {
     return str;
 }
 
-bool checkArm(Bottle b) {
-    if (b.size() > 16) {
+bool postureControlThread::checkA(Bottle* b) {
+    if (b->size() > 16) {
         return false;
     }
     
-    if((b[0] < -70) || (b > -20)) {
-        return false;
-    }
+    //if((b[0] < -70) || (b > -20)) {
+    //    return false;
+    //}
+    
+    return true;
 }
 
 void postureControlThread::setInputPortName(string InpPort) {
@@ -178,10 +180,10 @@ void postureControlThread::run() {
         if (inputRightArm.getInputCount()) {
             
             receivedBottle = inputRightArm.read(false);
-            if(receivedBottle!=NULL){
+            if(receivedBottle != NULL){
                 printf("Bottle %s \n", receivedBottle->toString().c_str());
 
-                bool rightArmOk = checkArm(receivedBottle);
+                bool rightArmOk = checkA(receivedBottle);
 
                 if(rightArmOk) {
 
@@ -234,9 +236,9 @@ void postureControlThread::threadRelease() {
 
 void postureControlThread::onStop() {
     printf("postureControlThread::onStop \n");
-    inputPort.interrupt();
+    inputRightArm.interrupt();
     printf("interrupted the port \n");
-    inputPort.close();
+    inputRightArm.close();
     printf("postureControlThread::onStop \n");
 }
 

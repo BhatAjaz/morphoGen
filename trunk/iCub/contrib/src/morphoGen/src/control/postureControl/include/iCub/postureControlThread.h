@@ -56,6 +56,7 @@ private:
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
     yarp::os::BufferedPort<yarp::os::Bottle > inputRightArm;                             // output port to plot event
+    
     std::string name;                                                                // rootname of all the ports opened by this thread
     
 public:
@@ -125,8 +126,9 @@ public:
 
     /*
     * function that checks the validity of the content of  the arm bottle
+    * @param b bottle that has arm position
     */
-    bool checkArm();
+    bool checkA(yarp::os::Bottle* b);
 
 
 };
