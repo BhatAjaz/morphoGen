@@ -223,11 +223,13 @@ void shapeSelectorRatethread::run() {
                 objectID[j][i]  =   -1;
                 }
         } 
+    }
+    
+    
         
-        
-       
+    for (int j = 0 ; j < 2; j++)  {                 // left case (0) and right case (1)    
         // image handling
-        if (outputImagePort[j].getOutputCount()) {
+        /*if (outputImagePort[j].getOutputCount()) {
             //printf("%d\n",foreground.at<int>(0, 0));                           
             ImageOf<PixelMono>& outputImage =  outputImagePort[j].prepare();
             outputImage.resize(width, height);
@@ -294,8 +296,8 @@ void shapeSelectorRatethread::run() {
         
         
         
-
-         
+*/
+    outputImagePort[j].write(); ////////////// temporarry     
     }// for loop ends here                   
     //printf("Finishing the rate thread run \n");
     //watershed();          
