@@ -31,7 +31,7 @@ using namespace yarp::sig;
 using namespace std;
 using namespace cv;
 
-#define THRATE 33 //ms
+#define THRATE 15 //ms
 
 shapeSelectorRatethread::shapeSelectorRatethread():RateThread(THRATE) {
     robot = "icub";        
@@ -229,17 +229,19 @@ void shapeSelectorRatethread::run() {
         
     for (int j = 0 ; j < 2; j++)  {                 // left case (0) and right case (1)    
         // image handling
-        /*if (outputImagePort[j].getOutputCount()) {
+        if (outputImagePort[j].getOutputCount()) {
             //printf("%d\n",foreground.at<int>(0, 0));                           
             ImageOf<PixelMono>& outputImage =  outputImagePort[j].prepare();
             outputImage.resize(width, height);
             padding = outputImage.getPadding();
-            int x   =   inputImagePort[j].getInputCount();
-            if (x)  {   // if any input ports are connected
+           
+            if (inputImagePort[j].getInputCount())  {   // if any input ports are connected
                 tempImage  =   inputImagePort[j].read(false);
                 if (tempImage  !=  NULL)   {
                     inputImage[j]   =   tempImage; // to save data from previous run tempImage is introduced
                 }
+                outputImage.resize(width, height);
+                outputImage.zero();
                 if (inputImage[j]  !=  NULL)   {
                     width           =   inputImage[j]->width();
                     height          =   inputImage[j]->height();
@@ -257,7 +259,7 @@ void shapeSelectorRatethread::run() {
                         rect = Rect (xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i]);
                         //printf("rect values %d: %d %d %d %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i]);
                         if (rect.area() > 0)    {
-                            grabCut( img0, mask, rect, bgdModel, fgdModel, 5 ,cv::GC_INIT_WITH_RECT);
+                            grabCut( img0, mask, rect, bgdModel, fgdModel, 1 ,cv::GC_INIT_WITH_RECT);
                             // Get the pixels marked as likely foreground
                             //cv::compare(mask,cv::GC_PR_FGD,mask,cv::CMP_EQ);
                             // Generate output image                        
@@ -269,9 +271,10 @@ void shapeSelectorRatethread::run() {
                         }
                         
                         
-                    }
-                    outputImagePort[j].write();               
+                    }              
                 }
+                outputImagePort[j].write(); 
+                 
                 
             }
             else{   // set white patches into the rectangles
@@ -291,13 +294,13 @@ void shapeSelectorRatethread::run() {
                 outputImagePort[j].write();
                 oproc = NULL;
             }
-            
+                  
         }
         
         
         
-*/
-    outputImagePort[j].write(); ////////////// temporarry     
+
+     
     }// for loop ends here                   
     //printf("Finishing the rate thread run \n");
     //watershed();          
