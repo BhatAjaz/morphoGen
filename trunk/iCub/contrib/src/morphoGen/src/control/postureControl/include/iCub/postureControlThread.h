@@ -35,6 +35,8 @@
 #include <time.h>
 
 
+
+
 class postureControlThread : public yarp::os::Thread {
 private:
     int jntsRightArm;              // number of jointRight leg
@@ -58,6 +60,8 @@ private:
     yarp::os::BufferedPort<yarp::os::Bottle > inputRightArm;                             // output port to plot event
     
     std::string name;                                                                // rootname of all the ports opened by this thread
+    
+    static const double rightArmMax[]; 
     
 public:
     /**
@@ -140,6 +144,8 @@ public:
 
 
 };
+
+
 
 #endif  //_POSTURE_CONTROL_THREAD_H_
 
