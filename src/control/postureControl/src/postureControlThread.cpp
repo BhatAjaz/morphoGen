@@ -30,6 +30,9 @@ using namespace yarp::os;
 using namespace yarp::sig;
 using namespace std;
 
+
+const double postureControlThread::rightArmMax[] = {10.0, 10.0}; 
+
 postureControlThread::postureControlThread() {
     robot = "icub";        
 }
@@ -111,9 +114,13 @@ bool postureControlThread::initController() {
         posRightArm->setRefSpeed(i, tmp[i]);
     }
     //checking the encoders readings
-    encsRightArm->getEncoders(encodersRightArm.data());
+    bool getRightCorrect = encsRightArm->getEncoders(encodersRightArm.data());
     printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
 
+    if(!getRightCorrect){
+        printf("just read crap from encoders \n");
+        return false;
+    }
     
     Vector command_position;
     posRightArm->getAxes(&jntsRightArm);
@@ -170,10 +177,13 @@ bool postureControlThread::checkA(Bottle* b) {
         return false;
     }
     
-    //if((b[0] < -70) || (b > -20)) {
-    //    return false;
-    //}
-    
+    for(int i = 0; i < 4 ; i++){
+        double b = values->get(i).asDouble();
+        if((b < -70) || (b > -20)) {
+            return false;        
+        }
+    }
+        
     return true;
 }
 
