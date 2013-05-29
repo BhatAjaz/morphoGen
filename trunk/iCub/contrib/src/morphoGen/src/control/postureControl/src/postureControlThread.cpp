@@ -116,7 +116,10 @@ bool postureControlThread::initController() {
 
     
     Vector command_position;
-    //posRightArm->getAxes(&jnts);
+    posRightArm->getAxes(&jntsRightArm);
+    printf("got the number of axis initialization %d \n", jntsRightArm);
+    
+
     command_position.resize(jntsRightArm);
     command_position[0]  = -30;
     command_position[1]  = 30;
@@ -156,7 +159,14 @@ std::string postureControlThread::getName(const char* p) {
 }
 
 bool postureControlThread::checkA(Bottle* b) {
-    if (b->size() > 16) {
+    printf("dimension of the received bottle %d \n", b->size());
+    printf("componets of the received bottle  \n");
+    Bottle* values =   b->get(0).asList();
+
+    printf("content of the bottle %s \n", values->toString().c_str());
+    printf("content comprises %d values \n", values->size());
+        
+    if (values->size() > 16) {
         return false;
     }
     
@@ -165,6 +175,22 @@ bool postureControlThread::checkA(Bottle* b) {
     //}
     
     return true;
+}
+
+Vector postureControlThread::parseBottle(Bottle* b, int dim) {
+    Bottle* values =   b->get(0).asList();
+    Vector result(dim); 
+    encsRightArm->getEncoders(encodersRightArm.data());
+    printf("encoders position \n (%s) \n",encodersRightArm.toString().c_str());
+    for (int i = 0; i < dim ; i++) {
+        if( i < values->size()) {
+            result[i] = values->get(i).asDouble();
+        }
+        else{            
+            result[i] = encodersRightArm(i);
+        }
+    }    
+    return result;
 }
 
 void postureControlThread::setInputPortName(string InpPort) {
@@ -188,11 +214,14 @@ void postureControlThread::run() {
                 if(rightArmOk) {
 
                     int jnts = 0;
-                    Vector command_position;
+                    //Vector command_position;
+                    Vector command_position = parseBottle(receivedBottle, 16);                    
+                    
                     command_position.resize(jntsRightArm);
                     
                     printf("jnt dimension %d \n", jntsRightArm);
                     
+                    /*
                     command_position[0]  = -45;
                     command_position[1]  = 65;
                     command_position[2]  = 0;
@@ -209,14 +238,15 @@ void postureControlThread::run() {
                     command_position[13] = 4;
                     command_position[14] = 1;
                     command_position[15] = 1;
+                    */
                     
-                    printf("sending command %s \n", command_position.toString().c_str());
-                
+                    printf("sending command\n %s \n", command_position.toString().c_str());
+                    //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
 
-                    //bool ok = posRightArm->positionMove(command_position.data());
-                    //if(!ok){
-                    //    break;
-                    //}
+                    bool ok = posRightArm->positionMove(command_position.data());
+                    if(!ok){
+                        break;
+                    }
                 } 
             }
         }

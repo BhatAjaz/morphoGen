@@ -130,6 +130,14 @@ public:
     */
     bool checkA(yarp::os::Bottle* b);
 
+    /**
+     * function that parses the bottle received and generate the vector of the control pos
+     * @param b received bottle
+     * @param dim dimension of the control vector
+     * @result vector of the control of the body part
+     */
+    yarp::sig::Vector parseBottle(yarp::os::Bottle* b, int dim);
+
 
 };
 
