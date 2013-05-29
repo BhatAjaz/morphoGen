@@ -43,7 +43,7 @@ private:
     std::string configFile;         // name of the configFile where the parameter of the camera are set
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
 
-    
+    double startTime, endTime;
 
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot event
@@ -52,7 +52,9 @@ private:
     yarp::os::BufferedPort<yarp::os::Bottle> inputBottlePort[2];
     
     // ports for recieving and sending image data
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >  inputImagePort[2], outputImagePort[2]; 
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >  inputImagePort[2], outputImagePort[2];
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputImagePortLeft;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputImagePortRight;    
     
     
     yarp::sig::ImageOf<yarp::sig::PixelMono> *outputImage,*tempImage, *inputImage[2];
