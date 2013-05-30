@@ -47,21 +47,31 @@ private:
     
     yarp::sig::Vector encodersRightArm;      // encoders position
 
-    yarp::dev::PolyDriver        *robotDevice;
+    yarp::dev::PolyDriver        *robotDeviceRightArm;  // device right arm
+    yarp::dev::PolyDriver        *robotDeviceLeftArm;   // device left arm
+    
     yarp::dev::IPositionControl  *posRightArm;          // position control of the robot RightArm
-    yarp::dev::IEncoders         *encsRightArm;                // encoders readings from the robot RightArm
-    yarp::dev::IControlMode      *ictrlRightArm;            // sets the modality of the control RightArm
-    yarp::dev::IImpedanceControl *iimpRightArm;        // impedence control of the robot RightArm
-    yarp::dev::ITorqueControl    *itrqRightArm;           // torque control of the robot RightArm
+    yarp::dev::IEncoders         *encsRightArm;         // encoders readings from the robot RightArm
+    yarp::dev::IControlMode      *ictrlRightArm;        // sets the modality of the control RightArm
+    yarp::dev::IImpedanceControl *iimpRightArm;         // impedence control of the robot RightArm
+    yarp::dev::ITorqueControl    *itrqRightArm;         // torque control of the robot RightArm
+
+    yarp::dev::IPositionControl  *posLeftArm;          // position control of the robot RightArm
+    yarp::dev::IEncoders         *encsLeftArm;         // encoders readings from the robot RightArm
+    yarp::dev::IControlMode      *ictrlLeftArm;        // sets the modality of the control RightArm
+    yarp::dev::IImpedanceControl *iimpLeftArm;         // impedence control of the robot RightArm
+    yarp::dev::ITorqueControl    *itrqLeftArm;         // torque control of the robot RightArm
 
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
-    yarp::os::BufferedPort<yarp::os::Bottle > inputRightArm;                             // output port to plot event
+    yarp::os::BufferedPort<yarp::os::Bottle > inputRightArm;                             //input port for right arm
+    yarp::os::BufferedPort<yarp::os::Bottle > inputLeftArm;                              //input port for right arm
     
-    std::string name;                                                                // rootname of all the ports opened by this thread
+    std::string name;                                                                    // rootname of all the ports opened by this thread
     
-    static const double rightArmMax[]; 
+    static const double armMin[];
+    static const double armMax[];
     
 public:
     /**
@@ -129,10 +139,10 @@ public:
     bool initController();
 
     /*
-    * function that checks the validity of the content of  the arm bottle
+    * function that checks the validity of the content of the arm bottle
     * @param b bottle that has arm position
     */
-    bool checkA(yarp::os::Bottle* b);
+    bool checkArm(yarp::os::Bottle* b);
 
     /**
      * function that parses the bottle received and generate the vector of the control pos
