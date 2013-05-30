@@ -100,6 +100,27 @@ bool postureControlThread::initController() {
         printf("Problems acquiring interfaces from the right arm\n");
         return 0;
     }
+    else {
+        printf("Ok. proceed! \n");
+    }
+
+    
+    Time::delay(0.01);
+    cout<<"after"<<endl;
+
+    // checking the readings
+    encodersRightArm.resize(16);
+    bool getRightCorrect = encsRightArm->getEncoders(encodersRightArm.data());
+    printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
+    
+    
+    if(!getRightCorrect){
+        printf("just read crap from encoders \n");
+        return 0;
+    }
+    else{
+        printf("correct encoders \n");
+    }
 
     // ================== instantiate left arm ==================================
     
@@ -154,13 +175,7 @@ bool postureControlThread::initController() {
     }
     //==================== checking the readings ===================================
     
-    // checking the readings
-    bool getRightCorrect = encsRightArm->getEncoders(encodersRightArm.data());
-    printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
-    if(!getRightCorrect){
-        printf("just read crap from encoders \n");
-        return 0;
-    }
+   
 
     Vector command_position;
     posRightArm->getAxes(&jntsRightArm);
