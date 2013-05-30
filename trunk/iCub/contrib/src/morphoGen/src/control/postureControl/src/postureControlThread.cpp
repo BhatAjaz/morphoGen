@@ -31,7 +31,8 @@ using namespace yarp::sig;
 using namespace std;
 
 
-const double postureControlThread::rightArmMax[] = {10.0, 10.0}; 
+const double postureControlThread::armMax[] = {-10.0, 70.0,  30.0, 80.0,  50.0,   0.0 };
+const double postureControlThread::armMin[] = {-70.0, 20.0, -20.0, 20.0, -50.0, -30.0 };  
 
 postureControlThread::postureControlThread() {
     robot = "icub";        
@@ -49,14 +50,20 @@ postureControlThread::~postureControlThread() {
 bool postureControlThread::threadInit() {
 
     //initialization of the controller
-    initController();
+    bool ok = initController();
+    if(!ok){
+        return false;
+    }
     
+    if (!inputLeftArm.open(getName("/leftArm:i").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
    
     if (!inputRightArm.open(getName("/rightArm:i").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
-    
 
     return true;
     
@@ -65,32 +72,73 @@ bool postureControlThread::threadInit() {
 
 bool postureControlThread::initController() {
     Property options;
+
+    // ================== instantiate right arm ==================================
+    
     options.put("device", "remote_controlboard");
-    options.put("local", "/postureControl/client");                 //local port names
+    options.put("local", "/postureControl/client/rightarm");                 //local port names
     string remoteRightArm("/");
     remoteRightArm.append(robot.c_str());
     remoteRightArm.append("/right_arm");
-    options.put("remote",(const char*)remoteRightArm.c_str());         //where we connect to
+    options.put("remote",(const char*)remoteRightArm.c_str());      //where we connect to
     
-    robotDevice = new PolyDriver(options);
+    robotDeviceRightArm = new PolyDriver(options);
    
-    if (!robotDevice->isValid()) {
-      printf("Device not available.  Here are the known devices:\n");
+    if (!robotDeviceRightArm->isValid()) {
+      printf("Device Right Arm not available.  Here are the known devices:\n");
       printf("%s", Drivers::factory().toString().c_str());
       return 0;
     }
 
-    bool ok;
-    ok = robotDevice->view(posRightArm);
-    ok = ok && robotDevice->view(encsRightArm);
-    ok = ok && robotDevice->view(ictrlRightArm);
-    ok = ok && robotDevice->view(iimpRightArm);
-    ok = ok && robotDevice->view(itrqRightArm);
-
-    if (!ok) {
-        printf("Problems acquiring interfaces\n");
+    bool okRight;
+    okRight = robotDeviceRightArm->view(posRightArm);
+    okRight = okRight && robotDeviceRightArm->view(encsRightArm);
+    okRight = okRight && robotDeviceRightArm->view(ictrlRightArm);
+    okRight = okRight && robotDeviceRightArm->view(iimpRightArm);
+    okRight = okRight && robotDeviceRightArm->view(itrqRightArm);
+    if (!okRight) {
+        printf("Problems acquiring interfaces from the right arm\n");
         return 0;
     }
+
+
+    // checking the readings
+    bool getRightCorrect = encsRightArm->getEncoders(encodersRightArm.data());
+    printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
+    if(!getRightCorrect){
+        printf("just read crap from encoders \n");
+        return 0;
+    }
+
+    // ================== instantiate left arm ==================================
+    
+    options.put("device", "remote_controlboard");
+    options.put("local", "/postureControl/client/leftarm");                 //local port names
+    string remoteLeftArm("/");
+    remoteLeftArm.append(robot.c_str());
+    remoteLeftArm.append("/left_arm");
+    options.put("remote",(const char*)remoteLeftArm.c_str());      //where we connect to
+    
+    robotDeviceLeftArm = new PolyDriver(options);
+   
+    if (!robotDeviceLeftArm->isValid()) {
+      printf("Device Left Arm not available.  Here are the known devices:\n");
+      printf("%s", Drivers::factory().toString().c_str());
+      return 0;
+    }
+
+    bool okLeft;
+    okLeft = robotDeviceLeftArm->view(posLeftArm);
+    okLeft = okLeft && robotDeviceLeftArm->view(encsLeftArm);
+    okLeft = okLeft && robotDeviceLeftArm->view(ictrlLeftArm);
+    okLeft = okLeft && robotDeviceLeftArm->view(iimpLeftArm);
+    okLeft = okLeft && robotDeviceLeftArm->view(itrqLeftArm);
+    if (!okLeft) {
+        printf("Problems acquiring interfaces from the left arm\n");
+        return 0;
+    }
+
+    // ================= interfacing to robot parts ==========================
 
     int jnts = 0;
     posRightArm->getAxes(&jnts);
@@ -113,20 +161,44 @@ bool postureControlThread::initController() {
         tmp[i] = 10.0;
         posRightArm->setRefSpeed(i, tmp[i]);
     }
-    //checking the encoders readings
-    bool getRightCorrect = encsRightArm->getEncoders(encodersRightArm.data());
-    printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
-
-    if(!getRightCorrect){
-        printf("just read crap from encoders \n");
-        return false;
-    }
+    //==================== checking the readings ===================================
     
+
+
     Vector command_position;
     posRightArm->getAxes(&jntsRightArm);
     printf("got the number of axis initialization %d \n", jntsRightArm);
+    Vector torques;
+    torques.resize(jntsRightArm);
+    itrqRightArm->getTorques(torques.data());
+    printf("got the reading of the torques %s \n", torques.toString().c_str());
+
+    // =================== setting impedence control  ===============================
+
+    double stiffness = 0.081;       // stiffness coefficient, units are Nm/deg
+    double damping   = 0.020;       // damping coefficient,   units are Nm/(deg/s)
+    double offset    = 0.0;         // torque offset,         units are Nm
+    bool okImpP = iimpRightArm->setImpedance(3, stiffness, damping);  
+    //bool okImpO = iimpRightArm->setImpedanceOffset(3,offset);
+    bool okImp  = ictrlRightArm->setImpedancePositionMode(3);
+
+    if(okImpP & okImp) {
+        printf("success in sending switching to impedence mode control \n");
+    }
+    else {
+        printf("Error! in sending switching to impedence mode control \n");
+    }
+
+    // =================== setting torque control ==================================
+
+    ictrlLeftArm->setTorqueMode(3);
+
+    double jnt_torque= 0.0; //expressed in Nm
+    itrqLeftArm->setRefTorque(3,jnt_torque); 
     
 
+    //==================== moving to default position ==============================
+    
     command_position.resize(jntsRightArm);
     command_position[0]  = -30;
     command_position[1]  = 30;
@@ -165,7 +237,7 @@ std::string postureControlThread::getName(const char* p) {
     return str;
 }
 
-bool postureControlThread::checkA(Bottle* b) {
+bool postureControlThread::checkArm(Bottle* b) {
     printf("dimension of the received bottle %d \n", b->size());
     printf("componets of the received bottle  \n");
     Bottle* values =   b->get(0).asList();
@@ -177,9 +249,10 @@ bool postureControlThread::checkA(Bottle* b) {
         return false;
     }
     
-    for(int i = 0; i < 4 ; i++){
+    for(int i = 0; i < values->size() ; i++){
         double b = values->get(i).asDouble();
-        if((b < -70) || (b > -20)) {
+        if((b < armMin[i]) || (b > armMax[i])) {
+            printf("b value %f out of limit \n", b);
             return false;        
         }
     }
@@ -219,7 +292,7 @@ void postureControlThread::run() {
             if(receivedBottle != NULL){
                 printf("Bottle %s \n", receivedBottle->toString().c_str());
 
-                bool rightArmOk = checkA(receivedBottle);
+                bool rightArmOk = checkArm(receivedBottle);
 
                 if(rightArmOk) {
 
@@ -257,7 +330,10 @@ void postureControlThread::run() {
                     if(!ok){
                         break;
                     }
-                } 
+                }
+                else {
+                    printf("detected out of limits control \n");
+                }
             }
         }
 
@@ -269,16 +345,22 @@ void postureControlThread::run() {
 }
 
 void postureControlThread::threadRelease() {
-    robotDevice->close();
-    printf("postureControlThread::threadRelease \n");
-     
+    robotDeviceRightArm->close();
+    robotDeviceLeftArm->close();
+    printf("postureControlThread::threadRelease \n");  
 }
 
 void postureControlThread::onStop() {
+    
+    ictrlRightArm->setPositionMode(3);
+    ictrlLeftArm->setPositionMode(3);
+
     printf("postureControlThread::onStop \n");
     inputRightArm.interrupt();
+    inputLeftArm.interrupt();
     printf("interrupted the port \n");
     inputRightArm.close();
+    inputLeftArm.close();
     printf("postureControlThread::onStop \n");
 }
 

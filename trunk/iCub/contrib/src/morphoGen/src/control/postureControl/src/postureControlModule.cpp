@@ -93,7 +93,15 @@ bool postureControlModule::configure(yarp::os::ResourceFinder &rf) {
     //rThread->setInputPortName(inputPortName.c_str());
     
     /* now start the thread to do the work */
-    rThread->start(); // this calls threadInit() and it if returns true, it then calls run()
+    bool threadOK = rThread->start(); // this calls threadInit() and it if returns true, it then calls run()
+
+    if(!threadOK){
+        printf("the thread ain`t started correctly \n");
+        return false;
+    }
+    else {
+        printf("thread correctly started \n");
+    }
 
     return true ;       // let the RFModule know everything went well
                         // so that it will then run the module
