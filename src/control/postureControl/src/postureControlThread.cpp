@@ -101,15 +101,6 @@ bool postureControlThread::initController() {
         return 0;
     }
 
-
-    // checking the readings
-    bool getRightCorrect = encsRightArm->getEncoders(encodersRightArm.data());
-    printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
-    if(!getRightCorrect){
-        printf("just read crap from encoders \n");
-        return 0;
-    }
-
     // ================== instantiate left arm ==================================
     
     options.put("device", "remote_controlboard");
@@ -163,7 +154,13 @@ bool postureControlThread::initController() {
     }
     //==================== checking the readings ===================================
     
-
+    // checking the readings
+    bool getRightCorrect = encsRightArm->getEncoders(encodersRightArm.data());
+    printf("initial encoders position (%s) \n",encodersRightArm.toString().c_str());
+    if(!getRightCorrect){
+        printf("just read crap from encoders \n");
+        return 0;
+    }
 
     Vector command_position;
     posRightArm->getAxes(&jntsRightArm);
@@ -179,22 +176,34 @@ bool postureControlThread::initController() {
     double damping   = 0.020;       // damping coefficient,   units are Nm/(deg/s)
     double offset    = 0.0;         // torque offset,         units are Nm
     bool okImpP = iimpRightArm->setImpedance(3, stiffness, damping);  
-    //bool okImpO = iimpRightArm->setImpedanceOffset(3,offset);
+    bool okImpO = iimpRightArm->setImpedanceOffset(3,offset);
     bool okImp  = ictrlRightArm->setImpedancePositionMode(3);
 
-    if(okImpP & okImp) {
+    if(okImpP & okImp & okImpO) {
         printf("success in sending switching to impedence mode control \n");
     }
     else {
         printf("Error! in sending switching to impedence mode control \n");
+        return false;
     }
 
     // =================== setting torque control ==================================
 
-    ictrlLeftArm->setTorqueMode(3);
+    //ictrlLeftArm->setTorqueMode(3);
+    //double jnt_torque= 0.0; //expressed in Nm
+    //itrqLeftArm->setRefTorque(3,jnt_torque); 
 
-    double jnt_torque= 0.0; //expressed in Nm
-    itrqLeftArm->setRefTorque(3,jnt_torque); 
+    okImpP = iimpLeftArm->setImpedance(3, stiffness, damping);  
+    okImpO = iimpLeftArm->setImpedanceOffset(3,offset);
+    okImp  = ictrlLeftArm->setImpedancePositionMode(3);
+
+    if(okImpP & okImp & okImpO) {
+        printf("success in sending switching to impedence mode control \n");
+    }
+    else {
+        printf("Error! in sending switching to impedence mode control \n");
+        return false;
+    }
     
 
     //==================== moving to default position ==============================
@@ -222,7 +231,7 @@ bool postureControlThread::initController() {
     
     posRightArm->positionMove(command_position.data());
     
-    
+    return true;
 }
 
 void postureControlThread::setName(string str) {
@@ -339,6 +348,56 @@ void postureControlThread::run() {
 
         //**************************************************************
 
+        if (inputLeftArm.getInputCount()) {
+            
+            receivedBottle = inputLeftArm.read(false);
+            if(receivedBottle != NULL){
+                printf("Bottle %s \n", receivedBottle->toString().c_str());
+
+                bool leftArmOk = checkArm(receivedBottle);
+
+                if(leftArmOk) {
+
+                    int jnts = 0;
+                    //Vector command_position;
+                    Vector command_position = parseBottle(receivedBottle, 16);                    
+                    
+                    command_position.resize(jntsRightArm);
+                    
+                    printf("jnt dimension %d \n", jntsRightArm);
+                    
+                    /*
+                    command_position[0]  = -45;
+                    command_position[1]  = 65;
+                    command_position[2]  = 0;
+                    command_position[3]  = 15;
+                    command_position[4]  = 0;
+                    command_position[5]  = 0;
+                    command_position[6]  = 0;
+                    command_position[7]  = 15;
+                    command_position[8]  = 30;
+                    command_position[9]  = 4;
+                    command_position[10] = 1;
+                    command_position[11] = 9;
+                    command_position[12] = 0;
+                    command_position[13] = 4;
+                    command_position[14] = 1;
+                    command_position[15] = 1;
+                    */
+                    
+                    printf("sending command\n %s \n", command_position.toString().c_str());
+                    //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
+
+                    bool ok = posLeftArm->positionMove(command_position.data());
+                    if(!ok){
+                        break;
+                    }
+                }
+                else {
+                    printf("detected out of limits control \n");
+                }
+            }
+        }
 
         Time::delay(0.1);
     }               
