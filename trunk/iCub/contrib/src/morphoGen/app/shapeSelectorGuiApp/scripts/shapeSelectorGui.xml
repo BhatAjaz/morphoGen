@@ -8,21 +8,21 @@
 <module>
  <name>yarpview</name>
   <parameters>--name /objectsViewLeft --x 000 --y 400  --RefreshTime 33</parameters>
-  <node>termBhat</node>
+  <node>icub14</node>
   <tag>objectsViewLeft</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /objectsViewRight --x 500 --y 400  --RefreshTime 33</parameters>
-  <node>termBhat</node>
+  <node>icub14</node>
   <tag>objectsViewRight</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /earlyVisionOutputImageLeft --x 000 --y 000  --RefreshTime 33</parameters>
-  <node>termBhat</node>
+  <node>icub14</node>
   <tag>earlyVisionOutputImageLeft</tag>
 </module>
 
@@ -30,40 +30,51 @@
   <name>yarpview</name>
   <parameters>--name /earlyVisionOutputImageRight --x 400 --y 000  --RefreshTime 33</parameters>
   <tag>earlyVisionOutputImageRight</tag>
-  <node>termBhat</node>
+  <node>icub14</node>
 </module>
 <module>
   <name>yarpview</name>
   <parameters>--name /histogramView --x 900 --y 000  --RefreshTime 33</parameters>
-  <node>termBhat</node>
+  <node>icub14</node>
   <tag>histogramView</tag>
 </module>
 
-
+<module>
+  <name>downSampler</name>
+  <parameters>--name /leftSampler </parameters>
+  <tag>leftSampler</tag>
+  <node>icub-b16</node>
+</module>
+<module>
+  <name>downSampler</name>
+  <parameters>--name /rightSampler </parameters>
+  <tag>rightSampler</tag>
+  <node>icub-b16</node>
+</module>
 <module>
   <name>earlyVision</name>
   <parameters>--name /leftVision </parameters>
   <tag>leftVision</tag>
-  <node>icub-b17</node>
+  <node>icub-b14</node>
 </module>
 <module>
   <name>earlyVision</name>
   <parameters>--name /rightVision </parameters>
   <tag>rightVision</tag>
-  <node>icub-b17</node>
+  <node>icub-b14</node>
 </module>
 
 <module>
   <name>blockDetector</name>
   <parameters>--name /leftDetector </parameters>
   <tag>leftDetector</tag>
-  <node>icub-b17</node>
+  <node>icub-b15</node>
 </module>
 <module>
   <name>blockDetector</name>
   <parameters>--name /rightDetector </parameters>
   <tag>rightDetector</tag>
-  <node>icub-b17</node>
+  <node>icub-b15</node>
 </module>
 
 
@@ -71,21 +82,21 @@
   <name>shapeSelector</name>
   <parameters>--name /shapeSelector --width 640 --height 480</parameters>
   <tag>shapeSelector</tag>
-  <node>termBhat</node>
+  <node>icub-b15</node>
 </module>
 
 <module>
   <name>logpolarTransform</name>
   <parameters>--name leftTransform --xsize 640 --ysize 480</parameters>
   <tag>leftTransform</tag>
-  <node>termBhat</node>
+  <node>icub-b16</node>
 </module>
 
 <module>
   <name>logpolarTransform</name>
   <parameters>--name rightTransform --xsize 640 --ysize 480</parameters>
   <tag>rightTransform</tag>
-  <node>termBhat</node>
+  <node>icub-b16</node>
 </module>
 
 
@@ -93,7 +104,7 @@
   <name>vergence</name>
   <parameters>--name /vergence --ctrl arbitrer </parameters>
   <tag>vergence</tag>
-  <node>termBhat</node>
+  <node>icub-b16</node>
 </module>
 
 
@@ -102,28 +113,32 @@
 
 
 
-<connection>
-  <from>/leftDetector/img:o</from>
-  <to>/earlyVisionOutputImageLeft</to>
-  <protocol>udp</protocol>
-</connection>
-<connection>
-  <from>/rightDetector/img:o</from>
-  <to>/earlyVisionOutputImageRight</to>
-  <protocol>udp</protocol>
-</connection>
+
 
 
 <connection>
   <from>/icub/camcalib/left/out</from>
-  <to>/leftVision/imageRGB:i</to>
+  <to>/leftSampler/image:i</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
   <from>/icub/camcalib/right/out</from>
+  <to>/rightSampler/image:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/leftSampler/image:o</from>
+  <to>/leftVision/imageRGB:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/rightSampler/image:o</from>
   <to>/rightVision/imageRGB:i</to>
   <protocol>udp</protocol>
 </connection>
+
+
+
 <connection>
   <from>/icub/camcalib/left/out</from>
   <to>/leftDetector/img:i</to>
@@ -195,5 +210,15 @@
   <to>/objectsViewRight</to>
   <protocol>udp</protocol>
 </connection> 
+<connection>
+  <from>/leftDetector/img:o</from>
+  <to>/earlyVisionOutputImageLeft</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/rightDetector/img:o</from>
+  <to>/earlyVisionOutputImageRight</to>
+  <protocol>udp</protocol>
+</connection>
 
 </application>
