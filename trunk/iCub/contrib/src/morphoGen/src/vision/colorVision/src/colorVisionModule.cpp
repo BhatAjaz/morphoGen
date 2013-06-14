@@ -96,6 +96,7 @@ bool colorVisionModule::configure(yarp::os::ResourceFinder &rf) {
 
 	colormapFile=rf.findFile(rf.find("colormap").asString().c_str());
 	if (colormapFile=="") {
+            printf("colormap not found \n");
             return false;
         }
 

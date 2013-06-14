@@ -53,7 +53,8 @@ colorVisionThread::~colorVisionThread() {
 
 bool colorVisionThread::threadInit() {
    
-   
+    printf("colorVisionThread thread init \n")   ;
+    
     if (!outputPort.open(getName("/img:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
@@ -65,7 +66,11 @@ bool colorVisionThread::threadInit() {
     if (!dataPort.open(getName("/colordata:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
-    }       
+    }     
+    
+    imagePortRTL.open("/v1/imagePortRTL");  
+    Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
+	Network::connect("/v1/imagePortRTL","/v/l"); 
      	
     return true;
     
@@ -99,20 +104,17 @@ void colorVisionThread::run() {
 						tdGpmp[i] = 0;
 		  				}
     		 
-			 imagePortRTL.open("/v1/imagePortRTL");
-			 Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
-	         Network::connect("/v1/imagePortRTL","/v/l"); 
  
              colSegMainL();
 			 tdGpmp[0] = numobjectsL;
 
-			 imagePortRT.open("/v1/imagePortRT");
-	         Network::connect("/icub/camcalib/right/out","/v1/imagePortRT");
-			 colSegMainR();
-			 tdGpmp[1] = numobjectsR;
+		//	 imagePortRT.open("/v1/imagePortRT");
+	   //      Network::connect("/icub/camcalib/right/out","/v1/imagePortRT");
+		//	 colSegMainR();
+		//	 tdGpmp[1] = numobjectsR;
     
 			 
-			 int k=2;
+			 int k=1;  //modified to account for the left cam only
     
 
 			 for (int i=0; i<numobjectsL; i++ )
@@ -124,7 +126,7 @@ void colorVisionThread::run() {
 						k=k+1;
 					 }
 			    }
-			 for (int i=0; i<numobjectsR; i++ )
+		/*	 for (int i=0; i<numobjectsR; i++ )
 				{
 					 for (int j=0; j<5; j++ )
 					 {
@@ -132,7 +134,7 @@ void colorVisionThread::run() {
                         printf("%f \n", imageDetails[i][j]);
 						k=k+1;
 					 }
-			    }
+			    }*/ 
     
                 cout << "ready to send data"<< endl;
 
