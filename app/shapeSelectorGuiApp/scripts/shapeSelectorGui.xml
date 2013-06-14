@@ -3,6 +3,11 @@
 <dependencies>
   <port>/icub/camcalib/left/out</port>
   <port>/icub/camcalib/right/out</port>
+  <port>/leftDetector/img:o</port>
+  <port>/rightDetector/img:o</port>
+  <port>/shapeSelector/leftImage:o</port>
+  <port>/shapeSelector/rightImage:o</port>
+  <port>/vergence/histo:o</port>
 </dependencies>
 
 <module>
@@ -39,160 +44,7 @@
   <tag>histogramView</tag>
 </module>
 
-<module>
-  <name>downSampler</name>
-  <parameters>--name /leftSampler </parameters>
-  <tag>leftSampler</tag>
-  <node>icub-b16</node>
-</module>
-<module>
-  <name>downSampler</name>
-  <parameters>--name /rightSampler </parameters>
-  <tag>rightSampler</tag>
-  <node>icub-b16</node>
-</module>
-<module>
-  <name>earlyVision</name>
-  <parameters>--name /leftVision </parameters>
-  <tag>leftVision</tag>
-  <node>icub-b14</node>
-</module>
-<module>
-  <name>earlyVision</name>
-  <parameters>--name /rightVision </parameters>
-  <tag>rightVision</tag>
-  <node>icub-b14</node>
-</module>
 
-<module>
-  <name>blockDetector</name>
-  <parameters>--name /leftDetector </parameters>
-  <tag>leftDetector</tag>
-  <node>icub-b15</node>
-</module>
-<module>
-  <name>blockDetector</name>
-  <parameters>--name /rightDetector </parameters>
-  <tag>rightDetector</tag>
-  <node>icub-b15</node>
-</module>
-
-
-<module>
-  <name>shapeSelector</name>
-  <parameters>--name /shapeSelector --width 640 --height 480</parameters>
-  <tag>shapeSelector</tag>
-  <node>icub-b15</node>
-</module>
-
-<module>
-  <name>logpolarTransform</name>
-  <parameters>--name leftTransform --xsize 640 --ysize 480</parameters>
-  <tag>leftTransform</tag>
-  <node>icub-b16</node>
-</module>
-
-<module>
-  <name>logpolarTransform</name>
-  <parameters>--name rightTransform --xsize 640 --ysize 480</parameters>
-  <tag>rightTransform</tag>
-  <node>icub-b16</node>
-</module>
-
-
-<module>
-  <name>vergence</name>
-  <parameters>--name /vergence --ctrl arbitrer </parameters>
-  <tag>vergence</tag>
-  <node>icub-b16</node>
-</module>
-
-
-
-
-
-
-
-
-
-
-<connection>
-  <from>/icub/camcalib/left/out</from>
-  <to>/leftSampler/image:i</to>
-  <protocol>udp</protocol>
-</connection>
-<connection>
-  <from>/icub/camcalib/right/out</from>
-  <to>/rightSampler/image:i</to>
-  <protocol>udp</protocol>
-</connection>
-<connection>
-  <from>/leftSampler/image:o</from>
-  <to>/leftVision/imageRGB:i</to>
-  <protocol>udp</protocol>
-</connection>
-<connection>
-  <from>/rightSampler/image:o</from>
-  <to>/rightVision/imageRGB:i</to>
-  <protocol>udp</protocol>
-</connection>
-
-
-
-<connection>
-  <from>/icub/camcalib/left/out</from>
-  <to>/leftDetector/img:i</to>
-  <protocol>udp</protocol>
-</connection>
-<connection>
-  <from>/icub/camcalib/right/out</from>
-  <to>/rightDetector/img:i</to>
-  <protocol>udp</protocol>
-</connection>
-
-<connection>
-  <from>/leftVision/edges/edges:o</from>
-  <to>/shapeSelector/leftImage:i</to>
-  <protocol>udp</protocol>
-</connection> 
-<connection>
-  <from>/rightVision/edges/edges:o</from>
-  <to>/shapeSelector/rightImage:i</to>
-  <protocol>udp</protocol>
-</connection> 
-
-<connection>
-  <from>/leftDetector/shapeData:o</from>
-  <to>/shapeSelector/leftBottle:i</to>
-  <protocol>udp</protocol>
-</connection> 
-<connection>
-  <from>/rightDetector/shapeData:o</from>
-  <to>/shapeSelector/rightBottle:i</to>
-  <protocol>udp</protocol>
-</connection> 
-
-<connection>
-  <from>/shapeSelector/leftImage:o</from>
-  <to>/leftTransform/image:i</to>
-  <protocol>udp</protocol>
-</connection> 
-<connection>
-  <from>/shapeSelector/rightImage:o</from>
-  <to>/rightTransform/image:i</to>
-  <protocol>udp</protocol>
-</connection> 
-
-<connection>
-  <from>/leftTransform/image:o</from>
-  <to>/vergence/left:i</to>
-  <protocol>udp</protocol>
-</connection> 
-<connection>
-  <from>/rightTransform/image:o</from>
-  <to>/vergence/right:i</to>
-  <protocol>udp</protocol>
-</connection> 
 
 <connection>
   <from>/vergence/histo:o</from>
