@@ -87,14 +87,14 @@ void downSamplerRatethread::run() {
     if (outputPort.getOutputCount() && inputPort.getInputCount()) {
     
         inputImage  =   inputPort.read(false);            
-        ImageOf<PixelRgb>& outputImage =  outputPort.prepare();
-        outputImage.resize(outputWidth, outputHeight);
-        if (inputImage!=NULL)   {
         
+        if (inputImage!=NULL)   {
+            ImageOf<PixelRgb>& outputImage =  outputPort.prepare();
+            outputImage.resize(outputWidth, outputHeight);
             inputWidth      =   inputImage->width();
             inputHeight     =   inputImage->height();
-            outputWidth     =   inputWidth/2; /// one can also use fixed values for 320 x 240
-            outputHeight    =   inputHeight/2;
+            outputWidth     =   inputWidth>>1; /// one can also use fixed values for 320 x 240
+            outputHeight    =   inputHeight>>1;
             outputImage.resize(outputWidth, outputHeight);   
             outputImage.zero();
            
@@ -125,9 +125,10 @@ void downSamplerRatethread::run() {
                 inputPxl += inputPadding;
                 outputPxl+= outputPadding;
                 inputPxl += (3 * inputWidth) + inputPadding;              
-            }          
+            }
+            outputPort.write();          
         }        
-        outputPort.write();
+        
     }                
 }
 
