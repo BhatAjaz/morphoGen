@@ -39,7 +39,7 @@ set(ICUB_APPLICATIONS_PREFIX "$ENV{ICUB_ROOT}" CACHE PATH "Application path pref
 #    add_subdirectory(cudaVision)
 #endif (ENABLE_CUDA)
 
-ADD_SUBDIRECTORY(morphoGenLib)
+#ADD_SUBDIRECTORY(morphoGenLib)
 add_subdirectory(app)
 add_subdirectory(src)
 
