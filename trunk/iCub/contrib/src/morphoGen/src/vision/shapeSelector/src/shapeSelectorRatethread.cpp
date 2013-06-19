@@ -95,8 +95,10 @@ bool shapeSelectorRatethread::threadInit() {
     //Network::connect("/PlanXplore:o","/shapeSelector/plan:i");
         //printf("connection NOT successful\n");
        
-
-    
+    width   =   320;
+    height  =   240;
+    scaleX  =   dimX / 320;
+    scaleY  =   dimY / 240; 
 
     for (int j = 0; j < 2; j++)
         for(int i = 0; i < 3; i++)  {        // initialize the coordinates
@@ -175,10 +177,8 @@ void shapeSelectorRatethread::run() {
     double interval = endTime - startTime;
     printf("interval %f \n", interval);
     startTime = Time::now();
-    */
-    scaleX  =   coordDimX/320;
-    scaleY  =   coordDimY/240;  
-    printf("scaleX %d scaleY %d", scaleX,scaleY);       
+    */ 
+    //printf("scaleX %d scaleY %d\n", scaleX,scaleY);       
     for (int j = 0 ; j < 2; j++)  {                 // left case (0) and right case (1) 
         
         // Bottle handling
