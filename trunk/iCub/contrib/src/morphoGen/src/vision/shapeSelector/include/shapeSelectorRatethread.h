@@ -62,6 +62,8 @@ private:
     yarp::os::Semaphore *leftMutex, *rightMutex;
     std::string name;
     int objectCount, xLeft[2][3], yTop[2][3], xWidth[2][3], yHeight[2][3],objectID[2][3],padding;
+    int coordDimX;                              // name of the width of the input
+    int coordDimY;                             // name of the  height of the input
     bool flag;
     int height, width,scaleX,scaleY;
     bool idle;
@@ -112,7 +114,7 @@ public:
     * @param width ...
     * @param height ...
     */
-    void setOutputDimension(int w, int h) {width = w; height = h; } ;
+    void setCoordinates(int w, int h) {coordDimX = w; coordDimY = h; } ;
     
     /**
     * function that returns the original root name and appends another string iff passed as parameter

@@ -160,7 +160,7 @@ class shapeSelectorModule:public yarp::os::RFModule {
     std::string handlerPortName;            // name of handler port
     std::string configFile;                 // name of the configFile that the resource Finder will seek
     int coordDimX;                              // name of the width of the output
-    int CoordDimY;                             // name of the  height of the output
+    int coordDimY;                             // name of the  height of the output
     yarp::os::Port handlerPort;             // a port to handle messages 
     shapeSelectorRatethread* rThread;       // pointer to a new thread to be created and started in configure() and stopped in... 
                                             // close(). This thread opens input ports and communicates with the other threads

@@ -108,7 +108,7 @@ bool shapeSelectorModule::configure(yarp::os::ResourceFinder &rf) {
     /* create the thread and pass pointers to the module parameters */
     rThread = new shapeSelectorRatethread(robotName, configFile);
     rThread->setName(getName().c_str());
-    rThread->setOutputDimension(width, height);
+    rThread->setCoordinates(coordDimX, coordDimY);
     //rThread->setInputPortName(inputPortName.c_str());
      
     /* get the module name which will form the stem of all module port names */

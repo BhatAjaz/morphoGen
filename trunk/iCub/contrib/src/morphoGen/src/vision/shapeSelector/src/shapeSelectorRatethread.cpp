@@ -250,7 +250,6 @@ void shapeSelectorRatethread::run() {
                 if (inputImage[j]  !=  NULL)   {
                     width           =   inputImage[j]->width();
                     height          =   inputImage[j]->height();
-                    scaleX
                     outputImage.resize(width, height);
                     outputImage.zero();
                     foreground      =   Mat(height,width,CV_8UC1,cv::Scalar(0));
