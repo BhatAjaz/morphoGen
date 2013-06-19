@@ -106,7 +106,8 @@ bool shapeSelectorRatethread::threadInit() {
             yHeight[j][i]   =   0;
             objectID[j][i]  =   -1;
         }
-         
+    scaleX  =   coordDimX/320;
+    scaleY  =   coordDimY/240;     
     return true;
 }
 
@@ -199,14 +200,15 @@ void shapeSelectorRatethread::run() {
                         // The below code line bounds the vision area to be processed
                         //if((tempBottle != NULL) && ( (abs(tempBottle->get(0).asInt()) > (0.2*width)) && (abs(tempBottle->get(1).asInt()) > (0.2*height)) && ((abs(tempBottle->get(0).asInt()) + abs(tempBottle->get(2).asInt())) < (0.80*width)) && ((abs(tempBottle->get(1).asInt()) + abs(tempBottle->get(3).asInt())) < (0.8*height))  )){
                         if (tempBottle != NULL){
-                            xLeft[j][i]         =   abs(tempBottle->get(0).asInt())/2; // Divison of 2 signifies is an external constraint
-                            yTop[j][i]          =   abs(tempBottle->get(1).asInt())/2; // as in our case have images and dimensions coming from
-                            xWidth[j][i]        =   abs(tempBottle->get(2).asInt())/2; // different modules.
-                            yHeight[j][i]       =   abs(tempBottle->get(3).asInt())/2;
+                            xLeft[j][i]         =   abs(tempBottle->get(0).asInt())/scaleX; // Divison of 2 signifies is an external constraint
+                            yTop[j][i]          =   abs(tempBottle->get(1).asInt())/scaleY; // as in our case have images and dimensions coming from
+                            xWidth[j][i]        =   abs(tempBottle->get(2).asInt())/scaleX; // different modules.
+                            yHeight[j][i]       =   abs(tempBottle->get(3).asInt())/scaleY;
                             objectID[j][i]      =   tempBottle->get(4).asInt();
                             
                         }
-                        printf("handling object %d: %d %d %d %d with ID %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i], objectID[j][i]);                   
+                        printf("handling object %d: %d %d %d %d with ID %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i], objectID[j][i]); 
+                        printf("scaleX %d scaleY %d", scaleX,scaleY);                  
                     }
                     incomingBottle->clear();
                     if(incomingBottle->size() != 0) {
@@ -248,6 +250,7 @@ void shapeSelectorRatethread::run() {
                 if (inputImage[j]  !=  NULL)   {
                     width           =   inputImage[j]->width();
                     height          =   inputImage[j]->height();
+                    scaleX
                     outputImage.resize(width, height);
                     outputImage.zero();
                     foreground      =   Mat(height,width,CV_8UC1,cv::Scalar(0));

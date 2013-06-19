@@ -63,7 +63,7 @@ private:
     std::string name;
     int objectCount, xLeft[2][3], yTop[2][3], xWidth[2][3], yHeight[2][3],objectID[2][3],padding;
     bool flag;
-    int height, width;
+    int height, width,scaleX,scaleY;
     bool idle;
     unsigned char* oproc, *inproc;
     cv::Mat img0, mask, foreground,temp;
