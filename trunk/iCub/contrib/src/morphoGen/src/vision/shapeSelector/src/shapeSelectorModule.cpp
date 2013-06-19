@@ -124,14 +124,14 @@ bool shapeSelectorModule::configure(yarp::os::ResourceFinder &rf) {
     
     
     //rThread->setSemaphore(leftMutex, rightMutex);
-    //sThread = new selectorThread();
+    
     //rThread->setSharingBottle(leftBottle, rightBottle);
     //rThread->setSemaphore(leftMutex, rightMutex);
     
     /* now start the thread to do the work */
     
     rThread->start(); // this calls threadInit() and it if returns true, it then calls run()
-    //sThread->start();
+    
   
         
     return true ;       // let the RFModule know everything went well

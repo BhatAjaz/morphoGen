@@ -105,9 +105,7 @@ bool shapeSelectorRatethread::threadInit() {
             xWidth[j][i]    =   0;
             yHeight[j][i]   =   0;
             objectID[j][i]  =   -1;
-        }
-    scaleX  =   coordDimX/320;
-    scaleY  =   coordDimY/240;     
+        }   
     return true;
 }
 
@@ -178,7 +176,9 @@ void shapeSelectorRatethread::run() {
     printf("interval %f \n", interval);
     startTime = Time::now();
     */
-
+    scaleX  =   coordDimX/320;
+    scaleY  =   coordDimY/240;  
+    printf("scaleX %d scaleY %d", scaleX,scaleY);       
     for (int j = 0 ; j < 2; j++)  {                 // left case (0) and right case (1) 
         
         // Bottle handling
@@ -208,7 +208,7 @@ void shapeSelectorRatethread::run() {
                             
                         }
                         printf("handling object %d: %d %d %d %d with ID %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i], objectID[j][i]); 
-                        printf("scaleX %d scaleY %d", scaleX,scaleY);                  
+                                   
                     }
                     incomingBottle->clear();
                     if(incomingBottle->size() != 0) {
