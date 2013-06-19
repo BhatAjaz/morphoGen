@@ -44,12 +44,12 @@ bool shapeSelectorModule::configure(yarp::os::ResourceFinder &rf) {
                            Value("/shapeSelector"), 
                            "module name (string)").asString();
     /* get the module name which will form the stem of all module port names */
-    width            = rf.check("width", 
-                           Value(320), 
+    coordDimX            = rf.check("coordDimX", 
+                           Value(640), 
                            "image width size (int)").asInt();
     /* get the module name which will form the stem of all module port names */
-    height            = rf.check("height", 
-                           Value(240), 
+    coordDimY            = rf.check("coordDimY", 
+                           Value(480), 
                            "image height size (int)").asInt();                       
     
      
