@@ -44,11 +44,11 @@ bool shapeSelectorModule::configure(yarp::os::ResourceFinder &rf) {
                            Value("/shapeSelector"), 
                            "module name (string)").asString();
     /* get the module name which will form the stem of all module port names */
-    coordDimX            = rf.check("coordDimX", 
+    dimX            = rf.check("dimX", 
                            Value(640), 
                            "image width size (int)").asInt();
     /* get the module name which will form the stem of all module port names */
-    coordDimY            = rf.check("coordDimY", 
+    dimY            = rf.check("dimY", 
                            Value(480), 
                            "image height size (int)").asInt();                       
     
@@ -108,7 +108,7 @@ bool shapeSelectorModule::configure(yarp::os::ResourceFinder &rf) {
     /* create the thread and pass pointers to the module parameters */
     rThread = new shapeSelectorRatethread(robotName, configFile);
     rThread->setName(getName().c_str());
-    rThread->setCoordinates(coordDimX, coordDimY);
+    rThread->setCoordinates(dimX, dimY);
     //rThread->setInputPortName(inputPortName.c_str());
      
     /* get the module name which will form the stem of all module port names */
