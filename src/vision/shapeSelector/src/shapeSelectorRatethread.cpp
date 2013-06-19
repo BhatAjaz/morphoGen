@@ -95,8 +95,7 @@ bool shapeSelectorRatethread::threadInit() {
     //Network::connect("/PlanXplore:o","/shapeSelector/plan:i");
         //printf("connection NOT successful\n");
        
-    width   =   320;
-    height  =   240;
+    
     scaleX  =   dimX / 320;
     scaleY  =   dimY / 240; 
 
@@ -200,8 +199,8 @@ void shapeSelectorRatethread::run() {
                         // The below code line bounds the vision area to be processed
                         //if((tempBottle != NULL) && ( (abs(tempBottle->get(0).asInt()) > (0.2*width)) && (abs(tempBottle->get(1).asInt()) > (0.2*height)) && ((abs(tempBottle->get(0).asInt()) + abs(tempBottle->get(2).asInt())) < (0.80*width)) && ((abs(tempBottle->get(1).asInt()) + abs(tempBottle->get(3).asInt())) < (0.8*height))  )){
                         if (tempBottle != NULL){
-                            xLeft[j][i]         =   abs(tempBottle->get(0).asInt())/scaleX; // Divison of 2 signifies is an external constraint
-                            yTop[j][i]          =   abs(tempBottle->get(1).asInt())/scaleY; // as in our case have images and dimensions coming from
+                            xLeft[j][i]         =   abs(tempBottle->get(0).asInt())/scaleX; // Divison by scale signifies an external constraint
+                            yTop[j][i]          =   abs(tempBottle->get(1).asInt())/scaleY; // as in our case we have images and dimensions coming from
                             xWidth[j][i]        =   abs(tempBottle->get(2).asInt())/scaleX; // different modules.
                             yHeight[j][i]       =   abs(tempBottle->get(3).asInt())/scaleY;
                             objectID[j][i]      =   tempBottle->get(4).asInt();
