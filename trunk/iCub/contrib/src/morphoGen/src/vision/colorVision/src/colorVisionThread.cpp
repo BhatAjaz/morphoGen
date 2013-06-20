@@ -68,9 +68,10 @@ bool colorVisionThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }     
     
-    imagePortRTL.open("/v1/imagePortRTL");  
-    Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
-	Network::connect("/v1/imagePortRTL","/v/l"); 
+
+    imagePortRTL.open(getName("/v1/imagePortRTL").c_str());  
+    //Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
+	//Network::connect("/v1/imagePortRTL","/v/l"); 
      	
     return true;
     
