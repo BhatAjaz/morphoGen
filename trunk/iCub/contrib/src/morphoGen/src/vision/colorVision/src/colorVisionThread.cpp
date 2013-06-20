@@ -26,7 +26,7 @@
 #include <cstring>
 #include <string>
 #include "fileutil.h"
-#include<time.h>
+#include <time.h>
 #include <math.h>
 
 using namespace yarp::dev;
@@ -69,9 +69,11 @@ bool colorVisionThread::threadInit() {
     }     
     
 
-    imagePortRTL.open(getName("/v1/imagePortRTL").c_str());  
+    imagePortRTL.open(getName("/imagePortRTL").c_str());  
     //Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
 	//Network::connect("/v1/imagePortRTL","/v/l"); 
+
+    ModelLoad();
      	
     return true;
     
@@ -96,79 +98,86 @@ void colorVisionThread::setInputPortName(string InpPort) {
 
 void colorVisionThread::run() {    
     while (isStopping() != true) {
-
+        
         if (imagePortRTL.getInputCount()) {   
-//========================================================================================
-           
-			 for ( int i=0; i<52; i++ )
-					   {
-						tdGpmp[i] = 0;
-		  				}
-    		 
- 
-             colSegMainL();
-			 tdGpmp[0] = numobjectsL;
+            //========================================================================================
 
-		//	 imagePortRT.open("/v1/imagePortRT");
-	   //      Network::connect("/icub/camcalib/right/out","/v1/imagePortRT");
-		//	 colSegMainR();
-		//	 tdGpmp[1] = numobjectsR;
+            
+            
+            for ( int i=0; i<52; i++ )  {
+                    tdGpmp[i] = 0;
+            }
+            
+            
+            colSegMainL();
+            tdGpmp[0] = numobjectsL;
+            
+		    //	 imagePortRT.open("/v1/imagePortRT");
+            //   Network::connect("/icub/camcalib/right/out","/v1/imagePortRT");
+            //	 colSegMainR();
+            //	 tdGpmp[1] = numobjectsR;
     
 			 
-			 int k=1;  //modified to account for the left cam only
+            int k=1;  //modified to account for the left cam only
     
-
-			 for (int i=0; i<numobjectsL; i++ )
-				{
-					 for (int j=0; j<5; j++ )
-					 {
-						tdGpmp[k] = imageDetailsL[i][j];
-                        printf("%f \n", imageDetailsL[i][j]);
-						k=k+1;
-					 }
-			    }
-		/*	 for (int i=0; i<numobjectsR; i++ )
-				{
-					 for (int j=0; j<5; j++ )
-					 {
-						tdGpmp[k] = imageDetails[i][j];
-                        printf("%f \n", imageDetails[i][j]);
-						k=k+1;
-					 }
-			    }*/ 
-    
-                cout << "ready to send data"<< endl;
-
-    			Bottle& ColOp = dataPort.prepare();
-                ColOp.clear();   
-                ColOp.addDouble(tdGpmp[0]);
+            
+            for (int i=0; i<numobjectsL; i++ )	{
+                for (int j=0; j<5; j++ )    {
+                    tdGpmp[k] = imageDetailsL[i][j];
+                    printf("%f \n", imageDetailsL[i][j]);
+                    k=k+1;
+                }
+			}
+            /*	 for (int i=0; i<numobjectsR; i++ )
+                 {
+                 for (int j=0; j<5; j++ )
+                 {
+                 tdGpmp[k] = imageDetails[i][j];
+                 printf("%f \n", imageDetails[i][j]);
+                 k=k+1;
+                 }
+                 }*/ 
+            
+            //cout << "ready to send data"<< endl;
+            
+            Bottle& ColOp = dataPort.prepare();
+            ColOp.clear();   
+            ColOp.addDouble(tdGpmp[0]);
                
-				for (int i = 1; i < 52; i++) {
-                    ColOp.addDouble(tdGpmp[i]);
-                    cout << " object Ids"<< tdGpmp[i] << endl;
-				}
+            for (int i = 1; i < 52; i++) {
+                ColOp.addDouble(tdGpmp[i]);
+                // cout << " object Ids"<< tdGpmp[i] << endl;
+            }
                 
-//========================================================================================     
+            //========================================================================================     
         }
-
-        if(outputPort.getOutputCount()) {
-    
+        
+      /*  if(outputPort.getOutputCount()) {
+            
             outputPort.prepare() = *inputImage;
             outputPort.write();   
-                 
-        }
+            
+        }*/
 
         if(dataPort.getOutputCount()) {
-    
+            
             dataPort.write();
 
 		    //Time::delay(5);
         }    
-    }               
+        
+        
+        Time::delay(0.1);
+
+    } // end if while isStopping
+    
 }
 
 void colorVisionThread::threadRelease() {
     //nothing here
+
+   
+
 }
 
 void colorVisionThread::onStop() {
@@ -184,73 +193,64 @@ void colorVisionThread::onStop() {
     imagePortRTL.close(); 
 }
 
-double* colorVisionThread::Vision(int ObjectType)
- {
+double* colorVisionThread::Vision(int ObjectType) {
 	 //loads model and colormap
-	int colorcall= colSegMainR();// segments right cam
-
-	  for ( int i=0; i<numobjectsR; i++ )
-		{
-		//  printf("\n %f \t %f\t %f\t %f\t %f\t", imageDetails[i][0], imageDetails[i][1], imageDetails[i][2],imageDetails[i][3],imageDetails[i][4]);
-	 	  ObjectIdentityR[i][0]= imageDetails[i][0];
-		  ObjectIdentityR[i][1]= imageDetails[i][1];
-		  ObjectIdentityR[i][2]= imageDetails[i][2];
-		  ObjectIdentityR[i][3]= imageDetails[i][3];
-		  ObjectIdentityR[i][4]= imageDetails[i][4];
-		}
-
-	 colSegMainL(); // segments left cam
-      for ( int i=0; i<numobjectsL; i++ )
-		{
-		 // printf("\n %f \t %f\t %f\t %f\t %f\t", imageDetailsL[i][0], imageDetailsL[i][1], imageDetailsL[i][2],imageDetailsL[i][3],imageDetailsL[i][4]);
-	      ObjectIdentityL[i][0]= imageDetailsL[i][0];
-		  ObjectIdentityL[i][1]= imageDetailsL[i][1];
-		  ObjectIdentityL[i][2]= imageDetailsL[i][2];
-		  ObjectIdentityL[i][3]= imageDetailsL[i][3];
-		  ObjectIdentityL[i][4]= imageDetailsL[i][4];
-		 }
-			
-	  if(numobjectsR == numobjectsL) // Assumption here that there is correspondance in ordering of images in both cameras
-	  {
-	for ( int i=0; i<numobjectsL; i++ )
-               { 
-				   ImagX=0;
-				   ImagY=0;
-				   ImagZ=0;
-					double ur=(ObjectIdentityR[i][0]+ObjectIdentityR[i][1])*0.5;
-					double vr=(ObjectIdentityR[i][2]+ObjectIdentityR[i][3])*0.5;
-					double ul=(ObjectIdentityL[i][0]+ObjectIdentityL[i][1])*0.5;
-					double vl=(ObjectIdentityL[i][2]+ObjectIdentityL[i][3])*0.5;
-                 
-                 ConvImg(ur,vr,ul,vl);
-                 ObjectIdentityR[i][5]=ImagX;
-			     ObjectIdentityR[i][6]=ImagY;
-			     ObjectIdentityR[i][7]=ImagZ; 
-                }
-      
-	  }
-
-	  for ( int i=0; i<41; i++ )
-					   {
-						tdGpmp[i] = 0;
-		  				}
-  
-  tdGpmp[0] = numobjectsL;
-  int k=1;
-	for (int i=0; i<numobjectsL; i++ )
-	{
-		 for (int j=0; j<8; j++ )
-		 {
-			tdGpmp[k] = ObjectIdentityR[i][j];
-			k=k+1;
-			}
-	}
- return tdGpmp;
- };
+    int colorcall= colSegMainR();// segments right cam
+    
+    for ( int i=0; i<numobjectsR; i++ ) {
+         //  printf("\n %f \t %f\t %f\t %f\t %f\t", imageDetails[i][0], imageDetails[i][1], imageDetails[i][2],imageDetails[i][3],imageDetails[i][4]);
+        ObjectIdentityR[i][0]= imageDetails[i][0];
+        ObjectIdentityR[i][1]= imageDetails[i][1];
+        ObjectIdentityR[i][2]= imageDetails[i][2];
+        ObjectIdentityR[i][3]= imageDetails[i][3];
+        ObjectIdentityR[i][4]= imageDetails[i][4];
+    }
+     
+	colSegMainL(); // segments left cam
+    for ( int i=0; i<numobjectsL; i++ ) {
+         // printf("\n %f \t %f\t %f\t %f\t %f\t", imageDetailsL[i][0], imageDetailsL[i][1], imageDetailsL[i][2],imageDetailsL[i][3],imageDetailsL[i][4]);
+        ObjectIdentityL[i][0]= imageDetailsL[i][0];
+        ObjectIdentityL[i][1]= imageDetailsL[i][1];
+        ObjectIdentityL[i][2]= imageDetailsL[i][2];
+        ObjectIdentityL[i][3]= imageDetailsL[i][3];
+        ObjectIdentityL[i][4]= imageDetailsL[i][4];
+    }
+     
+    if(numobjectsR == numobjectsL) {// Assumption here that there is correspondance in ordering of images in both cameras     
+        for ( int i=0; i<numobjectsL; i++ ) { 
+            ImagX=0;
+            ImagY=0;
+            ImagZ=0;
+            double ur=(ObjectIdentityR[i][0]+ObjectIdentityR[i][1])*0.5;
+            double vr=(ObjectIdentityR[i][2]+ObjectIdentityR[i][3])*0.5;
+            double ul=(ObjectIdentityL[i][0]+ObjectIdentityL[i][1])*0.5;
+            double vl=(ObjectIdentityL[i][2]+ObjectIdentityL[i][3])*0.5;
+               
+            ConvImg(ur,vr,ul,vl);
+            ObjectIdentityR[i][5]=ImagX;
+            ObjectIdentityR[i][6]=ImagY;
+            ObjectIdentityR[i][7]=ImagZ; 
+        }
+             
+    }
+     
+    for ( int i=0; i<41; i++ )  {
+        tdGpmp[i] = 0;
+    }
+     
+    tdGpmp[0] = numobjectsL;
+    int k=1;
+    for (int i=0; i<numobjectsL; i++ )  {
+        for (int j=0; j<8; j++ )    {
+            tdGpmp[k] = ObjectIdentityR[i][j];
+            k=k+1;
+        }
+    }
+    return tdGpmp;
+};
 
 
- bool colorVisionThread::ModelLoad()
-{
+bool colorVisionThread::ModelLoad() {
 	// extract parameters from properties (ini-file)
 	
 	//height = rf.find("height").asInt();
@@ -310,221 +310,241 @@ double* colorVisionThread::Vision(int ObjectType)
 }
 
 
-int colorVisionThread::colSegMainR()
-{
+int colorVisionThread::colSegMainR()    {
 	ModelLoad(); 
-     int greendetect=-1;
-	 //BufferedPort<Bottle> out1;
-     // Name the ports
-	 int averager=0;       
+    int greendetect=-1;
+	//BufferedPort<Bottle> out1;
+    // Name the ports
+	int averager=0;       
 	 
-	 double xMean = 0;
-     double yMean = 0;
- // read an image from the port
-     ImageOf<PixelRgb> *imgRT = imagePortRT.read();
-     int ctR=0; 
-     if (imgRT!=NULL) { // check we actually got something
-     printf("We got an image of size %dx%d\n", imgRT->width(), imgRT->height());
+	double xMean = 0;
+    double yMean = 0;
+    // read an image from the port
+    ImageOf<PixelRgb> *imgRT = imagePortRT.read();
+    int ctR=0; 
+    if (imgRT!=NULL) { // check we actually got something
+        printf("We got an image of size %dx%d\n", imgRT->width(), imgRT->height());
 
-	if ( q == NULL ) {
-		printf("Image size known, allocating MRF arrays.\n");
-		init_onsize(imgRT->width(),imgRT->height());
-	}
-	if ( (imgRT->width()!=width) || (imgRT->height()!=height) ) {
-		printf("Error: Image size changed during session.\n");
-		return 100;
-	}
+	    if ( q == NULL ) {
+		    printf("Image size known, allocating MRF arrays.\n");
+		    init_onsize(imgRT->width(),imgRT->height());
+	    }
+	    if ( (imgRT->width()!=width) || (imgRT->height()!=height) ) {
+		    printf("Error: Image size changed during session.\n");
+		    return 100;
+	    }
 	
-	unsigned char *I = imgRT->getRawImage();
+	    unsigned char *I = imgRT->getRawImage();
 	
-	printf("Constructing and optimizing MRF.\n");
-	compute_unary_potentials(I,W,nK,width*height,q);
-	reparameterize_unary_potentials(E,nE,q,width*height,nK,f);
-	for ( int iter=0; iter<niter; iter++ ) {
-		float resid = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
-		printf("iter=%i resid=%g\n",iter,resid);
-	}
-	extract_labeling(q,nK,width*height,K);
+	    printf("Constructing and optimizing MRF.\n");
+	    compute_unary_potentials(I,W,nK,width*height,q);
+	    reparameterize_unary_potentials(E,nE,q,width*height,nK,f);
+	    for ( int iter=0; iter<niter; iter++ ) {
+		    float resid = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
+		    printf("iter=%i resid=%g\n",iter,resid);
+	    }
+	    extract_labeling(q,nK,width*height,K);
 
-	printf("Segmentation done. Label histogram=[");
-	int *hist = new int[nK];
-	for ( int k=0; k<nK; k++ ) hist[k]=0;
-	for ( int i=0; i<width*height; i++ ) hist[K[i]]++;
-	for ( int k=0; k<nK; k++ ) printf("%i ",hist[k]);
-	printf("]\n");
-	delete[] hist;
+	    printf("Segmentation done. Label histogram=[");
+	    int *hist = new int[nK];
+	    for ( int k=0; k<nK; k++ ) hist[k]=0;
+	    for ( int i=0; i<width*height; i++ ) hist[K[i]]++;
+	    for ( int k=0; k<nK; k++ ) printf("%i ",hist[k]);
+	    printf("]\n");
+	    delete[] hist;
 
-	printf("Finding connected components.\n");
-	for ( int i=0; i<width; i++ ) K[i] = 0; // Set column 0 to background
-	for ( int j=0; j<height; j++ ) K[j*width] = 0; // Set row 0 to background
-	unsigned ncomponents = connected_components(K,width,height,minsize,J);
-	printf("No. of components (excl. background) = %i\n",ncomponents);
+	    printf("Finding connected components.\n");
+	    for ( int i=0; i<width; i++ ) K[i] = 0; // Set column 0 to background
+	    for ( int j=0; j<height; j++ ) K[j*width] = 0; // Set row 0 to background
+	    unsigned ncomponents = connected_components(K,width,height,minsize,J);
+	    printf("No. of components (excl. background) = %i\n",ncomponents);
 
-	printf("Computing bounding boxes.\n");
-	int *bbox = new int[5*ncomponents];
-	bounding_boxes(J,K,width,height,ncomponents,bbox);
-	for ( int k=0; k<ncomponents; k++ ) {
-		int *b = bbox + 5*k;
-		//printf("%i %i %i %i %i\n",b[0],b[1],b[2],b[3],b[4]);
-		for ( int i=b[0]; i<=b[1]; i++ ) K[i+width*b[2]] = K[i+width*b[3]] = b[4];
-		for ( int j=b[2]; j<=b[3]; j++ ) K[b[0]+width*j] = K[b[1]+width*j] = b[4];
-	}
+	    printf("Computing bounding boxes.\n");
+	    int *bbox = new int[5*ncomponents];
+	    bounding_boxes(J,K,width,height,ncomponents,bbox);
+	    for ( int k=0; k<ncomponents; k++ ) {
+		    int *b = bbox + 5*k;
+		    //printf("%i %i %i %i %i\n",b[0],b[1],b[2],b[3],b[4]);
+		    for ( int i=b[0]; i<=b[1]; i++ ) K[i+width*b[2]] = K[i+width*b[3]] = b[4];
+		    for ( int j=b[2]; j<=b[3]; j++ ) K[b[0]+width*j] = K[b[1]+width*j] = b[4];
+	    }
 
-	// Apply color map and send image to output.
-	for ( int t=0; t<width*height; t++ ) {
-		unsigned char Kt = K[t], *It = I + 3*t;
-		for ( int c=0; c<3; c++ ) if ( Kt>0 ) It[c] = colormap[3*Kt+c];
-	}
+	    // Apply color map and send image to output.
+	    for ( int t=0; t<width*height; t++ ) {
+		    unsigned char Kt = K[t], *It = I + 3*t;
+		    for ( int c=0; c<3; c++ ) if ( Kt>0 ) It[c] = colormap[3*Kt+c];
+	    }
 	
-	imagePortRT.prepare() = *imgRT;
-    imagePortRT.write();
+	    imagePortRT.prepare() = *imgRT;
+        imagePortRT.write();
 	
-	printf("\n number of objects %d ", ncomponents);
-	numobjectsR= ncomponents;
-	int tempV;
-    countee=0;
-	int counteei=0;
+	    printf("\n number of objects %d ", ncomponents);
+	    numobjectsR= ncomponents;
+	    int tempV;
+        countee=0;
+	    int counteei=0;
 	  
-	for ( int i=0; i<5*ncomponents; i++ )
-	{
-	bbvals[i]=bbox[i];
-    tempV=bbvals[i];
-    imageDetails[counteei][countee]=tempV;
-	if(countee==4)
-	{
-		if(imageDetails[counteei][countee]==3)
-	{
-	greendetect=1;
-	}
-	countee=0;
-	counteei=counteei+1;
-	
-	}
-	else 
-	{
-		countee=countee+1;
-	}
-	printf("\n bbval %d ", bbvals[i]);
-	}
-   
-	printf("\n");
-}
-free(K);
-free(q);
-free(E);
-free(f);
-free(W);
- return greendetect;	
-
-}
-
-
-void colorVisionThread::colSegMainL()
-{
-     ModelLoad();     
-	 
-	 // read an image from the port
-     ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
-     
-     if (imgRTL!=NULL) { // check we actually got something
-     //printf("We got an image of size %dx%d\n", imgRTL->width(), imgRTL->height());
-
-	if ( q == NULL ) {
-	//	printf("Image size known, allocating MRF arrays.\n");
-		init_onsize(imgRTL->width(),imgRTL->height());
-	}
-	if ( (imgRTL->width()!=width) || (imgRTL->height()!=height) ) {
-	//	printf("Error: Image size changed during session.\n");
-		return;
-	}
-	
-	unsigned char *I = imgRTL->getRawImage();
-	
-	//printf("Constructing and optimizing MRF.\n");
-	compute_unary_potentials(I,W,nK,width*height,q);
-	reparameterize_unary_potentials(E,nE,q,width*height,nK,f);
-	for ( int iter=0; iter<niter; iter++ ) {
-		float residL = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
-		// printf("iter=%i resid=%g\n",iter,residL);
-	}
-	extract_labeling(q,nK,width*height,K);
-
-	//printf("Segmentation done. Label histogram=[");
-	int *histL = new int[nK];
-	for ( int k=0; k<nK; k++ ) histL[k]=0;
-	for ( int i=0; i<width*height; i++ ) histL[K[i]]++;
-	// for ( int k=0; k<nK; k++ ) printf("%i ",histL[k]);
-	//printf("]\n");
-	delete[] histL;
-
-	//printf("Finding connected components.\n");
-	for ( int i=0; i<width; i++ ) K[i] = 0; // Set column 0 to background
-	for ( int j=0; j<height; j++ ) K[j*width] = 0; // Set row 0 to background
-	unsigned ncomponentsL = connected_components(K,width,height,minsize,J);
-	// printf("No. of components (excl. background) = %i\n",ncomponentsL);
-
-	// printf("Computing bounding boxes.\n");
-	int *bboxL = new int[5*ncomponentsL];
-	bounding_boxes(J,K,width,height,ncomponentsL,bboxL);
-	for ( int k=0; k<ncomponentsL; k++ ) {
-		int *bL = bboxL + 5*k;
-		//printf("%i %i %i %i %i\n",b[0],b[1],b[2],b[3],b[4]);
-		for ( int i=bL[0]; i<=bL[1]; i++ ) K[i+width*bL[2]] = K[i+width*bL[3]] = bL[4];
-		for ( int j=bL[2]; j<=bL[3]; j++ ) K[bL[0]+width*j] = K[bL[1]+width*j] = bL[4];
-	}
-
-	// Apply color map and send image to output.
-	for ( int t=0; t<width*height; t++ ) {
-		unsigned char KtL = K[t], *ItL = I + 3*t;
-		for ( int c=0; c<3; c++ ) if ( KtL>0 ) ItL[c] = colormap[3*KtL+c];
-	}
-	
-	imagePortRTL.prepare() = *imgRTL;
-    imagePortRTL.write();
-	
-	/*Bottle bot;
-	bot.addInt(ncomponents); // number of bounding boxes
-
-	for ( int i=0; i<5*ncomponents; i++ ) bot.addInt(bbox[i]);
-	output.write(bot);*/ 
-
-	//printf("\n number of objects %d ", ncomponentsL);
-	numobjectsL= ncomponentsL;
-	int tempVL;
-    counteeL=0;
-	int counteeiL=0;
- /*   for ( int i=0; i<10; i++ )
-	{
-      for ( int j=0; j<8; i++ )
-	  {
-	  imageDetailsL[i][j]=0;
-	  }
-	
-	}*/ 
-
-	for ( int i=0; i<5*ncomponentsL; i++ )
-	{
-	bbvalsL[i]=bboxL[i];
-    tempVL=bbvalsL[i];
-    imageDetailsL[counteeiL][counteeL]=tempVL;
-	if(counteeL==4)
-	{
-	counteeL=0;
-	counteeiL=counteeiL+1;
-	}
-	else 
-	{
-		counteeL=counteeL+1;
-	}
-	//printf("\n bbvalL %d ", bbvalsL[i]);
-	}
+	    for ( int i=0; i<5*ncomponents; i++ )   {
+	        bbvals[i]=bbox[i];
+            tempV=bbvals[i];
+            imageDetails[counteei][countee]=tempV;
+	        if(countee==4)  {
+		        if(imageDetails[counteei][countee]==3)  {
+	                greendetect=1;
+	            }
+	            countee=0;
+            	counteei=counteei+1;
+	        }
+	        else {
+		        countee=countee+1;
+	        }
+	        printf("\n bbval %d ", bbvals[i]);
+	    }
+        delete bbox;
+	    printf("\n");
+    }
     
-	// printf("\n");
-}
+    free(K);
+    free(q);
+    free(E);
+    free(f);
+    free(W);
+    return greendetect;
 }
 
-void colorVisionThread::init_onsize(int width_, int height_)
-{
+
+void colorVisionThread::colSegMainL()   {
+    
+	 
+	// read an image from the port
+    ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
+    ImageOf<PixelRgb> & outP    = outputPort.prepare(); 
+    if (imgRTL!=NULL) { // check we actually got something
+        //printf("We got an image of size %dx%d\n", imgRTL->width(), imgRTL->height());
+        
+        if ( q == NULL ) {
+            //	printf("Image size known, allocating MRF arrays.\n");
+            init_onsize(imgRTL->width(),imgRTL->height());
+        }
+        if ( (imgRTL->width()!=width) || (imgRTL->height()!=height) ) {
+            //	printf("Error: Image size changed during session.\n");
+            return;
+        }
+        outP.resize(width, height);
+        outP.zero(); 
+        unsigned char *I = imgRTL->getRawImage();
+        //unsigned char *O = outP.getRawImage();
+        
+        //printf("Constructing and optimizing MRF.\n");
+        // takes the colormap and find the object ID
+        compute_unary_potentials(I,W,nK,width*height,q); 
+
+        reparameterize_unary_potentials(E,nE,q,width*height,nK,f);
+        for ( int iter=0; iter<niter; iter++ ) {
+             float residL = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
+             // printf("iter=%i resid=%g\n",iter,residL);
+        }
+        extract_labeling(q,nK,width*height,K);
+    
+        /* 
+        //printf("Segmentation done. Label histogram=[");
+        int *histL = new int[nK];
+        for ( int k=0; k<nK; k++ ) {
+            histL[k]=0;
+        }
+        for ( int i=0; i<width*height; i++ ) {
+            histL[K[i]]++;
+        }
+        // for ( int k=0; k<nK; k++ ) printf("%i ",histL[k]);
+        //printf("]\n");
+        delete[] histL;
+        */
+         
+        //printf("Finding connected components.\n");
+        for ( int i=0; i<width; i++ ) {
+            K[i] = 0; // Set column 0 to background
+        }
+        for ( int j=0; j<height; j++ ) {
+            K[j*width] = 0; // Set row 0 to background
+        }
+        unsigned ncomponentsL = connected_components(K,width,height,minsize,J);
+        // printf("No. of components (excl. background) = %i\n",ncomponentsL);
+        
+        
+        // printf("Computing bounding boxes.\n");
+        int *bboxL = new int[5*ncomponentsL];
+        bounding_boxes(J,K,width,height,ncomponentsL,bboxL);
+        for ( int k=0; k<ncomponentsL; k++ ) {
+            int *bL = bboxL + 5*k;
+            //printf("%i %i %i %i %i\n",b[0],b[1],b[2],b[3],b[4]);
+            for ( int i=bL[0]; i<=bL[1]; i++ ) {
+                K[i+width*bL[2]] = K[i+width*bL[3]] = bL[4];
+            }
+            for ( int j=bL[2]; j<=bL[3]; j++ ) {
+                K[bL[0]+width*j] = K[bL[1]+width*j] = bL[4];
+            }
+        }
+
+        // Apply color map and send image to output.
+       for ( int t=0; t<width*height; t++ ) {
+            unsigned char KtL = K[t], *ItL = I + 3*t;
+            for ( int c=0; c<3; c++ ) {
+                if ( KtL>0 ) ItL[c] = colormap[3*KtL+c];
+            }
+        }
+     
+        //outputPort.prepare()    =   *imgRTL;
+        outP = *imgRTL;
+        outputPort.write();
+        //imagePortRTL.prepare() = *imgRTL;
+        //imagePortRTL.write();
+        
+        /*Bottle bot;
+          bot.addInt(ncomponents); // number of bounding boxes
+          
+          for ( int i=0; i<5*ncomponents; i++ ) bot.addInt(bbox[i]);
+          output.write(bot);*/ 
+         
+        //printf("\n number of objects %d ", ncomponentsL);
+        numobjectsL= ncomponentsL;
+        int tempVL;
+        counteeL=0;
+        int counteeiL=0;
+        /*   for ( int i=0; i<10; i++ )
+             {
+             for ( int j=0; j<8; i++ )
+             {
+             imageDetailsL[i][j]=0;
+             }
+             
+             }*/ 
+        
+        for ( int i=0; i< 5 * ncomponentsL; i++ )   {
+                bbvalsL[i]=bboxL[i];
+                tempVL=bbvalsL[i];
+                imageDetailsL[counteeiL][counteeL]=tempVL;
+                if(counteeL==4) {
+                        counteeL=0;
+                        counteeiL=counteeiL+1;
+                }
+                else    {
+                    counteeL=counteeL+1;
+                }
+                //printf("\n bbvalL %d ", bbvalsL[i]);
+        }
+         
+        // printf("\n");
+        //delete bboxL;
+        //free(K);
+        //free(q);
+        //free(E);
+        //free(f);
+        //free(W);
+         
+    }
+}
+
+void colorVisionThread::init_onsize(int width_, int height_)    {
 	width = width_;
 	height = height_;
 
@@ -539,8 +559,7 @@ void colorVisionThread::init_onsize(int width_, int height_)
 }
 
 
- double colorVisionThread::Determinant(double **a,int n)
- {
+double colorVisionThread::Determinant(double **a,int n) {
 	int i,j,j1,j2 ;                    // general loop and matrix subscripts
     double det = 0 ;                   // init determinant
     double **m = NULL ;                // pointer to pointers to implement 2d
@@ -550,12 +569,12 @@ void colorVisionThread::init_onsize(int width_, int height_)
 
     else if (n == 1) {                 // should not get here
         det = a[0][0] ;
-        }
+    }
 
     else if (n == 2)  {                // basic 2X2 sub-matrix determinate
                                        // definition. When n==2, this ends the
         det = a[0][0] * a[1][1] - a[1][0] * a[0][1] ;// the recursion series
-        }
+    }
 
 
                                        // recursion continues, solve next sub-matrix
@@ -568,18 +587,19 @@ void colorVisionThread::init_onsize(int width_, int height_)
                                            // get space for the pointer list
             m = (double **) malloc((n-1)* sizeof(double *)) ;
 
-            for (i = 0 ; i < n-1 ; i++)
+            for (i = 0 ; i < n-1 ; i++) {
                 m[i] = (double *) malloc((n-1)* sizeof(double)) ;
-                       //     i[0][1][2][3]  first malloc
-                       //  m -> +  +  +  +   space for 4 pointers
-                       //       |  |  |  |          j  second malloc
-                       //       |  |  |  +-> _ _ _ [0] pointers to
-                       //       |  |  +----> _ _ _ [1] and memory for
-                       //       |  +-------> _ a _ [2] 4 doubles
-                       //       +----------> _ _ _ [3]
-                       //
-                       //                   a[1][2]
-                      // build sub-matrix with minor elements excluded
+            }
+            //     i[0][1][2][3]  first malloc
+            //  m -> +  +  +  +   space for 4 pointers
+            //       |  |  |  |          j  second malloc
+            //       |  |  |  +-> _ _ _ [0] pointers to
+            //       |  |  +----> _ _ _ [1] and memory for
+            //       |  +-------> _ a _ [2] 4 doubles
+            //       +----------> _ _ _ [3]
+            //
+            //                   a[1][2]
+            // build sub-matrix with minor elements excluded
             for (i = 1 ; i < n ; i++) {
                 j2 = 0 ;               // start at first sum-matrix column position
                                        // loop to copy source matrix less one column
@@ -590,8 +610,8 @@ void colorVisionThread::init_onsize(int width_, int height_)
                                             // i-1 because new sub-matrix is one row
                                             // (and column) smaller with excluded minors
                     j2++ ;                  // move to next sub-matrix column position
-                    }
                 }
+            }
 
             det += pow(-1.0,1.0 + j1 + 1.0) * a[0][j1] * Determinant(m,n-1) ;
                                             // sum x raised to y power
@@ -606,83 +626,79 @@ void colorVisionThread::init_onsize(int width_, int height_)
         }
     }
     return(det) ;
- };
+};
 		
  void colorVisionThread::CoFactor(double **a,int n,double **b)
  {
 	int i,j,ii,jj,i1,j1;
-   double det;
-   double **c;
+    double det;
+    double **c;
 
-for (j = 0 ; j < n-1 ; j++) 
-{
+    for (j = 0 ; j < n-1 ; j++) {
                                     
-            c =  new double *[n-1] ;
+        c =  new double *[n-1] ;
 			
-            for (i = 0 ; i < n-1 ; i++)
-			{
-				c[i]=new double[n-1];
-			}
-}
+        for (i = 0 ; i < n-1 ; i++) {
+	        c[i]=new double[n-1];
+		}
+    }
 
 
-for (j = 0 ; j < n-1 ; j++) 
-{			
-            for (i = 0 ; i < n-1 ; i++)
-			{
+    for (j = 0 ; j < n-1 ; j++) {			
+        for (i = 0 ; i < n-1 ; i++) {
 				c[i][j]=0;
-			}
-}
+		}
+    }
 
 
-   for (j=0;j<n;j++) {
-      for (i=0;i<n;i++) {
+    for (j=0;j<n;j++) {
+        for (i=0;i<n;i++) {
 
-         /* Form the adjoint a_ij */
-         i1 = 0;
-         for (ii=0;ii<n;ii++) {
-            if (ii == i)
-               continue;
-            j1 = 0;
-            for (jj=0;jj<n;jj++) {
-               if (jj == j)
-                  continue;
-               c[i1][j1] = a[ii][jj];
-               j1++;
+            /* Form the adjoint a_ij */
+            i1 = 0;
+            for (ii=0;ii<n;ii++) {
+                if (ii == i) {
+                    continue;
+                }
+                j1 = 0;
+                for (jj=0;jj<n;jj++) {
+                    if (jj == j) {
+                    continue;
+                    }
+                    c[i1][j1] = a[ii][jj];
+                    j1++;
+                }
+                i1++;
             }
-            i1++;
-         }
 
-         /* Calculate the determinate */
-         det = Determinant(c,n-1);
+            /* Calculate the determinate */
+            det = Determinant(c,n-1);
 
-         /* Fill in the elements of the cofactor */
-         b[i][j] = pow(-1.0,i+j+2.0) * det;
-      }
-   }
-   for (i=0;i<n-1;i++)
-      free(c[i]);
-   free(c);
- };
+            /* Fill in the elements of the cofactor */
+            b[i][j] = pow(-1.0,i+j+2.0) * det;
+        }
+    }
+    for (i=0;i<n-1;i++) {
+        free(c[i]);
+    }
+    free(c);
+};
 		
- void colorVisionThread::Transpose(double **a,int n)
- {
+ void colorVisionThread::Transpose(double **a,int n)    {
 	int i,j;
-   double tmp;
+    double tmp;
+    
+    for (i=1;i<n;i++) {
+        for (j=0;j<i;j++) {
+            tmp = a[i][j];
+            a[i][j] = a[j][i];
+            a[j][i] = tmp;
+        }
+    }
+};
 
-   for (i=1;i<n;i++) {
-      for (j=0;j<i;j++) {
-         tmp = a[i][j];
-         a[i][j] = a[j][i];
-         a[j][i] = tmp;
-      }
-   }
- };
 
-
- void colorVisionThread::RBF(double UUC1,double UUV1,double UUC2,double UUV2)
- 
- {
+ void colorVisionThread::RBF(double UUC1,double UUV1,double UUC2,double UUV2)   {
     ifstream we1("w11.txt");
 	ifstream we2("w22.txt"); 
 	//ifstream bi1("b1.txt");
@@ -713,65 +729,55 @@ for (j = 0 ; j < n-1 ; j++)
 			    bias2[u]=s[u];  
 	   		}*/ 
 
-    if(	we1==NULL)
-        {
-            printf("Cant read the input file\n");
-            //exit(0);
-        }
+    if(	we1==NULL)  {
+        printf("Cant read the input file\n");
+        //exit(0);
+    }
     
     i=0;
-	for(u=0;u<77;u++)  // load caliberation matrix for camera 1
-		{
-            
-			for(j=0;j<2;j++)  // load caliberation matrix for camera 1
-                {
-                    we1 >> s[i];
-                    weight1[u][j]=s[i];  
-                    i=i+1;
-                }
-		}
-    
-    if(	we2==NULL)
-        {
-            printf("Cant read the input file\n");
-            //exit(0);
+	for(u=0;u<77;u++)   {  // load caliberation matrix for camera 1
+        for(j=0;j<2;j++) { // load caliberation matrix for camera 1
+            we1 >> s[i];
+            weight1[u][j]=s[i];  
+            i=i+1;
         }
+    }
+    
+    if(	we2==NULL)  {
+        printf("Cant read the input file\n");
+        //exit(0);
+    }
     
     i=0;
-	for(u=0;u<2;u++)  // load caliberation matrix for camera 1
-		{
-		
-			for(j=0;j<77;j++)  // load caliberation matrix for camera 1
-		    {
-				we2 >> s[i];
-			    weight2[u][j]=s[i];  
-				i=i+1;
-	   		}
-		}
+	for(u=0;u<2;u++) { // load caliberation matrix for camera 1
+	    for(j=0;j<77;j++){  // load caliberation matrix for camera 1
+	    	    
+		    we2 >> s[i];
+		    weight2[u][j]=s[i];  
+			i=i+1;
+	    }
+	}
 
 	printf("\n BIAS AND WEIGHT %f  %f  %f %f \t ", weight1[76][0],weight1[76][1],weight2[0][76],weight2[1][76]);
 	
 
 	double mid[77], midrad[77], pintee, tempj;
     
-    for(u=0;u<77;u++)  // load caliberation matrix for camera 1
-		{
-            mid[u]=(sqrt(pow((171-weight1[u][0]),2)+ pow((201-weight1[u][1]),2)))*0.8326;
-            pintee=pow(mid[u],2);
-            midrad[u]=(exp((-1*pintee)/50)); 
-		 	printf("\n Midrad %f  %f \t ", pintee,midrad[u]);
-        }
+    for(u=0;u<77;u++) {  // load caliberation matrix for camera 1
+        mid[u]=(sqrt(pow((171-weight1[u][0]),2)+ pow((201-weight1[u][1]),2)))*0.8326;
+        pintee=pow(mid[u],2);
+        midrad[u]=(exp((-1*pintee)/50)); 
+		printf("\n Midrad %f  %f \t ", pintee,midrad[u]);
+    }
     
     
-	for(u=0;u<2;u++)
-		{
-            tempj=0;
-            for(j=0;j<77;j++)	
-                {
-                    tempj=tempj+weight2[u][j]*midrad[j];
-                }
-            FinXpos[u]=tempj;
+	for(u=0;u<2;u++) {
+        tempj=0;
+        for(j=0;j<77;j++) {
+            tempj=tempj+weight2[u][j]*midrad[j];
         }
+        FinXpos[u]=tempj;
+    }
     
 	printf("\n FINALPOSITION %f  %f  %f  \t ", FinXpos[0],FinXpos[1]);
     
@@ -780,12 +786,11 @@ for (j = 0 ; j < n-1 ; j++)
     //FinXpos[2]=FinXpos[2]+5;
     printf("\n FINALPOSITION %f  %f  %f  \t ", FinXpos[0],FinXpos[1]);
     //Sleep(45000);		
- }
+}
      
 
 
- void colorVisionThread::ConvImg(double UUC1,double UUV1,double UUC2,double UUV2)
- {
+ void colorVisionThread::ConvImg(double UUC1,double UUV1,double UUC2,double UUV2)   {
 	
 	ofstream write3("Sconf.txt");
 	ofstream write4("SconfT.txt");
@@ -805,9 +810,9 @@ for (j = 0 ; j < n-1 ; j++)
 
 	double u1,v1,u2,v2;
 
-//	    point[0][0]=94; point[0][1]=104; point[0][2]=78; point[0][3]=104;
-  //  point[1][0]=139; point[1][1]=91;point[1][2]=110; point[1][3]=83;
-   // point[3][0]=46; point[3][1]=106;point[3][2]=47; point[3][3]=117;
+    //	    point[0][0]=94; point[0][1]=104; point[0][2]=78; point[0][3]=104;
+    //  point[1][0]=139; point[1][1]=91;point[1][2]=110; point[1][3]=83;
+    // point[3][0]=46; point[3][1]=106;point[3][2]=47; point[3][3]=117;
 
 	u1=UUC1;
     v1=UUV1;
@@ -987,6 +992,12 @@ ImagX=inv[0][0]*inter1+inv[0][1]*inter2+inv[0][2]*inter3;
 ImagY=inv[1][0]*inter1+inv[1][1]*inter2+inv[1][2]*inter3;
 ImagZ=inv[2][0]*inter1+inv[2][1]*inter2+inv[2][2]*inter3;
 printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
+for (i=0;i<n-1;i++) {
+    free(p[i]);
+    free(b[i]);
+}
+    free(p);
+    free(b);
 ////Sleep(5000);
  };
 		
