@@ -52,6 +52,11 @@ bool colorVisionThread::threadInit() {
    
     printf("colorVisionThread thread init \n")   ;
     
+    // initialization of the variables
+    
+
+
+    // opening ports
     if (!outputPort.open(getName("/img:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
@@ -65,8 +70,10 @@ bool colorVisionThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }     
     
-
-    imagePortRTL.open("/v1/imagePortRTL");  
+    if (!imagePortRTL.open(getName("/imagePortRTL").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }    
     //Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
 	//Network::connect("/v1/imagePortRTL","/v/l"); 
 
@@ -158,12 +165,12 @@ void colorVisionThread::run() {
             //========================================================================================     
         }
         
-        if(outputPort.getOutputCount()) {
+        //if(outputPort.getOutputCount()) {
             
-            //outputPort.prepare() = *inputImage;
-            //outputPort.write();   
+        //    outputPort.prepare() = *inputImage;
+        //    outputPort.write();   
             
-        }
+        //}
 
         
         
@@ -177,7 +184,16 @@ void colorVisionThread::run() {
 void colorVisionThread::threadRelease() {
     //nothing here
 
-   
+    printf("\n freeing memory \n");
+    
+    free(K);
+    free(q);
+    free(E);
+    free(f);
+    free(W);
+    free(colormap);
+
+    printf("after freeing memory");
 
 }
 
@@ -422,9 +438,7 @@ int colorVisionThread::colSegMainR()    {
 
 
 void colorVisionThread::colSegMainL()   {
-    //printf("before model load \n");
-	 
-    //printf("after model load \n");
+
 	// read an image from the port
     ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
     runSem.wait();
@@ -439,10 +453,13 @@ void colorVisionThread::colSegMainL()   {
             //	printf("Error: Image size changed during session.\n");
             return;
         }
-        ImageOf<PixelRgb> & outP    = outputPort.prepare(); 
+        ImageOf<PixelRgb>& outP    = outputPort.prepare(); 
         outP.resize(width, height);
         outP.zero(); 
+        
         unsigned char *I = imgRTL->getRawImage();
+
+
         //unsigned char *O = outP.getRawImage();
         
         //printf("Constructing and optimizing MRF.\n");
@@ -501,19 +518,19 @@ void colorVisionThread::colSegMainL()   {
         
 
         // Apply color map and send image to output.
-       for ( int t=0; t<width*height; t++ ) {
+        for ( int t=0; t<width*height; t++ ) {
             unsigned char KtL = K[t], *ItL = I + 3*t;
             for ( int c=0; c<3; c++ ) {
                 if ( KtL>0 ) ItL[c] = colormap[3*KtL+c];
             }
-        }
+       }
+       
+       //outputPort.prepare()    =   *imgRTL;
+        outP = (const ImageOf<PixelRgb>)*imgRTL;
+       outputPort.write();
         
-        outputPort.prepare()    =   *imgRTL;
-        outP = *imgRTL;
-        outputPort.write();
-        
-        imagePortRTL.prepare() = *imgRTL;
-        imagePortRTL.write();
+        //imagePortRTL.prepare() = *imgRTL;
+        //imagePortRTL.write();
         
         /*Bottle bot;
           bot.addInt(ncomponents); // number of bounding boxes
@@ -551,17 +568,7 @@ void colorVisionThread::colSegMainL()   {
         }
         */
          
-       //frintf("\n freeing memory \n");
-       //delete bboxL;
-       free(K);
-
-       //free(q);
-       //free(E);
-       //free(f);
-       //free(W);
-       //free(colormap)
-
-       //printf("after freeing memory");
+        delete bboxL;
        
          
     }
@@ -844,185 +851,185 @@ double colorVisionThread::Determinant(double **a,int n) {
     v2=UUV2;
 
 
-//====read calibration martixes of camera 1 and camera 2 ==============
-
+    //====read calibration martixes of camera 1 and camera 2 ==============
+    
 	if(	calib1==NULL)
-				{
-					printf("Cant read the input file\n");
-					//exit(0);
-				}
+        {
+            printf("Cant read the input file\n");
+            //exit(0);
+        }
 	for(u=0;u<11;u++)  // load caliberation matrix for camera 1
-		    {
-				calib1 >> s[u];
+        {
+            calib1 >> s[u];
 			//fscanf(calib1,"%f",&s[u]);
 	        //printf("\n\ndata testing  %f",s[u]);
 	        l1[u]=s[u];  
 	   	}
-
-if(	calib2==NULL)
-				{
-					printf("Cant read the input file\n");
-					//exit(0);
-				}
+    
+    if(	calib2==NULL)
+        {
+            printf("Cant read the input file\n");
+            //exit(0);
+        }
 	for(u=0;u<11;u++)   // load caliberation matrix for camera 2
-		    {
+        {
             calib2 >> s[u];
 	        //printf("\n\ndata testing  %f",s[u]);
 	        l2[u]=s[u];  
 	   	}
-//=============================RHS Ycal====================================
-Y1=u1-l1[3];
-Y2=v1-l1[7];
-Y3=u2-l2[3];
-Y4=v2-l2[7];
-double a1=l1[8],a2=l1[9],a3=l1[10],b1=l2[8],b2=l2[9],b3=l2[10];
-
-//=============================Get LHS Matrix using U,V and Calbration Matrixes ====================================
-
-Sconf[0][0]=l1[0]-u1*a1;
-Sconf[0][1]=l1[1]-u1*a2;
-Sconf[0][2]=l1[2]-u1*a3;
-Sconf[1][0]=l1[4]-v1*a1;
-Sconf[1][1]=l1[5]-v1*a2;
-Sconf[1][2]=l1[6]-v1*a3;
-Sconf[2][0]=l2[0]-u2*b1;
-Sconf[2][1]=l2[1]-u2*b2;
-Sconf[2][2]=l2[2]-u2*b3;
-Sconf[3][0]=l2[4]-v2*b1;
-Sconf[3][1]=l2[5]-v2*b2;
-Sconf[3][2]=l2[6]-v2*b3;
-SconfT[0][0]=l1[0]-u1*a1;
-SconfT[0][1]=l1[4]-v1*a1;
-SconfT[0][2]=l2[0]-u2*b1;
-SconfT[0][3]=l2[4]-v2*b1;
-SconfT[1][0]=l1[1]-u1*a2;
-SconfT[1][1]=l1[5]-v1*a2;
-SconfT[1][2]=l2[1]-u2*b2;
-SconfT[1][3]=l2[5]-v2*b2;
-SconfT[2][0]=l1[2]-u1*a3;
-SconfT[2][1]=l1[6]-v1*a3;
-SconfT[2][2]=l2[2]-u2*b3;
-SconfT[2][3]=l2[6]-v2*b3;
-
-int count;
-for (count = 0 ; count < 4 ; count++) 
-    {			
-	write3 << Sconf[count][0]<< Sconf[count][1] << Sconf[count][2]<< endl ;
-    } 
-
-for (count = 0 ; count < 3 ; count++) 
-{			
-    write4 << SconfT[count][0]<< SconfT[count][1] << SconfT[count][2]<< SconfT[count][3]<< endl ;      
-} 
-
-
-
-// printf("\n\n %f %f", Sconf[3][0],SconfT[0][3]);
-
-int g, h, q;
-double sum, C[3][3];
+    //=============================RHS Ycal====================================
+    Y1=u1-l1[3];
+    Y2=v1-l1[7];
+    Y3=u2-l2[3];
+    Y4=v2-l2[7];
+    double a1=l1[8],a2=l1[9],a3=l1[10],b1=l2[8],b2=l2[9],b3=l2[10];
     
-            for (g = 0; g < 3; g++) {
-                    for (h = 0; h < 3; h++) {
-                            sum = 0;
-                            for (q = 0; q < 4; q++) {
-								rw=SconfT[g][q];
-                                rx=Sconf[q][h];
-                                   sum += rw * rx;
-                           }
-                           C[g][h] = sum;
-                   }
-           }
-
-for (count = 0 ; count < 3 ; count++) 
-{			
-    write5 << C[count][0]<< C[count][1] << C[count][2]<< endl ;      
-} 
-
-//===============================================================
-
-
-double **p;
-double **b;
-
-for (j1 = 0 ; j1 < n ; j1++) 
-{
-                                    
+    //=============================Get LHS Matrix using U,V and Calbration Matrixes ====================================
+    
+    Sconf[0][0]=l1[0]-u1*a1;
+    Sconf[0][1]=l1[1]-u1*a2;
+    Sconf[0][2]=l1[2]-u1*a3;
+    Sconf[1][0]=l1[4]-v1*a1;
+    Sconf[1][1]=l1[5]-v1*a2;
+    Sconf[1][2]=l1[6]-v1*a3;
+    Sconf[2][0]=l2[0]-u2*b1;
+    Sconf[2][1]=l2[1]-u2*b2;
+    Sconf[2][2]=l2[2]-u2*b3;
+    Sconf[3][0]=l2[4]-v2*b1;
+    Sconf[3][1]=l2[5]-v2*b2;
+    Sconf[3][2]=l2[6]-v2*b3;
+    SconfT[0][0]=l1[0]-u1*a1;
+    SconfT[0][1]=l1[4]-v1*a1;
+    SconfT[0][2]=l2[0]-u2*b1;
+    SconfT[0][3]=l2[4]-v2*b1;
+    SconfT[1][0]=l1[1]-u1*a2;
+    SconfT[1][1]=l1[5]-v1*a2;
+    SconfT[1][2]=l2[1]-u2*b2;
+    SconfT[1][3]=l2[5]-v2*b2;
+    SconfT[2][0]=l1[2]-u1*a3;
+    SconfT[2][1]=l1[6]-v1*a3;
+    SconfT[2][2]=l2[2]-u2*b3;
+    SconfT[2][3]=l2[6]-v2*b3;
+    
+    int count;
+    for (count = 0 ; count < 4 ; count++) 
+        {			
+            write3 << Sconf[count][0]<< Sconf[count][1] << Sconf[count][2]<< endl ;
+        } 
+    
+    for (count = 0 ; count < 3 ; count++) 
+        {			
+            write4 << SconfT[count][0]<< SconfT[count][1] << SconfT[count][2]<< SconfT[count][3]<< endl ;      
+        } 
+    
+    
+    
+    // printf("\n\n %f %f", Sconf[3][0],SconfT[0][3]);
+    
+    int g, h, q;
+    double sum, C[3][3];
+    
+    for (g = 0; g < 3; g++) {
+        for (h = 0; h < 3; h++) {
+            sum = 0;
+            for (q = 0; q < 4; q++) {
+                rw=SconfT[g][q];
+                rx=Sconf[q][h];
+                sum += rw * rx;
+            }
+            C[g][h] = sum;
+        }
+    }
+    
+    for (count = 0 ; count < 3 ; count++) 
+        {			
+            write5 << C[count][0]<< C[count][1] << C[count][2]<< endl ;      
+        } 
+    
+    //===============================================================
+    
+    
+    double **p;
+    double **b;
+    
+    for (j1 = 0 ; j1 < n ; j1++) 
+        {
+            
             p =  new double *[n] ;
 			
             for (i = 0 ; i < n ; i++)
-			{
-				p[i]=new double[n];
-			}
-}
-
-
-for (j = 0 ; j < n ; j++) 
-{			
+                {
+                    p[i]=new double[n];
+                }
+        }
+    
+    
+    for (j = 0 ; j < n ; j++) 
+        {			
             for (i = 0 ; i < n ; i++)
-			{
-				p[i][j]=C[i][j];
-			}
-}
-
-double dete = Determinant(p,n);
-//printf("\n\n %f", dete);
-
-for (j1 = 0 ; j1 < n ; j1++) 
-{
-                                    
+                {
+                    p[i][j]=C[i][j];
+                }
+        }
+    
+    double dete = Determinant(p,n);
+    //printf("\n\n %f", dete);
+    
+    for (j1 = 0 ; j1 < n ; j1++) 
+        {
+            
             b =  new double *[n] ;
 			
             for (i = 0 ; i < n ; i++)
-			{
-				b[i]=new double[n];
-			}
-}
-
-
-for (j = 0 ; j < n ; j++) 
-{			
+                {
+                    b[i]=new double[n];
+                }
+        }
+    
+    
+    for (j = 0 ; j < n ; j++) 
+        {			
             for (i = 0 ; i < n ; i++)
-			{
-				b[i][j]=0;
-			}
-}
-
-CoFactor(p,n,b);
-for (j = 0 ; j < n ; j++) 
-{			
-    write1 << b[j][0]<< b[j][1]<< b[j][2]<< endl ;        
-} 
-Transpose(b,n);
-
-for (j = 0 ; j < n ; j++) 
-{
-for (i = 0 ; i < n ; i++)
-{
-inv[j][i]=(1/dete)*b[j][i];	
-}
-}
-for (j = 0 ; j < n ; j++) 
-{			
-    write2 << inv[j][0]<< inv[j][1]<< inv[j][2]<< endl ;         
-} 
-
-//======================= Inverse(AA')============================================
-inter1=SconfT[0][0]*Y1 + SconfT[0][1]*Y2 +SconfT[0][2]*Y3+SconfT[0][3]*Y4;
-inter2=SconfT[1][0]*Y1 + SconfT[1][1]*Y2 +SconfT[1][2]*Y3+SconfT[1][3]*Y4;
-inter3=SconfT[2][0]*Y1 + SconfT[2][1]*Y2 +SconfT[2][2]*Y3+SconfT[2][3]*Y4;
-
-ImagX=inv[0][0]*inter1+inv[0][1]*inter2+inv[0][2]*inter3;
-ImagY=inv[1][0]*inter1+inv[1][1]*inter2+inv[1][2]*inter3;
-ImagZ=inv[2][0]*inter1+inv[2][1]*inter2+inv[2][2]*inter3;
-printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
-/*for (i=0;i<n-1;i++) {
-    free(p[i]);
-    free(b[i]);
-}
-    free(p);
-    free(b);*/
-////Sleep(5000);
+                {
+                    b[i][j]=0;
+                }
+        }
+    
+    CoFactor(p,n,b);
+    for (j = 0 ; j < n ; j++) 
+        {			
+            write1 << b[j][0]<< b[j][1]<< b[j][2]<< endl ;        
+        } 
+    Transpose(b,n);
+    
+    for (j = 0 ; j < n ; j++) 
+        {
+            for (i = 0 ; i < n ; i++)
+                {
+                    inv[j][i]=(1/dete)*b[j][i];	
+                }
+        }
+    for (j = 0 ; j < n ; j++) 
+        {			
+            write2 << inv[j][0]<< inv[j][1]<< inv[j][2]<< endl ;         
+        } 
+    
+    //======================= Inverse(AA')============================================
+    inter1=SconfT[0][0]*Y1 + SconfT[0][1]*Y2 +SconfT[0][2]*Y3+SconfT[0][3]*Y4;
+    inter2=SconfT[1][0]*Y1 + SconfT[1][1]*Y2 +SconfT[1][2]*Y3+SconfT[1][3]*Y4;
+    inter3=SconfT[2][0]*Y1 + SconfT[2][1]*Y2 +SconfT[2][2]*Y3+SconfT[2][3]*Y4;
+    
+    ImagX=inv[0][0]*inter1+inv[0][1]*inter2+inv[0][2]*inter3;
+    ImagY=inv[1][0]*inter1+inv[1][1]*inter2+inv[1][2]*inter3;
+    ImagZ=inv[2][0]*inter1+inv[2][1]*inter2+inv[2][2]*inter3;
+    printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
+    /*for (i=0;i<n-1;i++) {
+      free(p[i]);
+      free(b[i]);
+      }
+      free(p);
+      free(b);*/
+    ////Sleep(5000);
  };
 		
  
