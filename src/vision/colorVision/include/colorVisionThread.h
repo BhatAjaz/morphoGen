@@ -150,6 +150,7 @@ public:
 	void RBF(double UUC1,double UUV1,double UUC2,double UUV2);
 	void initHead(double headzero);
 
+    int *bboxL;
 	int width, height; // image dimensions
 	int nK; // number of labels
 	std::string colormapFile, svmFile;
