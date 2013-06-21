@@ -1,3 +1,6 @@
+
+
+
 #include <math.h>
 #include <fstream>
 #include "segment.h"
@@ -183,9 +186,11 @@ int extract_labeling( // returns the number of variables in which old labeling K
         maxq = qt[k];
         maxk = k;
       }
-    if ( *Kt != maxk + 1 ) {
+
+    //  if ( *Kt != maxk + 1 ) // removed Rea: It caused multiple bounding boxes
+    if ( *Kt != maxk + 1  ) {
       diff++;
-      *Kt = (unsigned char)maxk;
+      *Kt = (unsigned char) maxk;
     }
   }
   return diff;
@@ -213,7 +218,9 @@ unsigned connected_components( // returns the number of components excl. backgro
   }
 
   const unsigned MAXLABEL = 10*(width+height); // increase if components are very ragged
+    
 
+  /*  
   universe U((nlabels+1)*MAXLABEL);
   unsigned *newlabel = new unsigned[nlabels+1];
   for ( int k=0; k<=nlabels; k++ ) newlabel[k] = 0;
@@ -243,11 +250,14 @@ unsigned connected_components( // returns the number of components excl. backgro
       }
       J[i+width*j] = J0;
     }
+  */
 
  // printf("max labels = [");
  // for ( int k=0; k<=nlabels; k++ ) printf("%i ",(int)newlabel[k]);
  // printf("]\n");
 
+
+  /*  
   // Transform J to representants of equivalence classes for each component.
   // Compute n[k] the number of pixels with label k.
   unsigned *n = new unsigned[U.nelem()];
@@ -257,18 +267,23 @@ unsigned connected_components( // returns the number of components excl. backgro
       J[i] = U.find( J[i]+I[i]*MAXLABEL );
       n[J[i]]++;
     }
+  */
 
   //for ( int k=0; k<U.nelem(); k++ ) if (n[k]) printf("%i ",k);
 
-  // Compute total number of components (with size thresholded by minsize).
-  // Re-index J so that its values are in range 0..(ncomponents-1) without gaps.
-  unsigned ncomponents = 1;
-  for ( int k=0; k<U.nelem(); k++ ) n[k] = (n[k]>minsize ? ncomponents++ : 0);
-  for ( int i=0; i<width*height; i++ ) if ( J[i] ) J[i] = n[J[i]];
-  ncomponents--;
+    unsigned ncomponents = 1;
 
-  delete [] n;
-  delete [] newlabel;
+    /* 
+   // Compute total number of components (with size thresholded by minsize).
+   // Re-index J so that its values are in range 0..(ncomponents-1) without gaps.
+   for ( int k=0; k<U.nelem(); k++ ) n[k] = (n[k]>minsize ? ncomponents++ : 0);
+   for ( int i=0; i<width*height; i++ ) if ( J[i] ) J[i] = n[J[i]];
+   ncomponents--;
+    */
+    
+
+  //delete [] n;
+  //delete [] newlabel;
 
   return ncomponents;
 }
