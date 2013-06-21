@@ -1,4 +1,26 @@
+// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
 
+/*
+  * Copyright (C)2013  Department of Robotics Brain and Cognitive Sciences - Istituto Italiano di Tecnologia
+  * Author:Francesco Rea
+  * email: francesco.reak@iit.it
+  * Permission is granted to copy, distribute, and/or modify this program
+  * under the terms of the GNU General Public License, version 2 or any
+  * later version published by the Free Software Foundation.
+  *
+  * A copy of the license can be found at
+  * http://www.robotcub.org/icub/license/gpl.txt
+  *
+  * This program is distributed in the hope that it will be useful, but
+  * WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+  * Public License for more details
+*/
+
+/**
+ * @file segment.cpp
+ * @brief Implementation of other methods that enrich thread (see colorVisionThread.h).
+ */
 
 
 #include <math.h>
@@ -46,26 +68,26 @@ void compute_unary_potentials(
   real *q // array (nK,nT) of unary costs (must be pre-allocated)
 )
 {
-  for ( int t=0; t<nT; t++ ) {
-    real *qt = q + nK*t;
-    const unsigned char *It = I + 3*t;
-    unsigned char minc=255, maxc=0;
-    for ( int c=0; c<3; c++ ) {
-      if ( It[c] < minc ) minc = It[c];
-      if ( It[c] > maxc ) maxc = It[c];
+    for ( int t=0; t<nT; t++ ) {
+        real *qt = q + nK*t;
+        const unsigned char *It = I + 3*t;
+        unsigned char minc=255, maxc=0;
+        for ( int c=0; c<3; c++ ) {
+            if ( It[c] < minc ) minc = It[c];
+            if ( It[c] > maxc ) maxc = It[c];
+        }
+        for ( int k=0; k<nK; k++ ) {
+            const real *Wk = W + 8*k;
+            qt[k] = Wk[0]
+                + (real)(Wk[1]*(real)It[0])
+                + (real)(Wk[2]*(real)It[1])
+                + (real)(Wk[3]*(real)It[2])
+                + (real)(Wk[4]*((real)maxc-(real)minc))
+                + (real)(Wk[5]*(real)It[1]*(real)It[2])
+                + (real)(Wk[6]*(real)It[2]*(real)It[0])
+                + (real)(Wk[7]*(real)It[0]*(real)It[1]);
+        }
     }
-    for ( int k=0; k<nK; k++ ) {
-      const real *Wk = W + 8*k;
-      qt[k] = Wk[0]
-            + (real)(Wk[1]*(real)It[0])
-            + (real)(Wk[2]*(real)It[1])
-            + (real)(Wk[3]*(real)It[2])
-            + (real)(Wk[4]*((real)maxc-(real)minc))
-            + (real)(Wk[5]*(real)It[1]*(real)It[2])
-            + (real)(Wk[6]*(real)It[2]*(real)It[0])
-            + (real)(Wk[7]*(real)It[0]*(real)It[1]);
-    }
-  }
 }
 
 
@@ -78,14 +100,14 @@ void reparameterize_unary_potentials(
   const real *f // array (nK,2,nE), messages
 )
 {
-  for ( int e=0; e<nE; e++ ) {
-    real *qe = q + nK*E[2*e+0], *qee = q + nK*E[2*e+1];
-	const real *fe = f + nK*(2*e+0), *fee = fe + nK;
-    for ( int k=0; k<nK; k++ ) {
-      qe[k] -= fe[k];
-      qee[k] -= fee[k];
+    for ( int e=0; e<nE; e++ ) {
+        real *qe = q + nK*E[2*e+0], *qee = q + nK*E[2*e+1];
+        const real *fe = f + nK*(2*e+0), *fee = fe + nK;
+        for ( int k=0; k<nK; k++ ) {
+            qe[k] -= fe[k];
+            qee[k] -= fee[k];
+        }
     }
-  }
 }
 
 
@@ -102,69 +124,69 @@ real trws_potts( // returns residual
   real gamma // TRW-S edge occurence probability (for grid graph, set gamma=1/2)
 )
 {
-  real resid = 0, *d = new real[nK], INF = 1E10;
-
-  // forward pass
-  for ( int e=0; e<nE; e++ ) {
-    real *qe = q + nK*E[0+e*2],
-         *qee = q + nK*E[1+e*2],
-         *fe = f + nK*(0+e*2),
-         *fee = fe + nK;
-
-    real a = -INF;
-    for ( int k=0; k<nK; k++ ) {
-      d[k] = gamma*qe[k] + fe[k];
-      if ( d[k]>a ) a=d[k];
+    real resid = 0, *d = new real[nK], INF = 1E10;
+    
+    // forward pass
+    for ( int e=0; e<nE; e++ ) {
+        real *qe = q + nK*E[0+e*2],
+            *qee = q + nK*E[1+e*2],
+            *fe = f + nK*(0+e*2),
+            *fee = fe + nK;
+        
+        real a = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            d[k] = gamma*qe[k] + fe[k];
+            if ( d[k]>a ) a=d[k];
+        }
+        a -= w;
+        
+        real maxd = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            if ( a>d[k] ) d[k]=a;
+            d[k] += fee[k];
+            if ( d[k]>maxd ) maxd=d[k];
+        }
+        
+        for ( int k=0; k<nK; k++ ) {
+            d[k] -= maxd;
+            qee[k] += d[k];
+            fee[k] -= d[k];
+            resid += fabs(d[k]);
+        }
     }
-    a -= w;
-
-    real maxd = -INF;
-    for ( int k=0; k<nK; k++ ) {
-      if ( a>d[k] ) d[k]=a;
-      d[k] += fee[k];
-      if ( d[k]>maxd ) maxd=d[k];
+    
+    // backward pass
+    for ( int e=nE-1; e>=0; e-- ) {
+        real *qe = q + nK*E[1+e*2],
+            *qee = q + nK*E[0+e*2],
+            *fe = f + nK*(1+e*2),
+            *fee = fe - nK;
+        
+        real a = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            d[k] = gamma*qe[k] + fe[k];
+            if ( d[k]>a ) a=d[k];
+        }
+        a -= w;
+        
+        real maxd = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            if ( a>d[k] ) d[k]=a;
+            d[k] += fee[k];
+            if ( d[k]>maxd ) maxd=d[k];
+        }
+        
+        for ( int k=0; k<nK; k++ ) {
+            d[k] -= maxd;
+            qee[k] += d[k];
+            fee[k] -= d[k];
+            resid += fabs(d[k]);
+        }
+        
     }
-
-    for ( int k=0; k<nK; k++ ) {
-      d[k] -= maxd;
-      qee[k] += d[k];
-      fee[k] -= d[k];
-      resid += fabs(d[k]);
-    }
-  }
-
-  // backward pass
-  for ( int e=nE-1; e>=0; e-- ) {
-    real *qe = q + nK*E[1+e*2],
-         *qee = q + nK*E[0+e*2],
-         *fe = f + nK*(1+e*2),
-         *fee = fe - nK;
-
-    real a = -INF;
-    for ( int k=0; k<nK; k++ ) {
-      d[k] = gamma*qe[k] + fe[k];
-      if ( d[k]>a ) a=d[k];
-    }
-    a -= w;
-
-    real maxd = -INF;
-    for ( int k=0; k<nK; k++ ) {
-      if ( a>d[k] ) d[k]=a;
-      d[k] += fee[k];
-      if ( d[k]>maxd ) maxd=d[k];
-    }
-
-    for ( int k=0; k<nK; k++ ) {
-      d[k] -= maxd;
-      qee[k] += d[k];
-      fee[k] -= d[k];
-      resid += fabs(d[k]);
-    }
-
-  }
-
-  delete[] d;
-  return resid/(nK*2*nE); // normalize residual to one label*pixel
+    
+    delete[] d;
+    return resid/(nK*2*nE); // normalize residual to one label*pixel
 }
 
 
@@ -175,25 +197,25 @@ int extract_labeling( // returns the number of variables in which old labeling K
   unsigned char *K // nT-vector, labeling (must be pre-allocated)
 )
 {
-  int diff = 0;
-  for ( int t=0; t<nT; t++ ) {
-    const real *qt = q + nK*t;
-    real maxq = qt[0];
-    int maxk = 0;
-    unsigned char *Kt = K + t;
-    for ( int k=1; k<nK; k++ )
-      if ( qt[k]>maxq ) {
-        maxq = qt[k];
-        maxk = k;
-      }
-
-    //  if ( *Kt != maxk + 1 ) // removed Rea: It caused multiple bounding boxes
-    if ( *Kt != maxk + 1  ) {
-      diff++;
-      *Kt = (unsigned char) maxk;
+    int diff = 0;
+    for ( int t=0; t<nT; t++ ) {
+        const real *qt = q + nK*t;
+        real maxq = qt[0];
+        int maxk = 0;
+        unsigned char *Kt = K + t;
+        for ( int k=1; k<nK; k++ )
+            if ( qt[k]>maxq ) {
+                maxq = qt[k];
+                maxk = k;
+            }
+        
+        //  if ( *Kt != maxk + 1 ) // removed Rea: It caused multiple bounding boxes
+        if ( *Kt != maxk  ) {
+            diff++;
+            *Kt = (unsigned char) maxk;
+        }
     }
-  }
-  return diff;
+    return diff;
 }
 
 
@@ -211,81 +233,93 @@ unsigned connected_components( // returns the number of components excl. backgro
   unsigned *J              // output image
 )
 {
-  unsigned nlabels = 0;
-  for ( int i=0; i<width*height; i++ ) {
-    J[i] = (I[i] > 0);
-    if ( I[i] > nlabels ) nlabels = I[i];
-  }
-
-  const unsigned MAXLABEL = 10*(width+height); // increase if components are very ragged
+    unsigned nlabels = 0;
+    for ( int i=0; i<width*height; i++ ) {
+        J[i] = (I[i] > 0);
+        if ( I[i] > nlabels ) 
+            nlabels = I[i];
+    }
     
-
-  /*  
-  universe U((nlabels+1)*MAXLABEL);
-  unsigned *newlabel = new unsigned[nlabels+1];
-  for ( int k=0; k<=nlabels; k++ ) newlabel[k] = 0;
-
-  for ( int j=1, jj=width; j<height; j++, jj+=width )
-    for ( int i=1; i<width; i++ ) {
-      int ij = i+jj;
-      unsigned J0 = J[ij];
-      if ( J0>0 ) {
-        unsigned J1 = J[ij-1], J2 = J[ij-width];
-        unsigned char I0 = I[ij], I1 = I[ij-1], I2 = I[ij-width];
-        if ( I1 != I0 ) {
-          if ( I2 != I0 ) {
-            J0 = ++newlabel[I0];
-            if ( J0 >= MAXLABEL ) {
-              fprintf(stderr,"Error: MAXLABEL exceeded, increase it.\n");
-              //exit(1);
+    const unsigned MAXLABEL = 10*(width+height); // increase if components are very ragged
+    
+    universe U((nlabels+1)*MAXLABEL);
+    unsigned *newlabel = new unsigned[nlabels+1];
+    for ( int k=0; k<=nlabels; k++ ){
+        newlabel[k] = 0;
+    }
+    
+    for ( int j=1, jj=width; j<height; j++, jj+=width ) {
+        for ( int i=1; i<width; i++ ) {
+            int ij = i+jj;
+            unsigned J0 = J[ij];
+            if ( J0>0 ) {
+                unsigned J1 = J[ij-1], J2 = J[ij-width];
+                unsigned char I0 = I[ij], I1 = I[ij-1], I2 = I[ij-width];
+                if ( I1 != I0 ) {
+                    if ( I2 != I0 ) {
+                        J0 = ++newlabel[I0];
+                        if ( J0 >= MAXLABEL ) {
+                            fprintf(stderr,"Error: MAXLABEL exceeded, increase it.\n");
+                            //exit(1);
+                        }
+                    } else{
+                        J0 = J2;
+                    }
+                } else {
+                    if ( I2 != I0 ){
+                        J0 = J1;
+                    }
+                    else {
+                        J0 = J1;
+                        if ( J1 != J2 ) 
+                            U.join( U.find(J1+I0*MAXLABEL), U.find(J2+I0*MAXLABEL) );
+                    }
+                }
             }
-          } else J0 = J2;
-        } else {
-          if ( I2 != I0 ) J0 = J1;
-          else {
-            J0 = J1;
-            if ( J1 != J2 ) U.join( U.find(J1+I0*MAXLABEL), U.find(J2+I0*MAXLABEL) );
-          }
+            J[i+width*j] = J0;
         }
-      }
-      J[i+width*j] = J0;
     }
-  */
 
- // printf("max labels = [");
- // for ( int k=0; k<=nlabels; k++ ) printf("%i ",(int)newlabel[k]);
- // printf("]\n");
-
-
-  /*  
-  // Transform J to representants of equivalence classes for each component.
-  // Compute n[k] the number of pixels with label k.
-  unsigned *n = new unsigned[U.nelem()];
-  for ( int k=0; k<U.nelem(); k++ ) n[k] = 0;
-  for ( int i=0; i<width*height; i++ )
-    if ( J[i] ) {
-      J[i] = U.find( J[i]+I[i]*MAXLABEL );
-      n[J[i]]++;
-    }
-  */
-
-  //for ( int k=0; k<U.nelem(); k++ ) if (n[k]) printf("%i ",k);
-
-    unsigned ncomponents = 1;
-
-    /* 
-   // Compute total number of components (with size thresholded by minsize).
-   // Re-index J so that its values are in range 0..(ncomponents-1) without gaps.
-   for ( int k=0; k<U.nelem(); k++ ) n[k] = (n[k]>minsize ? ncomponents++ : 0);
-   for ( int i=0; i<width*height; i++ ) if ( J[i] ) J[i] = n[J[i]];
-   ncomponents--;
-    */
+    // printf("max labels = [");
+    // for ( int k=0; k<=nlabels; k++ ) printf("%i ",(int)newlabel[k]);
+    // printf("]\n");
     
 
-  //delete [] n;
-  //delete [] newlabel;
+    // Transform J to representants of equivalence classes for each component.
+    // Compute n[k] the number of pixels with label k.
+    unsigned *n = new unsigned[U.nelem()];
+    for ( int k=0; k<U.nelem(); k++ ){
+        n[k] = 0;
+    }
+    for ( int i=0; i<width*height; i++ ){
+        if ( J[i] ) {
+            J[i] = U.find( J[i]+I[i]*MAXLABEL );
+            n[J[i]]++;
+        }
+    }
+  
+    
+    //for ( int k=0; k<U.nelem(); k++ ) if (n[k]) printf("%i ",k);
 
-  return ncomponents;
+    
+    unsigned ncomponents = 1;
+    // Compute total number of components (with size thresholded by minsize).
+    // Re-index J so that its values are in range 0..(ncomponents-1) without gaps.
+    for ( int k=0; k<U.nelem(); k++ ) {
+        n[k] = (n[k]>minsize ? ncomponents++ : 0);
+    }
+    for ( int i=0; i<width*height; i++ ) {
+        if ( J[i] ){
+            J[i] = n[J[i]];
+        }
+    }
+    ncomponents--;
+    
+    
+    delete [] n;
+    delete [] newlabel;
+    
+    return ncomponents;
 }
 
 
@@ -301,23 +335,26 @@ void bounding_boxes(
   int *bbox         // array of length 5*max(I) with tuples [minrow maxrow mincol maxcol label] 
 )
 {
-  for ( int k=0; k<ncomponents; k++ ) {
-    int *b = bbox + 5*k;
-    b[0] = width;
-    b[1] = -1;
-    b[2] = height;
-    b[3] = -1;
-  }
-  for ( int j=1, jj=width; j<height; j++, jj+=width )
-    for ( int i=1; i<width; i++ ) {
-      int ij = i+jj;
-      unsigned k = J[ij];
-      if ( k ) {
-        int *b = bbox + 5*(k-1);
-        if ( i<b[0] ) { b[0]=i; b[4]=I[ij]; }
-        if ( i>b[1] ) b[1]=i;
-        if ( j<b[2] ) b[2]=j;
-        if ( j>b[3] ) b[3]=j;
-      }
+    for ( int k=0; k<ncomponents; k++ ) {
+        int *b = bbox + 5*k;
+        b[0] = width;
+        b[1] = -1;
+        b[2] = height;
+        b[3] = -1;
+    }
+    for ( int j=1, jj=width; j<height; j++, jj+=width ) {
+        for ( int i=1; i<width; i++ ) {
+            int ij = i+jj;
+            unsigned k = J[ij];
+            if ( k ) {
+                int *b = bbox + 5*(k-1);
+                if ( i<b[0] ) { 
+                    b[0]=i; b[4]=I[ij];
+                }
+                if ( i>b[1] ) b[1]=i;
+                if ( j<b[2] ) b[2]=j;
+                if ( j>b[3] ) b[3]=j;
+            }
+        }
     }
 }
