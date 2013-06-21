@@ -63,6 +63,7 @@ private:
 	double Sconf[4][3],SconfT[3][4],C[3][3],point[5][4];
 	float s[5000];
 	int iLocX,iLocY,iLocXL,iLocYL;
+    yarp::os::Semaphore runSem;
 
     double tdGpmp[52];                                                                 // data trasmitted from this module
 

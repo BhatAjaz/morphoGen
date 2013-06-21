@@ -69,11 +69,10 @@ bool colorVisionThread::threadInit() {
     }     
     
 
-    imagePortRTL.open(getName("/imagePortRTL").c_str());  
+    imagePortRTL.open("/v1/imagePortRTL");  
     //Network::connect("/icub/camcalib/left/out","/v1/imagePortRTL");
 	//Network::connect("/v1/imagePortRTL","/v/l"); 
-
-    ModelLoad();
+  
      	
     return true;
     
@@ -121,6 +120,8 @@ void colorVisionThread::run() {
             int k=1;  //modified to account for the left cam only
     
             
+            printf("printing the details \n");
+
             for (int i=0; i<numobjectsL; i++ )	{
                 for (int j=0; j<5; j++ )    {
                     tdGpmp[k] = imageDetailsL[i][j];
@@ -152,12 +153,14 @@ void colorVisionThread::run() {
             //========================================================================================     
         }
         
-      /*  if(outputPort.getOutputCount()) {
+
+        
+        if(outputPort.getOutputCount()) {
             
-            outputPort.prepare() = *inputImage;
-            outputPort.write();   
+            //outputPort.prepare() = *inputImage;
+            //outputPort.write();   
             
-        }*/
+        }
 
         if(dataPort.getOutputCount()) {
             
@@ -167,7 +170,7 @@ void colorVisionThread::run() {
         }    
         
         
-        Time::delay(0.1);
+        //Time::delay(0.1);
 
     } // end if while isStopping
     
@@ -320,7 +323,7 @@ int colorVisionThread::colSegMainR()    {
 	double xMean = 0;
     double yMean = 0;
     // read an image from the port
-    ImageOf<PixelRgb> *imgRT = imagePortRT.read();
+    ImageOf<PixelRgb> *imgRT = imagePortRTL.read();
     int ctR=0; 
     if (imgRT!=NULL) { // check we actually got something
         printf("We got an image of size %dx%d\n", imgRT->width(), imgRT->height());
@@ -333,7 +336,9 @@ int colorVisionThread::colSegMainR()    {
 		    printf("Error: Image size changed during session.\n");
 		    return 100;
 	    }
-	
+	    ImageOf<PixelRgb> & outP    = outputPort.prepare(); 
+        outP.resize(width, height);
+        outP.zero();
 	    unsigned char *I = imgRT->getRawImage();
 	
 	    printf("Constructing and optimizing MRF.\n");
@@ -374,9 +379,10 @@ int colorVisionThread::colSegMainR()    {
 		    unsigned char Kt = K[t], *It = I + 3*t;
 		    for ( int c=0; c<3; c++ ) if ( Kt>0 ) It[c] = colormap[3*Kt+c];
 	    }
-	
-	    imagePortRT.prepare() = *imgRT;
-        imagePortRT.write();
+	    outP = *imgRT;
+        outputPort.write();
+	    //imagePortRT.prepare() = *imgRT;
+        //imagePortRT.write();
 	
 	    printf("\n number of objects %d ", ncomponents);
 	    numobjectsR= ncomponents;
@@ -400,7 +406,7 @@ int colorVisionThread::colSegMainR()    {
 	        }
 	        printf("\n bbval %d ", bbvals[i]);
 	    }
-        delete bbox;
+        //delete bbox;
 	    printf("\n");
     }
     
@@ -414,13 +420,14 @@ int colorVisionThread::colSegMainR()    {
 
 
 void colorVisionThread::colSegMainL()   {
-    
-	 
+    printf("before model load \n");
+	ModelLoad(); 
+    printf("after model load \n");
 	// read an image from the port
     ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
-    ImageOf<PixelRgb> & outP    = outputPort.prepare(); 
+    runSem.wait();
     if (imgRTL!=NULL) { // check we actually got something
-        //printf("We got an image of size %dx%d\n", imgRTL->width(), imgRTL->height());
+        printf("We got an image of size %dx%d\n", imgRTL->width(), imgRTL->height());
         
         if ( q == NULL ) {
             //	printf("Image size known, allocating MRF arrays.\n");
@@ -430,6 +437,7 @@ void colorVisionThread::colSegMainL()   {
             //	printf("Error: Image size changed during session.\n");
             return;
         }
+        ImageOf<PixelRgb> & outP    = outputPort.prepare(); 
         outP.resize(width, height);
         outP.zero(); 
         unsigned char *I = imgRTL->getRawImage();
@@ -444,9 +452,12 @@ void colorVisionThread::colSegMainL()   {
              float residL = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
              // printf("iter=%i resid=%g\n",iter,residL);
         }
+        printf("preparing extract \n");
         extract_labeling(q,nK,width*height,K);
+        printf("after extract \n");
     
-        /* 
+         
+        /*  Rea: commented out because not useful
         //printf("Segmentation done. Label histogram=[");
         int *histL = new int[nK];
         for ( int k=0; k<nK; k++ ) {
@@ -459,7 +470,8 @@ void colorVisionThread::colSegMainL()   {
         //printf("]\n");
         delete[] histL;
         */
-         
+        
+                 
         //printf("Finding connected components.\n");
         for ( int i=0; i<width; i++ ) {
             K[i] = 0; // Set column 0 to background
@@ -471,9 +483,10 @@ void colorVisionThread::colSegMainL()   {
         // printf("No. of components (excl. background) = %i\n",ncomponentsL);
         
         
-        // printf("Computing bounding boxes.\n");
+        printf("Computing bounding boxes.\n");
         int *bboxL = new int[5*ncomponentsL];
-        bounding_boxes(J,K,width,height,ncomponentsL,bboxL);
+        //bounding_boxes(J,K,width,height,ncomponentsL,bboxL);
+        /*            
         for ( int k=0; k<ncomponentsL; k++ ) {
             int *bL = bboxL + 5*k;
             //printf("%i %i %i %i %i\n",b[0],b[1],b[2],b[3],b[4]);
@@ -484,6 +497,7 @@ void colorVisionThread::colSegMainL()   {
                 K[bL[0]+width*j] = K[bL[1]+width*j] = bL[4];
             }
         }
+        */
 
         // Apply color map and send image to output.
        for ( int t=0; t<width*height; t++ ) {
@@ -492,12 +506,13 @@ void colorVisionThread::colSegMainL()   {
                 if ( KtL>0 ) ItL[c] = colormap[3*KtL+c];
             }
         }
-     
-        //outputPort.prepare()    =   *imgRTL;
+        
+        outputPort.prepare()    =   *imgRTL;
         outP = *imgRTL;
         outputPort.write();
-        //imagePortRTL.prepare() = *imgRTL;
-        //imagePortRTL.write();
+        
+        imagePortRTL.prepare() = *imgRTL;
+        imagePortRTL.write();
         
         /*Bottle bot;
           bot.addInt(ncomponents); // number of bounding boxes
@@ -505,7 +520,7 @@ void colorVisionThread::colSegMainL()   {
           for ( int i=0; i<5*ncomponents; i++ ) bot.addInt(bbox[i]);
           output.write(bot);*/ 
          
-        //printf("\n number of objects %d ", ncomponentsL);
+        printf("\n number of objects %d ", ncomponentsL);
         numobjectsL= ncomponentsL;
         int tempVL;
         counteeL=0;
@@ -519,6 +534,7 @@ void colorVisionThread::colSegMainL()   {
              
              }*/ 
         
+        /*
         for ( int i=0; i< 5 * ncomponentsL; i++ )   {
                 bbvalsL[i]=bboxL[i];
                 tempVL=bbvalsL[i];
@@ -532,16 +548,23 @@ void colorVisionThread::colSegMainL()   {
                 }
                 //printf("\n bbvalL %d ", bbvalsL[i]);
         }
+        */
          
-        // printf("\n");
-        //delete bboxL;
-        //free(K);
-        //free(q);
-        //free(E);
-        //free(f);
-        //free(W);
+        printf("\n freeing memory \n");
+       //delete bboxL;
+       //free(K);
+
+       //free(q);
+       //free(E);
+       //free(f);
+       //free(W);
+       //free(colormap)
+
+       printf("after freeing memory");
+       
          
     }
+    runSem.post();
 }
 
 void colorVisionThread::init_onsize(int width_, int height_)    {
@@ -992,12 +1015,12 @@ ImagX=inv[0][0]*inter1+inv[0][1]*inter2+inv[0][2]*inter3;
 ImagY=inv[1][0]*inter1+inv[1][1]*inter2+inv[1][2]*inter3;
 ImagZ=inv[2][0]*inter1+inv[2][1]*inter2+inv[2][2]*inter3;
 printf("\n  %f  %f   %f \t ",ImagX,ImagY,ImagZ);
-for (i=0;i<n-1;i++) {
+/*for (i=0;i<n-1;i++) {
     free(p[i]);
     free(b[i]);
 }
     free(p);
-    free(b);
+    free(b);*/
 ////Sleep(5000);
  };
 		
