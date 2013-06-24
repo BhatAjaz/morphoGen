@@ -116,6 +116,12 @@ public:
     */
     void setCoordinates(int w, int h) {dimX = w; dimY = h; } ;
     
+/*
+    * function that sets the rootname of all the ports that are going to be created by the thread
+    * @param width ...
+    * @param height ...
+    */
+    void setOutputDimensions(int w, int h) {width = w; height = h; } ;
     /**
     * function that returns the original root name and appends another string iff passed as parameter
     * @param p pointer to the string that has to be added
