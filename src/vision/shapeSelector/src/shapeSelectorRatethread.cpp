@@ -238,30 +238,36 @@ void shapeSelectorRatethread::run() {
             ImageOf<PixelMono>& outputImage =  outputImagePort[j].prepare();
             outputImage.resize(width, height);
             padding = outputImage.getPadding();
-           
+            
+            outputImage.zero();
             if (inputImagePort[j].getInputCount())  {   // if any input ports are connected
                 tempImage  =   inputImagePort[j].read(false);
+                
                 if (tempImage  !=  NULL)   {
                     inputImage[j]   =   tempImage; // to save data from previous run tempImage is introduced
                 }
-                outputImage.resize(width, height);
-                outputImage.zero();
+                
+                //outputImage.resize(width, height);
+                //
                 if (inputImage[j]  !=  NULL)   {
+                    
                     width           =   inputImage[j]->width();
                     height          =   inputImage[j]->height();
+                    printf("input width height %d %d \n",width,height);
                     outputImage.resize(width, height);
                     outputImage.zero();
                     foreground      =   Mat(height,width,CV_8UC1,cv::Scalar(0));
                     mask            =   Mat(height,width,CV_8UC1,cv::Scalar(0));
                     inputIplImage   =   *((IplImage*) inputImage[j]->getIplImage());   
                     temp            =   &inputIplImage;
+                    
                     cv::Mat in[]    =   {temp, temp, temp};
                     cv::merge(in, 3, img0);
                     int i = 0;
                     cv::Mat bgdModel, fgdModel;
                     for (int i = 0; i < 3; i++) {
                         rect = Rect (xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i]);
-                        //printf("rect values %d: %d %d %d %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i]);
+                        printf("rect values %d: %d %d %d %d rect area: %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i], rect.area());
                         if (rect.area() > 0)    {
                             grabCut( img0, mask, rect, bgdModel, fgdModel, 1 ,cv::GC_INIT_WITH_RECT);
                             // Get the pixels marked as likely foreground
@@ -294,7 +300,7 @@ void shapeSelectorRatethread::run() {
                     }
                 }
                 outputImagePort[j].write();
-                oproc = NULL;
+                //oproc = NULL;
             }
                   
         }

@@ -80,10 +80,11 @@ bool colorVisionThread::threadInit() {
     
     ModelLoad();
   
+    // allocating memory
+    d_trws = new real[nK];
      	
     return true;
-    
-
+  
 }
 
 void colorVisionThread::setName(string str) {
@@ -108,13 +109,13 @@ void colorVisionThread::run() {
         if (imagePortRTL.getInputCount()) {   
             //========================================================================================
 
-            for ( int i=0; i<52; i++ )  {
-                tdGpmp[i] = 0;
-            }
+            //for ( int i=0; i<52; i++ )  {
+                //tdGpmp[i] = 0;
+            //}
             
             
             colSegMainL();
-            tdGpmp[0] = numobjectsL;
+            //tdGpmp[0] = numobjectsL;
             
 		    //	 imagePortRT.open("/v1/imagePortRT");
             //   Network::connect("/icub/camcalib/right/out","/v1/imagePortRT");
@@ -122,7 +123,7 @@ void colorVisionThread::run() {
             //	 tdGpmp[1] = numobjectsR;
     
 			
-            int k=1;  //modified to account for the left cam only
+            //int k=1;  //modified to account for the left cam only
                         
             //printf("printing the details \n");
             /*
@@ -134,25 +135,34 @@ void colorVisionThread::run() {
                 }
 			}
             */
-            /*	 for (int i=0; i<numobjectsR; i++ )
-                 {
-                 for (int j=0; j<5; j++ )
-                 {
-                 tdGpmp[k] = imageDetails[i][j];
-                 printf("%f \n", imageDetails[i][j]);
-                 k=k+1;
-                 }
-                 }*/ 
+            /* 
+            for (int i=0; i<numobjectsR; i++ )
+                {
+                    for (int j=0; j<5; j++ )
+                        {
+                            tdGpmp[k] = imageDetails[i][j];
+                            printf("%f \n", imageDetails[i][j]);
+                            k=k+1;
+                        }
+                }
+            */
             
             //cout << "ready to send data"<< endl;
 
             if(dataPort.getOutputCount()) {
                 Bottle& ColOp = dataPort.prepare();
                 ColOp.clear();   
-                ColOp.addDouble(tdGpmp[0]);
-                
-                for (int i = 1; i < 52; i++) {
-                    ColOp.addDouble(tdGpmp[i]);
+                ColOp.addInt(numobjectsL);
+                Bottle objectBottle;
+
+                for (int i = 0; i < numobjectsL; i++) {
+                    Bottle& objectBottle = ColOp.addList();
+                    objectBottle.clear();
+                    objectBottle.addInt(imageDetailsL[i][0]);
+                    objectBottle.addInt(imageDetailsL[i][2]);
+                    objectBottle.addInt(imageDetailsL[i][1]-imageDetailsL[i][0]);
+                    objectBottle.addInt(imageDetailsL[i][3]-imageDetailsL[i][2]);
+                    objectBottle.addInt(imageDetailsL[i][4]);
                     // cout << " object Ids"<< tdGpmp[i] << endl;
                 }
                 
@@ -192,6 +202,9 @@ void colorVisionThread::threadRelease() {
     free(f);
     free(W);
     free(colormap);
+
+
+   
 
     printf("after freeing memory");
 
@@ -440,8 +453,11 @@ int colorVisionThread::colSegMainR()    {
 void colorVisionThread::colSegMainL()   {
 
 	// read an image from the port
-    ImageOf<PixelRgb> *imgRTL = imagePortRTL.read();
-    runSem.wait();
+    ImageOf<PixelRgb> *imgRTL = imagePortRTL.read(true);
+    
+    
+    
+    //runSem.wait();
     if (imgRTL!=NULL) { // check we actually got something
         //printf("We got an image of size %dx%d\n", imgRTL->width(), imgRTL->height());
         
@@ -465,15 +481,16 @@ void colorVisionThread::colSegMainL()   {
         //printf("Constructing and optimizing MRF.\n");
         // takes the colormap and find the object ID
         compute_unary_potentials(I,W,nK,width*height,q); 
-
+        //printf("interval for compute_unary_potentials = %f \n",intervalFunc);
         reparameterize_unary_potentials(E,nE,q,width*height,nK,f);
         for ( int iter=0; iter<niter; iter++ ) {
-             float residL = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
-             // printf("iter=%i resid=%g\n",iter,residL);
+            float residL = trws_potts(E,nE,smoothness,q,width*height,nK,f,.5);
+            // printf("iter=%i resid=%g\n",iter,residL);
         }
         //printf("preparing extract \n");
         extract_labeling(q,nK,width*height,K);
-        //printf("after extract \n");
+       
+               //printf("after extract \n");
          
         /*  Rea: commented out because not useful
         //printf("Segmentation done. Label histogram=[");
@@ -552,7 +569,7 @@ void colorVisionThread::colSegMainL()   {
              
              }*/ 
         
-        /*
+        
         for ( int i=0; i< 5 * ncomponentsL; i++ )   {
                 bbvalsL[i]=bboxL[i];
                 tempVL=bbvalsL[i];
@@ -566,14 +583,101 @@ void colorVisionThread::colSegMainL()   {
                 }
                 //printf("\n bbvalL %d ", bbvalsL[i]);
         }
-        */
+        
          
         delete bboxL;
        
          
     }
-    runSem.post();
+    //runSem.post();
 }
+
+
+/*
+// MAP inference in the MRF by a message-passing algorithm (TRW-S).
+// See [V.Kolmogorov: Convergent Tree-reweighted Message Passing for Energy Minimization].
+real colorVisionThread::trws_potts( // returns residual
+  const unsigned *E, // edges
+  int nE, // nr of edges
+  real w, // edge weights (non-negative)
+  real *q, // array (nK,nT), unary potentials
+  int nT, // nr of pixels
+  int nK, // nr of labels
+  real *f, // array (nK,2,nE), messages
+  real gamma // TRW-S edge occurence probability (for grid graph, set gamma=1/2)
+)
+{
+
+    printf("trws_potts class function \n");
+    
+    real resid   = 0;
+    //d_trws = new real[nK]; 
+    real INF     = 1E10;
+    
+    // forward pass
+    for ( int e=0; e<nE; e++ ) {
+        real *qe = q + nK*E[0+e*2],
+            *qee = q + nK*E[1+e*2],
+            *fe = f + nK*(0+e*2),
+            *fee = fe + nK;
+        
+        real a = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            d_trws[k] = gamma*qe[k] + fe[k];
+            if ( d_trws[k]>a ) a=d_trws[k];
+        }
+        a -= w;
+        
+        real maxd = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            if ( a>d_trws[k] ) d_trws[k]=a;
+            d_trws[k] += fee[k];
+            if ( d_trws[k]>maxd ) maxd=d_trws[k];
+        }
+        
+        for ( int k=0; k<nK; k++ ) {
+            d_trws[k] -= maxd;
+            qee[k]    += d_trws[k];
+            fee[k]    -= d_trws[k];
+            resid     += fabs(d_trws[k]);
+        }
+    }
+    
+    // backward pass
+    for ( int e=nE-1; e>=0; e-- ) {
+        real *qe = q + nK*E[1+e*2],
+            *qee = q + nK*E[0+e*2],
+            *fe = f + nK*(1+e*2),
+            *fee = fe - nK;
+        
+        real a = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            d_trws[k] = gamma*qe[k] + fe[k];
+            if ( d_trws[k]>a ) a=d_trws[k];
+        }
+        a -= w;
+        
+        real maxd = -INF;
+        for ( int k=0; k<nK; k++ ) {
+            if ( a>d_trws[k] ) d_trws[k]=a;
+            d_trws[k] += fee[k];
+            if ( d_trws[k]>maxd ) maxd=d_trws[k];
+        }
+        
+        for ( int k=0; k<nK; k++ ) {
+            d_trws[k] -= maxd;
+            qee[k]    += d_trws[k];
+            fee[k]    -= d_trws[k];
+            resid     += fabs(d_trws[k]);
+        }
+        
+    }
+    
+    //delete[] d_trws;
+    return resid/(nK*2*nE); // normalize residual to one label*pixel
+}
+*/
+
 
 void colorVisionThread::init_onsize(int width_, int height_)    {
 	width = width_;
@@ -683,7 +787,7 @@ double colorVisionThread::Determinant(double **a,int n) {
 
 
     for (j=0;j<n;j++) {
-        for (i=0;i<n;i++) {
+        for(i=0;i<n;i++) {
 
             /* Form the adjoint a_ij */
             i1 = 0;

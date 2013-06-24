@@ -124,7 +124,9 @@ real trws_potts( // returns residual
   real gamma // TRW-S edge occurence probability (for grid graph, set gamma=1/2)
 )
 {
-    real resid = 0, *d = new real[nK], INF = 1E10;
+    real resid   = 0;
+    real* d_trws = new real[nK]; 
+    real INF     = 1E10;
     
     // forward pass
     for ( int e=0; e<nE; e++ ) {
@@ -135,25 +137,26 @@ real trws_potts( // returns residual
         
         real a = -INF;
         for ( int k=0; k<nK; k++ ) {
-            d[k] = gamma*qe[k] + fe[k];
-            if ( d[k]>a ) a=d[k];
+            d_trws[k] = gamma*qe[k] + fe[k];
+            if ( d_trws[k]>a ) a=d_trws[k];
         }
         a -= w;
         
         real maxd = -INF;
         for ( int k=0; k<nK; k++ ) {
-            if ( a>d[k] ) d[k]=a;
-            d[k] += fee[k];
-            if ( d[k]>maxd ) maxd=d[k];
+            if ( a>d_trws[k] ) d_trws[k]=a;
+            d_trws[k] += fee[k];
+            if ( d_trws[k]>maxd ) maxd=d_trws[k];
         }
         
         for ( int k=0; k<nK; k++ ) {
-            d[k] -= maxd;
-            qee[k] += d[k];
-            fee[k] -= d[k];
-            resid += fabs(d[k]);
+            d_trws[k] -= maxd;
+            qee[k]    += d_trws[k];
+            fee[k]    -= d_trws[k];
+            resid     += fabs(d_trws[k]);
         }
     }
+    
     
     // backward pass
     for ( int e=nE-1; e>=0; e-- ) {
@@ -164,30 +167,34 @@ real trws_potts( // returns residual
         
         real a = -INF;
         for ( int k=0; k<nK; k++ ) {
-            d[k] = gamma*qe[k] + fe[k];
-            if ( d[k]>a ) a=d[k];
+            d_trws[k] = gamma*qe[k] + fe[k];
+            if ( d_trws[k]>a ) a=d_trws[k];
         }
         a -= w;
         
         real maxd = -INF;
         for ( int k=0; k<nK; k++ ) {
-            if ( a>d[k] ) d[k]=a;
-            d[k] += fee[k];
-            if ( d[k]>maxd ) maxd=d[k];
+            if ( a>d_trws[k] ) d_trws[k]=a;
+            d_trws[k] += fee[k];
+            if ( d_trws[k]>maxd ) maxd=d_trws[k];
         }
         
         for ( int k=0; k<nK; k++ ) {
-            d[k] -= maxd;
-            qee[k] += d[k];
-            fee[k] -= d[k];
-            resid += fabs(d[k]);
+            d_trws[k] -= maxd;
+            qee[k]    += d_trws[k];
+            fee[k]    -= d_trws[k];
+            resid     += fabs(d_trws[k]);
         }
         
     }
     
-    delete[] d;
+    
+    delete[] d_trws;
     return resid/(nK*2*nE); // normalize residual to one label*pixel
 }
+
+
+
 
 
 int extract_labeling( // returns the number of variables in which old labeling K differs from the new one

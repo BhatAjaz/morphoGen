@@ -58,7 +58,10 @@ private:
 
     //add your private stuff here ...
 
-    double a[3][3], det,l1[11],l2[11],bias1[84],weight1[77][2],bias2[3],weight2[2][77],Y1,Y2,Y3,Y4;
+    double a[3][3];
+    double det;
+    double l1[11];
+    double l2[11],bias1[84],weight1[77][2],bias2[3],weight2[2][77],Y1,Y2,Y3,Y4;
 	double rw,rx,ImagX,ImagY,ImagZ,FinXpos[2];
 	double Sconf[4][3],SconfT[3][4],C[3][3],point[5][4];
 	float s[5000];
@@ -66,6 +69,8 @@ private:
     yarp::os::Semaphore runSem;
 
     double tdGpmp[52];                                                                 // data trasmitted from this module
+
+    real* d_trws;
 
 public:
     /**
@@ -142,6 +147,21 @@ public:
 	bool ModelLoad();
 	int colSegMainR();
 	void colSegMainL();
+    
+    /*
+    real trws_potts( // returns residual
+                    const unsigned *E, // edges
+                    int nE, // nr of edges
+                    real w, // edge weights (non-negative)
+                    real *q, // array (nK,nT), unary potentials
+                    int nT, // nr of pixels
+                    int nK, // nr of labels
+                    real *f, // array (nK,2,nE), messages
+                    real gamma // TRW-S edge occurence probability (for grid graph, set gamma=1/2)
+                     );
+    */
+                     
+                     
 	void init_onsize(int width_, int height_);
 	double Determinant(double **a,int n);
 	void CoFactor(double **a,int n,double **b);
