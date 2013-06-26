@@ -29,7 +29,7 @@
 
 /** 
  *
- * \defgroup icub_tutorial tutorial
+ * \defgroup icub_colorVision colorVision
  * @ingroup icub_morphoGen
  *
  * This is a module that receives the RGB image from input connection and sends it back to output connection. The purpose
