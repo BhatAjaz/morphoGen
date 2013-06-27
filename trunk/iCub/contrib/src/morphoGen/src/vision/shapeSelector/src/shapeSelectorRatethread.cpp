@@ -235,7 +235,7 @@ void shapeSelectorRatethread::run() {
         // image handling
         if (outputImagePort[j].getOutputCount()) {
             //printf("%d\n",foreground.at<int>(0, 0));                           
-            ImageOf<PixelMono>& outputImage =  outputImagePort[j].prepare();
+            ImageOf<PixelRgb>& outputImage =  outputImagePort[j].prepare();
             outputImage.resize(width, height);
             padding = outputImage.getPadding();
             
@@ -256,30 +256,31 @@ void shapeSelectorRatethread::run() {
                     printf("input width height %d %d \n",width,height);
                     outputImage.resize(width, height);
                     outputImage.zero();
-                    foreground      =   Mat(height,width,CV_8UC1,cv::Scalar(0));
-                    mask            =   Mat(height,width,CV_8UC1,cv::Scalar(0));
+                    foreground      =   Mat(height,width,CV_8UC3,cv::Scalar(0,0,0));
+                    mask            =   Mat(height,width,CV_8UC3,cv::Scalar(0,0,0));
                     inputIplImage   =   *((IplImage*) inputImage[j]->getIplImage());   
                     temp            =   &inputIplImage;
                     
-                    cv::Mat in[]    =   {temp, temp, temp};
-                    cv::merge(in, 3, img0);
+                    //cv::Mat in[]    =   {temp, temp, temp};
+                    //cv::merge(in, 3, img0);
                     int i = 0;
                     cv::Mat bgdModel, fgdModel;
                     for (int i = 0; i < 3; i++) {
                         rect = Rect (xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i]);
                         printf("rect values %d: %d %d %d %d rect area: %d \n", i, xLeft[j][i], yTop[j][i], xWidth[j][i], yHeight[j][i], rect.area());
                         if (rect.area() > 0)    {
-                            grabCut( img0, mask, rect, bgdModel, fgdModel, 1 ,cv::GC_INIT_WITH_RECT);
+                            grabCut( temp, mask, rect, bgdModel, fgdModel, 1 ,cv::GC_INIT_WITH_RECT);
                             // Get the pixels marked as likely foreground
                             //cv::compare(mask,cv::GC_PR_FGD,mask,cv::CMP_EQ);
                             // Generate output image                        
-                            img0.copyTo(foreground,mask);
+                            temp.copyTo(foreground,mask);
                             //printf("this is the first character %c",foreground.at<unsigned char>(0,0));
-                            outputIplImage = foreground;
-                            outputImage.wrapIplImage(&outputIplImage);
+                            
                             
                         }                      
-                    }              
+                    }
+                    outputIplImage = foreground;
+                    outputImage.wrapIplImage(&outputIplImage);              
                 }
                 outputImagePort[j].write();                 
                 
@@ -292,9 +293,13 @@ void shapeSelectorRatethread::run() {
                     for (int r = 0; r < height; r++) {
                         for (int c = 0; c < width; c++) {
                             if ( ( r >= yTop[j][i]) && (r <= (yTop[j][i] + yHeight[j][i])) && (c >= xLeft[j][i]) && (c <= (xLeft[j][i] + xWidth[j][i] )) ) {
-                                *oproc = 255;
-                            }    
-                            oproc++;                 
+                                
+                                *oproc++ = 255;
+                                *oproc++ = 255;
+                                *oproc++ = 255;
+                            }
+                            else    
+                            oproc+=3;                 
                         }
                         oproc+=padding;                                
                     }
