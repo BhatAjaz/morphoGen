@@ -259,8 +259,8 @@ void shapeSelectorRatethread::run() {
                     foreground      =   Mat(height,width,CV_8UC3,cv::Scalar(0,0,0));
                     mask            =   Mat(height,width,CV_8UC3,cv::Scalar(0,0,0));
                     inputIplImage   =   *((IplImage*) inputImage[j]->getIplImage());   
-                    temp            =   &inputIplImage;
-                    
+                    temp1            =   &inputIplImage;
+                    cv::cvtColor(temp1, temp, CV_BGR2RGB);
                     //cv::Mat in[]    =   {temp, temp, temp};
                     //cv::merge(in, 3, img0);
                     int i = 0;
