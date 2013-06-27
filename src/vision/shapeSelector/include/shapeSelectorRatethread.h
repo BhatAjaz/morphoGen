@@ -52,12 +52,13 @@ private:
     yarp::os::BufferedPort<yarp::os::Bottle> inputBottlePort[2];
     
     // ports for recieving and sending image data
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >  inputImagePort[2], outputImagePort[2];
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputImagePortLeft;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputImagePortRight;    
+    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >   inputImagePort[2], outputImagePort[2];
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >    inputImagePort[2], outputImagePort[2];
+    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >   outputImagePortLeft, outputImagePortRight;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >    outputImagePortLeft, outputImagePortRight;
     
-    
-    yarp::sig::ImageOf<yarp::sig::PixelMono> *outputImage,*tempImage, *inputImage[2];
+    //yarp::sig::ImageOf<yarp::sig::PixelMono> *outputImage,*tempImage, *inputImage[2];
+    yarp::sig::ImageOf<yarp::sig::PixelRgb>    *outputImage,*tempImage, *inputImage[2];
     yarp::os::Bottle *incomingBottle, *leftBot, *rightBot;
     yarp::os::Semaphore *leftMutex, *rightMutex;
     std::string name;
@@ -116,12 +117,14 @@ public:
     */
     void setCoordinates(int w, int h) {dimX = w; dimY = h; } ;
     
-/*
+    
+    /*
     * function that sets the rootname of all the ports that are going to be created by the thread
     * @param width ...
     * @param height ...
     */
     void setOutputDimensions(int w, int h) {width = w; height = h; } ;
+    
     /**
     * function that returns the original root name and appends another string iff passed as parameter
     * @param p pointer to the string that has to be added
