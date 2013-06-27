@@ -54,11 +54,13 @@ private:
     // ports for recieving and sending image data
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >   inputImagePort[2], outputImagePort[2];
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >    inputImagePort[2], outputImagePort[2];
-    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >   outputImagePortLeft, outputImagePortRight;
+    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputImagePortLeft;
+    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputImagePortRight;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >    outputImagePortLeft, outputImagePortRight;
     
+    
     //yarp::sig::ImageOf<yarp::sig::PixelMono> *outputImage,*tempImage, *inputImage[2];
-    yarp::sig::ImageOf<yarp::sig::PixelRgb>    *outputImage,*tempImage, *inputImage[2];
+    yarp::sig::ImageOf<yarp::sig::PixelRgb> *outputImage,*tempImage, *inputImage[2];
     yarp::os::Bottle *incomingBottle, *leftBot, *rightBot;
     yarp::os::Semaphore *leftMutex, *rightMutex;
     std::string name;
@@ -67,9 +69,9 @@ private:
     int dimY;                             // name of the  height of the input
     bool flag;
     int height, width,scaleX,scaleY;
-    bool idle;
+    bool idle,similar;
     unsigned char* oproc, *inproc;
-    cv::Mat img0, mask, foreground,temp;
+    cv::Mat img0, mask, foreground,temp,temp1;
     IplImage inputIplImage, outputIplImage;
     cv::Rect rect;
 public:
