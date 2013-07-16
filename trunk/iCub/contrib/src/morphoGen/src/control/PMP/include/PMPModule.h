@@ -60,12 +60,15 @@ public:
     *  interrupt, e.g., the ports 
     */
     bool interruptModule();                    
-
+    
     /**
     *  close and shut down the tutorial
     */
     bool close();
-
+    /**
+    *  Function to share robotName to the thread
+    */
+    void setRobotName(char );
     /**
     *  to respond through rpc port
     * @param command reference to bottle given to rpc port of module, alongwith parameters
