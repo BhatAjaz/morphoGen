@@ -50,6 +50,8 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
     robotName             = rf.check("robot", 
                            Value("icub"), 
                            "Robot name (string)").asString();
+                           
+                           printf("robotName in Module %s \n", robotName.c_str());
     robotPortName         = "/" + robotName + "/head";
 
     inputPortName           = rf.check("inputPortName",
@@ -82,7 +84,7 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
  
 	/* create the thread and pass pointers to the module parameters */
     rThread = new PMPThread(robotName, configFile);
-
+    rThread->setRobotName(robotName);
 	//=======================================================================
 
     /* now start the thread to do the work */
