@@ -50,7 +50,7 @@ private:
 	yarp::os::BufferedPort<yarp::os::Bottle > MotCom;     // output port to command the robot
 	yarp::os::BufferedPort<yarp::os::Bottle > Inp3D;      // input port to receive 3d information 
 	yarp::os::BufferedPort<yarp::os::Bottle > Inpjoints;
-	
+	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort;     // output ports to command the robot parts
 	//PMPServer to Observer
 	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result
 	//and motor commands
@@ -81,7 +81,7 @@ private:
    
 	    double Jan[10];
 		double JanL[10]; //initial Joint angles
-
+        double a[3], aL[3], aLRH[3], res[3], resL[3],Jvel[20];
 
 		double x_ini; // Using PMP+ Symmetry So Right and Left Arm movements are
 		// coordinated by the forward inverse model of the left arm only
@@ -90,7 +90,7 @@ private:
 		double x_iniL; // Init Config / O/p of target generator
 		double y_iniL;
 		double z_iniL;
-
+        
 		double x_fin,y_fin,z_fin;
 		double x_finL,y_finL,z_finL;
 
@@ -176,6 +176,13 @@ public:
     * @return rootname 
     */
     std::string getName(const char* p);
+    
+    /*
+    * function that sets the robot name of all related ports that are going to be created by the thread
+    * @param str robotName
+
+    */
+    void setRobotName(std::string robotname);
 
     /*
     * function that sets the inputPort name
@@ -213,6 +220,11 @@ public:
 		void MessageDevDriverR();
 		void MessageDevDriverL();
 		void MessageDevDriverT();
+		void cmdInterfacePassR();
+		void cmdInterfacePassL();
+		void cmdInterfacePassT();
+		void cmdInterfacePassRhand();
+		void cmdInterfacePassLhand();
 		void initiCubUp();
 		void InitializeJan();
 		void InitializeJanObst();
