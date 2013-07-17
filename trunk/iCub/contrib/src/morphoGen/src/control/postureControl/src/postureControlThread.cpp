@@ -55,6 +55,11 @@ bool postureControlThread::threadInit() {
         return false;
     }
     
+    if (!interfaceIn.open(getName("/interface:i").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    
     if (!inputLeftArm.open(getName("/leftArm:i").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
@@ -190,36 +195,43 @@ bool postureControlThread::initController() {
     double stiffness = 0.081;       // stiffness coefficient, units are Nm/deg
     double damping   = 0.020;       // damping coefficient,   units are Nm/(deg/s)
     double offset    = 0.0;         // torque offset,         units are Nm
-    bool okImpP = iimpRightArm->setImpedance(3, stiffness, damping);  
-    bool okImpO = iimpRightArm->setImpedanceOffset(3,offset);
-    bool okImp  = ictrlRightArm->setImpedancePositionMode(3);
-
-    if(okImpP & okImp & okImpO) {
-        printf("success in sending switching to impedence mode control \n");
-    }
-    else {
-        printf("Error! in sending switching to impedence mode control \n");
+    bool okImpP, okImpO, okImp;
+    
+    if(robot!="icubSim"){
+        okImpP = iimpRightArm->setImpedance(3, stiffness, damping);  
+        okImpO = iimpRightArm->setImpedanceOffset(3,offset);
+        okImp  = ictrlRightArm->setImpedancePositionMode(3);
+        
+        if(okImpP & okImp & okImpO) {
+            printf("success in sending switching to impedence mode control \n");
+        }
+        else {
+            printf("Error! in sending switching to impedence mode control \n");
         return false;
+        }
     }
-
+        
     // =================== setting torque control ==================================
 
     //ictrlLeftArm->setTorqueMode(3);
     //double jnt_torque= 0.0; //expressed in Nm
     //itrqLeftArm->setRefTorque(3,jnt_torque); 
 
-    okImpP = iimpLeftArm->setImpedance(3, stiffness, damping);  
-    okImpO = iimpLeftArm->setImpedanceOffset(3,offset);
-    okImp  = ictrlLeftArm->setImpedancePositionMode(3);
+    if(robot!="icubSim"){
 
-    if(okImpP & okImp & okImpO) {
-        printf("success in sending switching to impedence mode control \n");
-    }
-    else {
-        printf("Error! in sending switching to impedence mode control \n");
-        return false;
-    }
+        okImpP = iimpLeftArm->setImpedance(3, stiffness, damping);  
+        okImpO = iimpLeftArm->setImpedanceOffset(3,offset);
+        okImp  = ictrlLeftArm->setImpedancePositionMode(3);
+        
+        if(okImpP & okImp & okImpO) {
+            printf("success in sending switching to impedence mode control \n");
+        }
+        else {
+            printf("Error! in sending switching to impedence mode control \n");
+            return false;
+        }
     
+    }
 
     //==================== moving to default position ==============================
     
@@ -308,6 +320,39 @@ void postureControlThread::run() {
     while (isStopping() != true) {
 
         Bottle* receivedBottle;
+
+        //**********************************************************
+        if (interfaceIn.getInputCount()) {
+            
+            receivedBottle = interfaceIn.read(false);
+            if(receivedBottle != NULL){
+                
+                int bodypart = receivedBottle->get(0).asVocab();
+                Bottle* value = receivedBottle->get(1).asList();
+                
+                switch(bodypart){
+                case COMMAND_RIGHT_ARM: {
+                    printf("right_arm: %s \n", value->toString().c_str());
+                } break;
+                case COMMAND_LEFT_ARM:  {
+                    printf("left_arm: %s \n", value->toString().c_str());
+                } break;
+                case COMMAND_TORSO_ARM: {
+                    printf("torso: %s \n", value->toString().c_str());
+                } break;
+                case COMMAND_RIGHT_HAND:{
+                    printf("right_hand: %s \n", value->toString().c_str());
+                } break;
+                case COMMAND_LEFT_HAND:  {
+                    printf("left_hand: %s \n", value->toString().c_str());
+                } break;
+                default:{
+                    printf("command not recognized \n");
+                }
+                }
+            }
+        }
+        
 
         //**********************************************************
         if (inputRightArm.getInputCount()) {
@@ -431,10 +476,12 @@ void postureControlThread::onStop() {
 
     printf("postureControlThread::onStop \n");
     inputRightArm.interrupt();
-    inputLeftArm.interrupt();
+    inputLeftArm .interrupt();
+    interfaceIn  .interrupt();
     printf("interrupted the port \n");
-    inputRightArm.close();
-    inputLeftArm.close();
+    inputRightArm .close();
+    inputLeftArm  .close();
+    interfaceIn   .close();
     printf("postureControlThread::onStop \n");
 }
 
