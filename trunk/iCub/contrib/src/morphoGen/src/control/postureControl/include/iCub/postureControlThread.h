@@ -43,7 +43,9 @@
 
 class postureControlThread : public yarp::os::Thread {
 private:
-    int jntsRightArm;              // number of jointRight leg
+    int jntsRightArm;               // number of jointRight arm
+    int jntsLeftArm;                // number of jointLeft arm
+    int jntsTorso;                  // number of jointTorso
     
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
@@ -84,6 +86,8 @@ private:
     
     static const double armMin[];
     static const double armMax[];
+    static const double torsoMin[];
+    static const double torsoMax[];
     
 public:
     /**
@@ -154,7 +158,13 @@ public:
     * function that checks the validity of the content of the arm bottle
     * @param b bottle that has arm position
     */
-    bool checkArm(yarp::os::Bottle* b);
+    const bool checkArm(const yarp::os::Bottle* b);
+
+    /*
+    * function that checks the validity of the content of the torso bottle
+    * @param b bottle that has torso position
+    */
+    const bool checkTorso(const yarp::os::Bottle* b);
 
     /**
      * function that parses the bottle received and generate the vector of the control pos

@@ -26,10 +26,9 @@
 #define _POSTURE_CONTROL_MODULE_H_
 
 
-
 /** 
  *
- * \defgroup icub_postureControl morphoGen
+ * \defgroup icub_postureControl postureControl
  * @ingroup icub_morphoGen
  *
  * This module receives bottles that indicate the posture from the PMP module and 
