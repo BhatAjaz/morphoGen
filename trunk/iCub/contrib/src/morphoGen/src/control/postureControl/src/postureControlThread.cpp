@@ -155,6 +155,34 @@ bool postureControlThread::initController() {
         return 0;
     }
 
+    // ================== instantiate torso =====================================
+    
+    options.put("device", "remote_controlboard");
+    options.put("local", "/postureControl/client/torso");                 //local port names
+    string remoteTorso("/");
+    remoteTorso.append(robot.c_str());
+    remoteTorso.append("/torso");
+    options.put("remote",(const char*)remoteTorso.c_str());      //where we connect to
+    
+    robotDeviceTorso = new PolyDriver(options);
+   
+    if (!robotDeviceTorso->isValid()) {
+      printf("Device Torso not available.  Here are the known devices:\n");
+      printf("%s", Drivers::factory().toString().c_str());
+      return 0;
+    }
+
+    bool okTorso;
+    okTorso = robotDeviceTorso->view(posTorso);
+    okTorso = okTorso && robotDeviceLeftArm->view(encsTorso);
+    okTorso = okTorso && robotDeviceLeftArm->view(ictrlTorso);
+    okTorso = okTorso && robotDeviceLeftArm->view(iimpTorso);
+    okTorso = okTorso && robotDeviceLeftArm->view(itrqTorso);
+    if (!okTorso) {
+        printf("Problems acquiring interfaces from the left arm\n");
+        return 0;
+    }
+
     // ================= interfacing to robot parts ==========================
 
     int jnts = 0;
@@ -179,8 +207,7 @@ bool postureControlThread::initController() {
         posRightArm->setRefSpeed(i, tmp[i]);
     }
     //==================== checking the readings ===================================
-    
-   
+     
 
     Vector command_position;
     posRightArm->getAxes(&jntsRightArm);
@@ -276,19 +303,20 @@ std::string postureControlThread::getName(const char* p) {
 bool postureControlThread::checkArm(Bottle* b) {
     printf("dimension of the received bottle %d \n", b->size());
     printf("componets of the received bottle  \n");
-    Bottle* values =   b->get(0).asList();
+    //Bottle* values =   b->get(0).asList();
 
-    printf("content of the bottle %s \n", values->toString().c_str());
-    printf("content comprises %d values \n", values->size());
+    //printf("content of the bottle %s \n", values->toString().c_str());
+    //printf("content comprises %d values \n", values->size());
         
-    if (values->size() > 16) {
+    if (b->size() > 16) {
+        printf("out of limit size \n");
         return false;
     }
     
-    for(int i = 0; i < values->size() ; i++){
-        double b = values->get(i).asDouble();
-        if((b < armMin[i]) || (b > armMax[i])) {
-            printf("b value %f out of limit \n", b);
+    for(int i = 0; i < b->size() ; i++){
+        double d = b->get(i).asDouble();
+        if((d < armMin[i]) || (d > armMax[i])) {
+            printf("d value %f out of limit \n", d);
             return false;        
         }
     }
@@ -297,13 +325,13 @@ bool postureControlThread::checkArm(Bottle* b) {
 }
 
 Vector postureControlThread::parseBottle(Bottle* b, int dim) {
-    Bottle* values =   b->get(0).asList();
+    //Bottle* values =   b->get(0).asList();
     Vector result(dim); 
     encsRightArm->getEncoders(encodersRightArm.data());
     printf("encoders position \n (%s) \n",encodersRightArm.toString().c_str());
     for (int i = 0; i < dim ; i++) {
-        if( i < values->size()) {
-            result[i] = values->get(i).asDouble();
+        if( i < b->size()) {
+            result[i] = b->get(i).asDouble();
         }
         else{            
             result[i] = encodersRightArm(i);
@@ -327,24 +355,142 @@ void postureControlThread::run() {
             receivedBottle = interfaceIn.read(false);
             if(receivedBottle != NULL){
                 
-                int bodypart = receivedBottle->get(0).asVocab();
+                int bodypart  = receivedBottle->get(0).asVocab();
                 Bottle* value = receivedBottle->get(1).asList();
-                
+                //Bottle lvalue;
+                //Bottle& rvalue = lvalue.addList();
+                //rvalue = *value;
+                                
                 switch(bodypart){
                 case COMMAND_RIGHT_ARM: {
                     printf("right_arm: %s \n", value->toString().c_str());
+                    //printf("right_arm: %s \n", lvalue.toString().c_str());
+                    bool rightArmOk = checkArm(value);
+
+                    if(rightArmOk) {
+
+                        int jnts = 0;
+                        //Vector command_position;
+                        Vector command_position = parseBottle(value, 16);                                            
+                        command_position.resize(jntsRightArm);
+                        printf("jnt dimension %d \n", jntsRightArm);
+                        
+                        printf("sending command\n %s \n", command_position.toString().c_str());
+                        //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
+                        
+                        bool ok = posRightArm->positionMove(command_position.data());
+                        if(!ok){
+                            break;
+                        }
+                    }
+                    else {
+                        printf("detected out of limits control \n");
+                    }
+                    
                 } break;
                 case COMMAND_LEFT_ARM:  {
+                    /*
                     printf("left_arm: %s \n", value->toString().c_str());
+                    bool leftArmOk = checkArm(value);
+
+                    if(leftArmOk) {
+
+                        int jnts = 0;
+                        //Vector command_position;
+                        Vector command_position = parseBottle(value, 16);                                            
+                        command_position.resize(jntsLeftArm);
+                        printf("jnt dimension %d \n", jntsLeftArm);
+                        
+                        printf("sending command\n %s \n", command_position.toString().c_str());
+                        //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
+                        
+                        bool ok = posLeftArm->positionMove(command_position.data());
+                        if(!ok){
+                            break;
+                        }
+                    }
+                    else {
+                        printf("detected out of limits control \n");
+                    }
+                    */
                 } break;
                 case COMMAND_TORSO_ARM: {
+                    /*
                     printf("torso: %s \n", value->toString().c_str());
+                    bool torsoOk = checkTorso(value);
+
+                    if(torsoOk) {
+
+                        int jnts = 0;
+                        //Vector command_position;
+                        Vector command_position = parseBottle(value, 16);                                            
+                        command_position.resize(jntsTorse);
+                        printf("jnt dimension %d \n", jntsTorso);
+                        
+                        printf("sending command\n %s \n", command_position.toString().c_str());
+                        //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
+                        
+                        bool ok = posTorso->positionMove(command_position.data());
+                        if(!ok){
+                            break;
+                        }
+                    }
+                    else {
+                        printf("detected out of limits control \n");
+                    }
+                    */
                 } break;
                 case COMMAND_RIGHT_HAND:{
+                    /*
                     printf("right_hand: %s \n", value->toString().c_str());
+                    bool rightArmOk = checkArm(value);
+
+                    if(rightArmOk) {
+
+                        int jnts = 0;
+                        //Vector command_position;
+                        Vector command_position = parseBottle(value, 16);                                            
+                        command_position.resize(jntsRightArm);
+                        printf("jnt dimension %d \n", jntsRightArm);
+                        
+                        printf("sending command\n %s \n", command_position.toString().c_str());
+                        //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
+                        
+                        bool ok = posRightArm->positionMove(command_position.data());
+                        if(!ok){
+                            break;
+                        }
+                    }
+                    else {
+                        printf("detected out of limits control \n");
+                    }
+                    */
                 } break;
                 case COMMAND_LEFT_HAND:  {
+                    /*
                     printf("left_hand: %s \n", value->toString().c_str());
+                    bool rightArmOk = checkArm(value);
+                    
+                    if(rightArmOk) {
+                        
+                        int jnts = 0;
+                        //Vector command_position;
+                        Vector command_position = parseBottle(value, 16);                                            
+                        command_position.resize(jntsRightArm);
+                        printf("jnt dimension %d \n", jntsRightArm);
+                        
+                        printf("sending command\n %s \n", command_position.toString().c_str());
+                        //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
+                        
+                        bool ok = posRightArm->positionMove(command_position.data());
+                        if(!ok){
+                            break;
+                        }
+                    }
+                    else {
+                        printf("detected out of limits control \n");
+                    }
+                    */
                 } break;
                 default:{
                     printf("command not recognized \n");
