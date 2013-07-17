@@ -37,8 +37,8 @@
 #define COMMAND_RIGHT_ARM    VOCAB4('r','a','r','m')
 #define COMMAND_LEFT_ARM     VOCAB4('l','a','r','m')
 #define COMMAND_TORSO_ARM    VOCAB4('t','o','r','s')
-#define COMMAND_RIGHT_HAND    VOCAB4('r','h','a','n')
-#define COMMAND_LEFT_HAND     VOCAB4('l','h','a','n')
+#define COMMAND_RIGHT_HAND   VOCAB4('r','h','a','n')
+#define COMMAND_LEFT_HAND    VOCAB4('l','h','a','n')
 
 
 class postureControlThread : public yarp::os::Thread {
@@ -53,6 +53,7 @@ private:
 
     yarp::dev::PolyDriver        *robotDeviceRightArm;  // device right arm
     yarp::dev::PolyDriver        *robotDeviceLeftArm;   // device left arm
+    yarp::dev::PolyDriver        *robotDeviceTorso;     // device torso
     
     yarp::dev::IPositionControl  *posRightArm;          // position control of the robot RightArm
     yarp::dev::IEncoders         *encsRightArm;         // encoders readings from the robot RightArm
@@ -60,11 +61,17 @@ private:
     yarp::dev::IImpedanceControl *iimpRightArm;         // impedence control of the robot RightArm
     yarp::dev::ITorqueControl    *itrqRightArm;         // torque control of the robot RightArm
 
-    yarp::dev::IPositionControl  *posLeftArm;          // position control of the robot RightArm
-    yarp::dev::IEncoders         *encsLeftArm;         // encoders readings from the robot RightArm
-    yarp::dev::IControlMode      *ictrlLeftArm;        // sets the modality of the control RightArm
-    yarp::dev::IImpedanceControl *iimpLeftArm;         // impedence control of the robot RightArm
-    yarp::dev::ITorqueControl    *itrqLeftArm;         // torque control of the robot RightArm
+    yarp::dev::IPositionControl  *posLeftArm;          // position control of the robot LeftArm
+    yarp::dev::IEncoders         *encsLeftArm;         // encoders readings from the robot LeftArm
+    yarp::dev::IControlMode      *ictrlLeftArm;        // sets the modality of the control LeftArm
+    yarp::dev::IImpedanceControl *iimpLeftArm;         // impedence control of the robot LeftArm
+    yarp::dev::ITorqueControl    *itrqLeftArm;         // torque control of the robot LeftArm
+
+    yarp::dev::IPositionControl  *posTorso;            // position control of the robot Torso
+    yarp::dev::IEncoders         *encsTorso;           // encoders readings from the robot Torso
+    yarp::dev::IControlMode      *ictrlTorso;          // sets the modality of the control Torso
+    yarp::dev::IImpedanceControl *iimpTorso;           // impedence control of the robot Torso
+    yarp::dev::ITorqueControl    *itrqTorso;           // torque control of the robot Torso
 
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
 
