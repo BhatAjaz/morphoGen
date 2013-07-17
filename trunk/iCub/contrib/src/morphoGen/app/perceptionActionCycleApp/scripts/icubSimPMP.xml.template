@@ -1,0 +1,52 @@
+<application>
+<name>icubSimPMP</name>
+<dependencies>
+  <port>/icubSim/right_arm/rpc:i</port>
+  <port>/icubSim/left_arm/rpc:i</port>
+  <port>/icubSim/torso/rpc:i</port>
+</dependencies>
+
+
+
+<module>
+  <name>PMP</name>
+  <parameters>--name /PMP --robot icubSim </parameters>
+  <tag>PMP</tag>
+  <node>icub14</node>
+</module>
+
+<module>
+  <name>postureControl</name>
+  <parameters>--name /postureControl --robot icubSim </parameters>
+  <tag>postureControl</tag>
+  <node>icub14</node>
+</module>
+
+
+
+<connection>
+  <from>/PMP/cmd/interface:o</from>
+  <to>/postureControl/interface:i</to>
+  <protocol>udp</protocol>
+</connection> 
+
+<connection>
+  <from>/PMP/cmd/right_arm:o</from>
+  <to>/icubSim/right_arm/rpc:i</to>
+  <protocol>udp</protocol>
+</connection> 
+
+<connection>
+  <from>/PMP/cmd/left_arm:o</from>
+  <to>/icubSim/left_arm/rpc:i</to>
+  <protocol>udp</protocol>
+</connection> 
+
+<connection>
+  <from>/PMP/cmd/torso:o</from>
+  <to>/icubSim/torso/rpc:i</to>
+  <protocol>udp</protocol>
+</connection> 
+
+
+</application>
