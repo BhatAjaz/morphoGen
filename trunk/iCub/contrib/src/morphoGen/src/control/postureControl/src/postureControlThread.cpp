@@ -33,8 +33,8 @@ using namespace std;
 
 const double postureControlThread::armMax[] = {-10.0, 70.0,  30.0, 80.0,  50.0,   0.0 };
 const double postureControlThread::armMin[] = {-70.0, 20.0, -20.0, 20.0, -50.0, -30.0 };  
-const double postureControlThread::torsoMin[] = {-70.0, 20.0, -20.0};  
-const double postureControlThread::torsoMax[] = {-70.0, 20.0, -20.0};
+const double postureControlThread::torsoMin[] = {-50.0, -30.0, -10.0};  
+const double postureControlThread::torsoMax[] = {50.0, 30.0, 70.0};
 
 postureControlThread::postureControlThread() {
     robot = "icub";        
