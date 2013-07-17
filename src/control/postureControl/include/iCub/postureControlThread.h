@@ -34,7 +34,11 @@
 #include <fstream>
 #include <time.h>
 
-
+#define COMMAND_RIGHT_ARM    VOCAB4('r','a','r','m')
+#define COMMAND_LEFT_ARM     VOCAB4('l','a','r','m')
+#define COMMAND_TORSO_ARM    VOCAB4('t','o','r','s')
+#define COMMAND_RIGHT_HAND    VOCAB4('r','h','a','n')
+#define COMMAND_LEFT_HAND     VOCAB4('l','h','a','n')
 
 
 class postureControlThread : public yarp::os::Thread {
@@ -66,7 +70,8 @@ private:
 
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
     yarp::os::BufferedPort<yarp::os::Bottle > inputRightArm;                             //input port for right arm
-    yarp::os::BufferedPort<yarp::os::Bottle > inputLeftArm;                              //input port for right arm
+    yarp::os::BufferedPort<yarp::os::Bottle > inputLeftArm;                              //input port for left arm
+    yarp::os::BufferedPort<yarp::os::Bottle > interfaceIn;                               //input port for left arm
     
     std::string name;                                                                    // rootname of all the ports opened by this thread
     
