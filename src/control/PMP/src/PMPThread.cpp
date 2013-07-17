@@ -30,6 +30,12 @@ using namespace std;
 #define Wrist_SIDEGRASP		0
 #define Wrist_TOPGRASP		90
 
+#define CMD_RIGHT_ARM	VOCAB4('r','a','r','m')
+#define CMD_LEFT_ARM	VOCAB4('l','a','r','m')
+#define CMD_RIGHT_HAND	VOCAB4('r','h','a','n')
+#define CMD_LEFT_HAND	VOCAB4('l','h','a','n')
+#define CMD_TORSO 		VOCAB4('t','o','r','s')
+
 PMPThread::PMPThread() {
     robot = "icubSim";        
 }
@@ -53,20 +59,20 @@ bool PMPThread::threadInit() {
     }   
     
 
-    if (!MotCom.open(getName("/v:o").c_str())) {
+    /*if (!MotCom.open(getName("/v:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
-    }   
+    } */  
     
     if (!PMPResponse.open(getName("/PMPreply:io").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
 
-    if (!Inpjoints.open(getName("/input/joints:i").c_str())) {
+    /*if (!Inpjoints.open(getName("/input/joints:i").c_str())) {
         cout << ": unable to open port /input/joints to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
-    }
+    }*/
     
     if (!cmdRight_armPort.open(getName("/cmd/right_arm:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
@@ -88,9 +94,9 @@ bool PMPThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
-    Network::connect("/cmd/right_arm:o","/icubSim/right_arm/rpc:i");
-    Network::connect("/cmd/left_arm:o","/icubSim/left_arm/rpc:i");
-    Network::connect("/cmd/torso:o","/icubSim/torso/rpc:i");
+    //Network::connect("/cmd/right_arm:o","/icubSim/right_arm/rpc:i");
+    //Network::connect("/cmd/left_arm:o","/icubSim/left_arm/rpc:i");
+    //Network::connect("/cmd/torso:o","/icubSim/torso/rpc:i");
 
     //if (Network::exists("/v:o"))			
     //Network::connect("/v:o", "/input/moveRobots");  //check this
@@ -181,7 +187,7 @@ void PMPThread::run() {
 					cout << "ResPM" << ResPM << endl;
 					int XmitGreen=0;
 					if(ResPM==1)   {
-						cout << "Seems Doable::Transmiting motor commands" << endl;
+						//cout << "Seems Doable::Transmiting motor commands" << endl;
 						XmitGreen=1;
 						ResPM=0;
 					}
@@ -192,11 +198,23 @@ void PMPThread::run() {
                    	ResPM=0;
                    	cout << "Goal INIT Robot recd from Client" << endl;
                    	initiCubUp();
-                   	MessagePassT();
-                   	MessagePassR();
-                   	MessagePassL();
-                }
-
+                   	if (MSimExec == 1) { 
+                   		if (cmdInterfacePort.getOutputCount()) {
+                   	
+    						// Send output commands in a bottle to another module through interface  		
+    						cmdInterfacePassT();
+    						cmdInterfacePassR();
+    						cmdInterfacePassRhand();
+    						cmdInterfacePassL();
+    						cmdInterfacePassLhand();
+    					}
+    					else {
+                   			MessagePassT();
+                   			MessagePassR();
+                   			MessagePassL();
+                		}
+                	}
+				}
                 cout << "Sending out Result of requested Primitive behaviour to Client Observer" << endl;
                 ObsResp.addDouble(221);
                 ObsResp.addDouble(ResPM);
@@ -249,6 +267,10 @@ void PMPThread::threadRelease() {
     cmdTorsoPort.close();
     cmdInterfacePort.interrupt();
     cmdInterfacePort.close();
+    Inp3D.interrupt();
+    Inp3D.close();
+    PMPResponse.interrupt();
+    PMPResponse.close();
      
 }
 
@@ -946,8 +968,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         }
      
     	if(MSim==MSim_MOVEMENT) {
-        	cout <<"About to activate motors" <<endl;
-        	cout <<"Body chain involved \t"<<HandAct<<endl;
+        	
             if((HandAct==BodyTorsoArm_RIGHT) || (HandAct==BodyTorsoArm_BOTH)) {
                 
                 if(((ang4>-99)&&(ang4<-15))&&((ang5>0)&&(ang5<100)))  {
@@ -1308,6 +1329,8 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	
     }
     if (retvalue)	{
+    	cout <<"About to activate robot motors" <<endl;
+        cout <<"Body chain involved \t"<<HandAct<<endl;
     	if (cmdInterfacePort.getOutputCount()) {
     		// Send output commands in a bottle to another module through interface
     		if (rightMove){
@@ -1983,7 +2006,7 @@ void PMPThread::MessagePassT()
            
     Bottle& outBot1 = cmdInterfacePort.prepare();   // Get the object
     outBot1.clear();
-    outBot1.addString("right_arm"); // put "pos" command in the bottle
+    outBot1.addVocab(CMD_RIGHT_ARM); // put "pos" command in the bottle
     Bottle& listBot = outBot1.addList();
     listBot.addDouble(ang4);
     listBot.addDouble(ang5);
@@ -2002,7 +2025,7 @@ void PMPThread::cmdInterfacePassL()
     
      Bottle& outBot2 = cmdInterfacePort.prepare();   // Get the object
      outBot2.clear();
-     outBot2.addString("left_arm"); // put "pos" command in the bottle
+     outBot2.addVocab(CMD_LEFT_ARM); // put "pos" command in the bottle
      Bottle& listBot1 = outBot2.addList();
      listBot1.addDouble(ang4L);
      listBot1.addDouble(ang5L);
@@ -2020,7 +2043,7 @@ void PMPThread::cmdInterfacePassL()
 void PMPThread::cmdInterfacePassT(){
     Bottle& outBot3 = cmdInterfacePort.prepare();   // Get the object
     outBot3.clear();
-    outBot3.addString("torso"); // put "pos" command in the bottle
+    outBot3.addVocab(CMD_TORSO); // put "pos" command in the bottle
     Bottle& listBot2 = outBot3.addList();
     listBot2.addDouble(-1*ang3);
     listBot2.addDouble(1*ang2);
@@ -2038,7 +2061,7 @@ void PMPThread::cmdInterfacePassRhand()
            
     Bottle& outBot1 = cmdInterfacePort.prepare();   // Get the object
     outBot1.clear();
-    outBot1.addString("right_hand"); // put "pos" command in the bottle
+    outBot1.addVocab(CMD_RIGHT_HAND); // put "pos" command in the bottle
     Bottle& listBot = outBot1.addList();
     listBot.addDouble(angCup);
     listBot.addDouble(angT1);
@@ -2060,7 +2083,7 @@ void PMPThread::cmdInterfacePassLhand()
     
      Bottle& outBot2 = cmdInterfacePort.prepare();   // Get the object
      outBot2.clear();
-     outBot2.addString("left_hand"); // put "pos" command in the bottle
+     outBot2.addVocab(CMD_LEFT_HAND); // put "pos" command in the bottle
      Bottle& listBot1 = outBot2.addList();
      listBot1.addDouble(angCupL);
      listBot1.addDouble(angTL1);

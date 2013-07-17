@@ -84,6 +84,7 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
  
 	/* create the thread and pass pointers to the module parameters */
     rThread = new PMPThread(robotName, configFile);
+    rThread->setName(getName().c_str());
     rThread->setRobotName(robotName);
 	//=======================================================================
 
