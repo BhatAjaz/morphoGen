@@ -33,6 +33,8 @@ using namespace std;
 
 const double postureControlThread::armMax[] = {-10.0, 70.0,  30.0, 80.0,  50.0,   0.0 };
 const double postureControlThread::armMin[] = {-70.0, 20.0, -20.0, 20.0, -50.0, -30.0 };  
+const double postureControlThread::torsoMin[] = {-70.0, 20.0, -20.0};  
+const double postureControlThread::torsoMax[] = {-70.0, 20.0, -20.0};
 
 postureControlThread::postureControlThread() {
     robot = "icub";        
@@ -300,7 +302,27 @@ std::string postureControlThread::getName(const char* p) {
     return str;
 }
 
-bool postureControlThread::checkArm(Bottle* b) {
+
+const bool postureControlThread::checkTorso(const Bottle* b) {
+    printf("dimension of the received bottle %d \n", b->size());
+        
+    if (b->size() > 3) {
+        printf("out of limit size \n");
+        return false;
+    }
+    
+    for(int i = 0; i < b->size() ; i++){
+        double d = b->get(i).asDouble();
+        if((d < torsoMin[i]) || (d > torsoMax[i])) {
+            printf("d value %f out of limit \n", d);
+            return false;        
+        }
+    }
+        
+    return true;
+}
+
+const bool postureControlThread::checkArm(const Bottle* b) {
     printf("dimension of the received bottle %d \n", b->size());
     printf("componets of the received bottle  \n");
     //Bottle* values =   b->get(0).asList();
@@ -389,7 +411,7 @@ void postureControlThread::run() {
                     
                 } break;
                 case COMMAND_LEFT_ARM:  {
-                    /*
+                    
                     printf("left_arm: %s \n", value->toString().c_str());
                     bool leftArmOk = checkArm(value);
 
@@ -412,10 +434,10 @@ void postureControlThread::run() {
                     else {
                         printf("detected out of limits control \n");
                     }
-                    */
+                    
                 } break;
                 case COMMAND_TORSO_ARM: {
-                    /*
+                    
                     printf("torso: %s \n", value->toString().c_str());
                     bool torsoOk = checkTorso(value);
 
@@ -423,8 +445,8 @@ void postureControlThread::run() {
 
                         int jnts = 0;
                         //Vector command_position;
-                        Vector command_position = parseBottle(value, 16);                                            
-                        command_position.resize(jntsTorse);
+                        Vector command_position = parseBottle(value, 3);                                            
+                        command_position.resize(jntsTorso);
                         printf("jnt dimension %d \n", jntsTorso);
                         
                         printf("sending command\n %s \n", command_position.toString().c_str());
@@ -438,7 +460,7 @@ void postureControlThread::run() {
                     else {
                         printf("detected out of limits control \n");
                     }
-                    */
+                    
                 } break;
                 case COMMAND_RIGHT_HAND:{
                     /*
