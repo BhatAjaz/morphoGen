@@ -48,14 +48,14 @@
  * The following key-value pairs can be specified as command-line parameters by prefixing \c -- to the key 
  * (e.g. \c --from file.ini. The value part can be changed to suit your needs; the default values are shown below. 
  *
- * - \c from \c tutorial.ini \n 
+ * - \c from \c tutorialThread.ini \n 
  *   specifies the configuration file
  *
- * - \c context \c tutorial/conf \n
+ * - \c context \c tutorialThread/conf \n
  *   specifies the sub-path from \c $ICUB_ROOT/icub/app to the configuration file
  *
- * - \c name \c tutorial \n 
- *   specifies the name of the tutorial (used to form the stem of tutorial port names)  
+ * - \c name \c tutorialThread \n 
+ *   specifies the name of the tutorialThread (used to form the stem of tutorialThread port names)  
  *
  * - \c robot \c icub \n 
  *   specifies the name of the robot (used to form the root of robot port names)
@@ -77,8 +77,8 @@
  *
  *  <b>Input ports</b>
  *
- *  - \c /tutorial \n
- *    This port is used to change the parameters of the tutorial at run time or stop the tutorial. \n
+ *  - \c /tutorialThread \n
+ *    This port is used to change the parameters of the tutorialThread at run time or stop the tutorialThread. \n
  *    The following commands are available
  * 
  *  -  \c help \n
@@ -86,21 +86,21 @@
  *
  *    Note that the name of this port mirrors whatever is provided by the \c --name parameter value
  *    The port is attached to the terminal so that you can type in commands and receive replies.
- *    The port can be used by other tutorials but also interactively by a user through the yarp rpc directive, viz.: \c yarp \c rpc \c /tutorial
+ *    The port can be used by other tutorialThreads but also interactively by a user through the yarp rpc directive, viz.: \c yarp \c rpc \c /tutorialThread
  *    This opens a connection from a terminal to the port and allows the user to then type in commands and receive replies.
  *       
- *  - \c /tutorial/image:i \n
+ *  - \c /tutorialThread/image:i \n
  *
  * <b>Output ports</b>
  *
- *  - \c /tutorial \n
+ *  - \c /tutorialThread \n
  *    see above
  *
- *  - \c /tutorial/image:o \n
+ *  - \c /tutorialThread/image:o \n
  *
  * <b>Port types</b>
  *
- * The functional specification only names the ports to be used to communicate with the tutorial 
+ * The functional specification only names the ports to be used to communicate with the tutorialThread 
  * but doesn't say anything about the data transmitted on the ports. This is defined by the following code. 
  *
  * \c BufferedPort<ImageOf<PixelRgb> >   \c myInputPort; \n 
@@ -116,8 +116,8 @@
  *
  * \section conf_file_sec Configuration Files
  *
- * \c tutorial.ini  in \c $ICUB_ROOT/app/tutorial/conf \n
- * \c icubEyes.ini  in \c $ICUB_ROOT/app/tutorial/conf
+ * \c tutorialThread.ini  in \c $ICUB_ROOT/app/tutorialThread/conf \n
+ * \c icubEyes.ini  in \c $ICUB_ROOT/app/tutorialThread/conf
  * 
  * \section tested_os_sec Tested OS
  *
@@ -125,13 +125,13 @@
  *
  * \section example_sec Example Instantiation of the Module
  * 
- * <tt>tutorial --name tutorial --context tutorial/conf --from tutorial.ini --robot icub</tt>
+ * <tt>tutorialThread --name tutorialThread --context tutorialThread/conf --from tutorialThread.ini --robot icub</tt>
  *
  * \author Rea Francesco
  *
  * Copyright (C) 2013 Robotics Brain and Cognitive Science \n
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.\n
- * This file can be edited at \c $ICUB_ROOT/main/src/tutorials/tutorial/include/iCub/tutorial.h
+ * This file can be edited at \c $ICUB_ROOT/contrib/src/morphoGen/src/tutorialThread/include/iCub/tutorialThread.h
  * 
  */
 
