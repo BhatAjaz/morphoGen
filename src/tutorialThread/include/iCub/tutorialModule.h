@@ -29,7 +29,7 @@
 
 /** 
  *
- * \defgroup icub_tutorial tutorial
+ * \defgroup icub_tutorialThread tutorialThread
  * @ingroup icub_morphoGen
  *
  * This is a module that receives the RGB image from input connection and sends it back to output connection. The purpose
@@ -127,9 +127,9 @@
  * 
  * <tt>tutorial --name tutorial --context tutorial/conf --from tutorial.ini --robot icub</tt>
  *
- * \author Shashank
+ * \author Rea Francesco
  *
- * Copyright (C) 2011 RobotCub Consortium\n
+ * Copyright (C) 2013 Robotics Brain and Cognitive Science \n
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.\n
  * This file can be edited at \c $ICUB_ROOT/main/src/tutorials/tutorial/include/iCub/tutorial.h
  * 
