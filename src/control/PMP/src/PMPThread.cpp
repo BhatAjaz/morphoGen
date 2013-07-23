@@ -29,6 +29,7 @@ using namespace std;
 #define Trajectory_CUSP		2
 #define Wrist_SIDEGRASP		0
 #define Wrist_TOPGRASP		90
+#define rad2degree          180/3.14159
 
 #define CMD_RIGHT_ARM	VOCAB4('r','a','r','m')
 #define CMD_LEFT_ARM	VOCAB4('l','a','r','m')
@@ -53,13 +54,13 @@ PMPThread::~PMPThread() {
 bool PMPThread::threadInit() {
    
    
-    if (!Inp3D.open(getName("/input/coordinates:i").c_str())) {
+    /*if (!Inp3D.open(getName("/input/coordinates:i").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }   
     
 
-    /*if (!MotCom.open(getName("/v:o").c_str())) {
+    if (!MotCom.open(getName("/v:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     } */  
@@ -103,24 +104,48 @@ bool PMPThread::threadInit() {
 
     //if (Network::exists("/input/joints:i"))
     //Network::connect("/output/alljoints","/input/joints:i");
+	
+	
+	//initial Joint angles
+	memset(Jan,0,10*sizeof(double));
+	memset(JanL,0,10*sizeof(double));
+     
 
-    for(int i=0; i<10; i++)
-    {
-        Jan[i] = 0;
-        
-        JanL[i] = 0;
-    } //initial Joint angles
+	 if (verboseTerm) {      
+		// Stores Output Gamma Function
+    	wr.open("Gamma.txt");
+    	// Stores Solution in Joint angles
+    	// Output of Target Generator
+    	wr1.open("target.txt");
+    	// X/Y Position reached
+    	posi.open("position.txt");
+   		// Stores Output Gamma Function
+    	wrL.open("GammaL.txt");
+    	// Stores Solution in Joint angles
+    	wr_GamL.open("resultL.txt");
+    	// Output of Target Generator
+    	wr1L.open("targetL.txt");
+    	// X/Y Position reached
+    	posiL.open("positionL.txt");
+    	wr_Gam.open("result.txt");
+    }  
+
+
+
+
 
     return true;
 }
 
 void PMPThread::setName(string str) {
+
     this->name=str;
     printf("name: %s", name.c_str());
 }
 
 
 std::string PMPThread::getName(const char* p) {
+
     string str(name);
     str.append(p);
     return str;
@@ -130,6 +155,7 @@ void PMPThread::setInputPortName(string InpPort) {
     
 }
 void PMPThread::setRobotName(string robName) {
+
     this->robot = robName;
     printf("Robot name: %s", robot.c_str());
 }
@@ -267,10 +293,18 @@ void PMPThread::threadRelease() {
     cmdTorsoPort.close();
     cmdInterfacePort.interrupt();
     cmdInterfacePort.close();
-    Inp3D.interrupt();
-    Inp3D.close();
     PMPResponse.interrupt();
     PMPResponse.close();
+    
+    if (verboseTerm) {
+    	wr_Gam.close();
+    	posiL.close();
+    	wr.close();
+    	wr1.close();
+    	posi.close();
+    	wr1L.close();
+    	wr_GamL.close();
+    }
      
 }
 
@@ -763,24 +797,10 @@ int PMPThread::FrameGoal()	{
 };
 
 int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, double Wrist,int TrajT)	{
-         
-	// Stores Output Gamma Function
-    ofstream wr("Gamma.txt");
-    // Stores Solution in Joint angles
-    // Output of Target Generator
-    ofstream wr1("target.txt");
-    // X/Y Position reached
-    ofstream posi("position.txt");
-    // Stores Output Gamma Function
-    ofstream wrL("GammaL.txt");
-    // Stores Solution in Joint angles
-    ofstream wr_GamL("resultL.txt");
-    // Output of Target Generator
-    ofstream wr1L("targetL.txt");
-    // X/Y Position reached
-    ofstream posiL("positionL.txt");
-    ofstream wr_Gam("result.txt");
-            
+   
+
+   
+        
     int time;
     double Gam;
     double fin[3];
@@ -896,30 +916,34 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
                 double *GarzL=Gam_ArrzL;
                 z_iniL=Gamma_Int(GarzL,time)+z_iniICL;
             }
-    		wr1L << x_ini << "    " << y_ini << "    " << z_ini << "    "  << x_iniL << "    " << y_iniL << "    " << z_iniL <<endl;
-    
+            if (verboseTerm) {
+    			wr1L << x_ini << "    " << y_ini << "    " << z_ini << "    "  << x_iniL << "    " << y_iniL << "    " << z_iniL <<endl;
+    		}
     		MotCon(x_ini,y_ini,z_ini, x_iniL,y_iniL,z_iniL,time,Gam,HandAct);
-    		posiL << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] << "    "  << X_posL[0] << "    " << X_posL[1] << "    " << X_posL[2] <<endl;
-    		wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
+    		
+    		if (verboseTerm) {
+    			posiL << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] << "    "  << X_posL[0] << "    " << X_posL[1] << "    " << X_posL[2] <<endl;
+    			wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
+    		}
     	}
-    	konst=(180/3.14159);
-    	ang1=konst*Jan[0];
-    	ang2=konst*Jan[1];
-    	ang3=konst*Jan[2];
-    	ang4=konst*Jan[3];
-    	ang5=konst*Jan[4];
-    	ang6=konst*Jan[5];
-    	ang7=konst*Jan[6];
+    	
+    	ang1=rad2degree*Jan[0];
+    	ang2=rad2degree*Jan[1];
+    	ang3=rad2degree*Jan[2];
+    	ang4=rad2degree*Jan[3];
+    	ang5=rad2degree*Jan[4];
+    	ang6=rad2degree*Jan[5];
+    	ang7=rad2degree*Jan[6];
     	ang8=Wrist;
-    	ang9=konst*Jan[8];
-    	ang10=30;//konst*Jan[9]
+    	ang9=rad2degree*Jan[8];
+    	ang10=30;//rad2degree*Jan[9]
     	angCup=51;
-    	ang4L=konst*JanL[3];
-    	ang5L=konst*JanL[4];
-    	ang6L=konst*JanL[5];
-    	ang7L=konst*JanL[6];
+    	ang4L=rad2degree*JanL[3];
+    	ang5L=rad2degree*JanL[4];
+    	ang6L=rad2degree*JanL[5];
+    	ang7L=rad2degree*JanL[6];
     	ang8L=Wrist;
-    	ang9L=konst*JanL[8];
+    	ang9L=rad2degree*JanL[8];
     	ang10L=28;//
     	angCupL=48;
 
@@ -1163,13 +1187,16 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     		double *Garz1L=Gam_Arrz1L;
     		double *Garz2L=Gam_Arrz2L;
     		z_iniL=KYAL*Gamma_Int(Garz1,time)+KYBL*Gamma_Int(Garz2L,time)+z_iniICL;
-     	
-     		wr1L << x_ini << "    " << y_ini << "    " << z_ini << "    "  << x_iniL << "    " << y_iniL << "    " << z_iniL <<endl;
-    
+     		
+     		if (verboseTerm) {
+     			wr1L << x_ini << "    " << y_ini << "    " << z_ini << "    "  << x_iniL << "    " << y_iniL << "    " << z_iniL <<endl;
+    		}
     		MotCon(x_ini,y_ini,z_ini, x_iniL,y_iniL,z_iniL,time,Gam,HandAct);
-    		posiL << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] << "    "  << X_posL[0] << "    " << X_posL[1] << "    " << X_posL[2] <<endl;	
-    		wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
-
+    		
+    		if (verboseTerm) {
+    			posiL << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] << "    "  << X_posL[0] << "    " << X_posL[1] << "    " << X_posL[2] <<endl;	
+    			wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
+			}
     		//printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],X_posL[1],X_posL[2]);
     
     		if(MSim==MSim_SIMULATION)  {
@@ -1218,26 +1245,26 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         	        if(((time%dividen)==0)&&(time>0)) {
         	                 
         	                        
-    					konst=(180/3.14159);
-    					ang1=konst*Jan[0];
-    					ang2=konst*Jan[1];
-    					ang3=konst*Jan[2];
-    					ang4=konst*Jan[3];
-    					ang5=konst*Jan[4];
-    					ang6=konst*Jan[5];
-    					ang7=konst*Jan[6];
+    					
+    					ang1=rad2degree*Jan[0];
+    					ang2=rad2degree*Jan[1];
+    					ang3=rad2degree*Jan[2];
+    					ang4=rad2degree*Jan[3];
+    					ang5=rad2degree*Jan[4];
+    					ang6=rad2degree*Jan[5];
+    					ang7=rad2degree*Jan[6];
     					ang8=Wrist;
-    					ang9=konst*Jan[8];
-    					ang10=konst*Jan[9];
+    					ang9=rad2degree*Jan[8];
+    					ang10=rad2degree*Jan[9];
     					
      					angCup=36;
-    					ang4L=konst*JanL[3];
-    					ang5L=konst*JanL[4];
-    					ang6L=konst*JanL[5];
-    					ang7L=konst*JanL[6];
+    					ang4L=rad2degree*JanL[3];
+    					ang5L=rad2degree*JanL[4];
+    					ang6L=rad2degree*JanL[5];
+    					ang7L=rad2degree*JanL[6];
     					ang8L=Wrist;
-    					ang9L=konst*JanL[8];
-    					ang10L=konst*JanL[9];
+    					ang9L=rad2degree*JanL[8];
+    					ang10L=rad2degree*JanL[9];
      					angCupL=36;
    						// printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
     					//printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
@@ -1272,26 +1299,26 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         	        if(((time%dividen)==0)&&(time>0)) {
         	                 
         	        
-        	            konst=(180/3.14159);
-        	            ang1=konst*Jan[0];
-        	            ang2=konst*Jan[1];
-        	            ang3=konst*Jan[2];
-        	            ang4=konst*Jan[3];
-        	            ang5=konst*Jan[4];
-        	            ang6=konst*Jan[5];
-        	            ang7=konst*Jan[6];
+        	            
+        	            ang1=rad2degree*Jan[0];
+        	            ang2=rad2degree*Jan[1];
+        	            ang3=rad2degree*Jan[2];
+        	            ang4=rad2degree*Jan[3];
+        	            ang5=rad2degree*Jan[4];
+        	            ang6=rad2degree*Jan[5];
+        	            ang7=rad2degree*Jan[6];
         	            ang8=Wrist;
-        	            ang9=konst*Jan[8];
-        	            ang10=konst*Jan[9];
+        	            ang9=rad2degree*Jan[8];
+        	            ang10=rad2degree*Jan[9];
         	            
         	            angCup=36;
-        	            ang4L=konst*JanL[3];
-        	            ang5L=konst*JanL[4];
-        	            ang6L=konst*JanL[5];
-        	            ang7L=konst*JanL[6];
+        	            ang4L=rad2degree*JanL[3];
+        	            ang5L=rad2degree*JanL[4];
+        	            ang6L=rad2degree*JanL[5];
+        	            ang7L=rad2degree*JanL[6];
         	            ang8L=Wrist;
-        	            ang9L=konst*JanL[8];
-        	            ang10L=konst*JanL[9];
+        	            ang9L=rad2degree*JanL[8];
+        	            ang10L=rad2degree*JanL[9];
         	            angCupL=36;
         	            //	printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
         	            //	printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
@@ -1360,13 +1387,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	}
     	retvalue = false;
     }
-    wr_Gam.close();
-    posiL.close();
-    wr.close();
-    wr1.close();
-    posi.close();
-    wr1L.close();
-    wr_GamL.close();
+    
 
     return 1; 
 };
@@ -2255,7 +2276,7 @@ void PMPThread::CubGrazp1()
  angRPL=0;*/ 
  //ang9L=0;
 
- printf("Angles of Solution \n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
+ printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
      
 
  };
@@ -2299,7 +2320,7 @@ void PMPThread::CubGrazp2()
  angML2=0;
  angRPL=0;*/ 
 
-printf("Angles of Solution \n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
+printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
      
  };
 
@@ -2332,7 +2353,7 @@ void PMPThread::CubUp(int HandUp)
          angML2=25;
          angRPL=0; 
       }
-printf("Angles of Solution \n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
+printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
      
  };
 
