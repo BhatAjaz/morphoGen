@@ -47,17 +47,19 @@ private:
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
         
   
-	yarp::os::BufferedPort<yarp::os::Bottle > MotCom;     // output port to command the robot
-	yarp::os::BufferedPort<yarp::os::Bottle > Inp3D;      // input port to receive 3d information 
-	yarp::os::BufferedPort<yarp::os::Bottle > Inpjoints;
-	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort;     // output ports to command the robot parts
+	//yarp::os::BufferedPort<yarp::os::Bottle > MotCom;     // output port to command the robot
+	//yarp::os::BufferedPort<yarp::os::Bottle > Inp3D;      // input port to receive 3d information 
+	//yarp::os::BufferedPort<yarp::os::Bottle > Inpjoints;
+	
+	// output ports to command the robot parts
+	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort;  
+	   
 	//PMPServer to Observer
-	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result
-	//and motor commands
+	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result and motor commands
    	
 	std::string name;           // rootname of all the ports opened by this thread
-
-
+    bool verboseFile, verboseTerm;
+    std::ofstream wr,wr1,posi,wrL,wr_GamL,wr1L,posiL,wr_Gam; //output file pointers
     /*	double Jan[6];
 		double x_ini; 
 		double y_ini;
@@ -100,7 +102,7 @@ private:
 		double Gam_ArrL[20000],Gam_ArryL[20000],Gam_ArrzL[20000],q1L[20000],q2L[20000],q3L[20000],q4L[20000],q5L[20000];
 		double q6L[20000],q7L[20000],q8L[20000],q9L[20000],q10L[20000];
 
-		double ang1,ang2,ang3,ang4,ang5,ang6,ang7,ang8,ang9,ang10,konst;
+		double ang1,ang2,ang3,ang4,ang5,ang6,ang7,ang8,ang9,ang10;
 		double ang1L,ang2L,ang3L,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L;
 
 		double angCup,angT1,angT2,angT3,angI1,angI2,angM1,angM2,angRP,angCupL,angTL1,angTL2,angTL3,angIL1,angIL2,angML1,angML2,angRPL;
@@ -188,6 +190,13 @@ public:
     * function that sets the inputPort name
     */
     void setInputPortName(std::string inpPrtName);
+    
+    /*
+    * function that enables/disables the verbose terminal and file
+    */
+    void setVerbose(bool vFile, bool vTerm) {verboseFile = vFile; verboseTerm = vTerm;};
+    
+    
 
     /*
     * function that sets the inputPort name

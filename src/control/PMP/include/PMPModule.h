@@ -148,7 +148,7 @@ class PMPModule:public yarp::os::RFModule {
     std::string outputPortName;              // name of output port
     std::string handlerPortName;             // name of handler port
     std::string configFile;                  // name of the configFile that the resource Finder will seek
-	
+	bool verboseTerm, verboseFile;           // name of booleans that enable outputs on terminals and files respectively
     yarp::os::Port handlerPort;              // a port to handle messages 
     /*  */
     PMPThread *rThread;             // pointer to a new thread to be created and started in configure() and stopped in close()
