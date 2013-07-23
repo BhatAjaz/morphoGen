@@ -47,17 +47,37 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
     * get the robot name which will form the stem of the robot ports names
     * and append the specific part and device required
     */
-    robotName             = rf.check("robot", 
+    robotName               = rf.check("robot", 
                            Value("icub"), 
                            "Robot name (string)").asString();
                            
-                           printf("robotName in Module %s \n", robotName.c_str());
-    robotPortName         = "/" + robotName + "/head";
+    printf("robotName in Module %s \n", robotName.c_str());
+    //robotPortName         = "/" + robotName + "/head";
 
     inputPortName           = rf.check("inputPortName",
 			                Value(":i"),
                             "Input port name (string)").asString();
+    /*verboseFile             = rf.check("verboseFile",
+                            Value(false),
+                            "Generate output files (bool)").asBool();
+    verboseTerm             =   rf.check("verboseTerm",
+                            Value(false),
+                            "Generate output on terminal (bool)").asBool();
+    */
+                            
+    if (rf.check("verboseTerm")) {
+        verboseTerm = true;
+    }
+    else {
+        verboseTerm = false;
+    }
     
+    if (rf.check("verboseFile")) {
+        verboseFile = true;
+    }
+    else {
+        verboseFile = false;
+    }
     
     /*
     * attach a port of the same name as the module (prefixed with a /) to the module
@@ -86,6 +106,7 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
     rThread = new PMPThread(robotName, configFile);
     rThread->setName(getName().c_str());
     rThread->setRobotName(robotName);
+    rThread->setVerbose(verboseFile,verboseTerm);
 	//=======================================================================
 
     /* now start the thread to do the work */
