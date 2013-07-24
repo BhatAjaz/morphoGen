@@ -999,12 +999,12 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
                    
                     if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))>=70))	{
                             
-                        retvalue = false;
+                        //retvalue = false;
                         printf("\n\n Target Unreachable");
                     }
                     if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))<70)) {
                             
-                    	retvalue =  true;
+                    	//retvalue =  true;
                     	rightMove = true;
                     	/*
                     	MessagePassR();
@@ -1026,12 +1026,12 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
                     
                     if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))>=70)) {
                         
-                        retvalue=false;
+                        //retvalue=false;
                         printf("\n\n Target Unreachable");
                     }
                     if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))<70)) {
                         
-                        retvalue = true;
+                        //retvalue = true;
                         leftMove = true;
                         /*
                 		MessagePassL(); 
@@ -1273,7 +1273,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         	            //MessageDevDriverR();
         	            if(((ang4>-99)&&(ang4<-15))&&((ang5>9)&&(ang5<100))) {
         	                          
-        	                retvalue =  true;
+        	                //retvalue =  true;
         	                rightMove = true;
         	                /*
         	                MessagePassT();
@@ -1329,7 +1329,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
             	        if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>9)&&(ang5L<100))) {
             	                    
                                     
-            	            retvalue = true;
+            	            //retvalue = true;
             	            leftMove = true;
             	            /*
             	            MessagePassT();
@@ -1355,7 +1355,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	}	
     	
     }
-    if (retvalue)	{
+    if (rightMove || leftMove)	{
     	cout <<"About to activate robot motors" <<endl;
         cout <<"Body chain involved \t"<<HandAct<<endl;
     	if (cmdInterfacePort.getOutputCount()) {
@@ -1385,7 +1385,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     			leftMove = false;
     		}	
     	}
-    	retvalue = false;
+    	//retvalue = false;
     }
     
 
@@ -1967,7 +1967,7 @@ void PMPThread::MessageDevDriverT()
     
     printf("Writing bottle right arm (%s)\n",outBot1.toString().c_str());
     cmdRight_armPort.write();                       
-    Time::delay(2);
+    //Time::delay(2);
 };
 
 void PMPThread::MessagePassL()
@@ -1996,7 +1996,7 @@ void PMPThread::MessagePassL()
      listBot1.addDouble(angRPL);
      printf("Writing bottle left arm (%s)\n",outBot2.toString().c_str());
      cmdLeft_armPort.write(); 
-     Time::delay(2);
+     //Time::delay(2);
     // Sleep(3000);
 
  };
@@ -2015,7 +2015,7 @@ void PMPThread::MessagePassT()
     
     printf("\n\n Writing bottle torso (%s)\n",outBot3.toString().c_str());
     cmdTorsoPort.write();                       // Now send i  
-    Time::delay(2);
+    //Time::delay(2);
     //Sleep(1000);
   };
 
@@ -2038,7 +2038,7 @@ void PMPThread::MessagePassT()
     listBot.addDouble(ang10);
     printf("sending bottle right arm (%s)\n",outBot1.toString().c_str());
     cmdInterfacePort.write();                       
-    Time::delay(2);
+    //Time::delay(2);
 };
 
 void PMPThread::cmdInterfacePassL()
@@ -2057,7 +2057,7 @@ void PMPThread::cmdInterfacePassL()
      listBot1.addDouble(ang10L);
      printf("Sending bottle left arm (%s)\n",outBot2.toString().c_str());
      cmdInterfacePort.write(); 
-     Time::delay(2);
+     //Time::delay(2);
     // Sleep(3000);
  };
 
@@ -2072,7 +2072,7 @@ void PMPThread::cmdInterfacePassT(){
     
     printf("\n\n Sending bottle torso (%s)\n",outBot3.toString().c_str());
     cmdInterfacePort.write();                       // Now send i  
-    Time::delay(2);
+    //Time::delay(2);
     //Sleep(1000);	
 }
 
@@ -2095,7 +2095,7 @@ void PMPThread::cmdInterfacePassRhand()
     listBot.addDouble(angRP);
     printf("sending bottle right hand (%s)\n",outBot1.toString().c_str());
     cmdInterfacePort.write();                       
-    Time::delay(2);
+    //Time::delay(2);
 };
 
 
@@ -2117,7 +2117,7 @@ void PMPThread::cmdInterfacePassLhand()
      listBot1.addDouble(angRPL);
      printf("Sending bottle left hand (%s)\n",outBot2.toString().c_str());
      cmdInterfacePort.write(); 
-     Time::delay(2);
+     //Time::delay(2);
     // Sleep(3000);
  };
 
