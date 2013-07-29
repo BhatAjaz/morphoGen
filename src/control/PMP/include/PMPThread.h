@@ -38,7 +38,18 @@
 #include <math.h>
 #include <vector>
 
-#define COMMAND_VOCAB_REACH   VOCAB3('R','E','A')
+
+#define COMMAND_VOCAB_CACT   VOCAB4('C','A','C','T')
+#define COMMAND_VOCAB_BCHA   VOCAB4('B','C','H','A')
+#define COMMAND_VOCAB_MSIM   VOCAB4('M','S','I','M')
+#define COMMAND_VOCAB_TRAT   VOCAB4('T','R','A','T')
+#define COMMAND_VOCAB_GRIG   VOCAB4('G','R','I','G')
+#define COMMAND_VOCAB_GLEF   VOCAB4('G','L','E','F')
+#define COMMAND_VOCAB_OLEF   VOCAB4('O','L','E','F')
+#define COMMAND_VOCAB_ORIG   VOCAB4('O','R','I','G')
+#define COMMAND_VOCAB_WRIO   VOCAB4('W','R','I','O')
+#define COMMAND_VOCAB_REA    VOCAB3('R','E','A')
+
 
 class PMPThread : public yarp::os::Thread {
 private:
@@ -123,7 +134,7 @@ private:
     double Gam_Arr1L[20000],Gam_Arry1L[20000],Gam_Arrz1L[20000];
     double Gam_Arr2L[20000],Gam_Arry2L[20000],Gam_Arrz2L[20000];
     double KXA,KXB,KYA,KYB,KXAL,KXBL,KYAL,KYBL,x_off1,z_off1,x_off2,z_off2,STARTini,FrameRef,XinitTarg,ZinitTarg,csi_dot1,csi_dot;
-    int dividen,NoBjS,Obj1ID,Obj2ID,BodyChain,MSimExec,TrajType,TSEC;
+    int dividen,NoBjS,Obj1ID,Obj2ID,GoalCodePMP,BodyChain,MSimExec,TrajType,TSEC;
     // Global information management
     double MiniGoal[12], PlaceMap[10][10],BodyTrack[2][15],GoalSpace[10][23],WristOrR,WristOrL;
     double PickX,PickY,PickZ,PlacX,PlacY,PlacZ, WristO;

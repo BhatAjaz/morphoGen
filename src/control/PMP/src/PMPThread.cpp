@@ -184,63 +184,128 @@ void PMPThread::run() {
                 printf("%s \n",ObsReq.toString().c_str());
                 cout<<"ObsReq!=NULL"<<endl;
                 // request present
-                //reading
+                // reading the typology of the command first element
                 int cmd = ObsReq.get(0).asVocab();
-                int GoalCodePMP=ObsReq.get(1).asInt();
-                BodyChain=ObsReq.get(2).asInt();
-				MSimExec=ObsReq.get(3).asInt();
-				TrajType=ObsReq.get(4).asInt();
-				WristO=ObsReq.get(5).asDouble();
-				/*
-						Body Chain: 0,1,2 
-						MSimExec: 0/1
-						wristO:orient: in angles
-						TrajType: 0,1,2 for line bump and cusp if goal code is 21 i.e traj synthesis
-				*/
-				cout<< "Received microgoal VOCAB ID from Client:Observer" <<cmd<<endl;
+                
+                switch(cmd){
+                case COMMAND_VOCAB_CACT:{
+                  printf("Goal Code PMP - choice act \n");
+                  GoalCodePMP=ObsReq.get(1).asInt();
+                }break;
 
-			    ResPM=0;
-				for(int i=0;i<12;i++)	{
-					MiniGoal[i]=ObsReq.get(i+6).asDouble(); 
-					//0-11 are the 3D coordinates for right and left arm
+                case COMMAND_VOCAB_BCHA:{
+                  printf("Body Chain \n");
+                  //Body Chain: 0,1,2 
+                  BodyChain=ObsReq.get(1).asInt();
+                }break;
+
+                case COMMAND_VOCAB_MSIM:{
+                  printf("Mental Simulation\n");
+                  //MSimExec: 0/1
+                  MSimExec=ObsReq.get(1).asInt();
+                }break;
+
+                case COMMAND_VOCAB_TRAT:{
+                  printf("Trajectory Type \n");
+                  //TrajType: 0,1,2 for line bump and cusp if goal code is 21 i.e traj synthesis
+                  TrajType=ObsReq.get(1).asInt();
+                }break;
+
+                case COMMAND_VOCAB_WRIO:{
+                  printf("Wrist Orientation \n");
+                  // wristO:orient: in angle degrees
+                  WristO=ObsReq.get(1).asDouble();
+                }break;
+
+                case COMMAND_VOCAB_GLEF:{
+                  Bottle* Coord = ObsReq.get(1).asList();
+                  for(int i = 0; i < 3; i++)	{
+					MiniGoal[i] = Coord->get(i).asDouble(); 
 					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
-				}
-				//placing the arm close to the destination...
-				if((GoalCodePMP==GoalCodePMP_DISC)||(GoalCodePMP==GoalCodePMP_CONT))	{
+                  }
+                }break;
+
+                case COMMAND_VOCAB_GRIG:{
+                  Bottle* Coord = ObsReq.get(1).asList();
+                  for(int i = 0; i < 3; i++)	{
+					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
+					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+                  }
+                }break;
+
+                case COMMAND_VOCAB_OLEF:{
+                  Bottle* Coord = ObsReq.get(1).asList();
+                  for(int i = 0; i < 3; i++)	{
+					MiniGoal[3 + i] = Coord->get(i).asDouble(); 
+					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+                  }
+                }break;
+
+                case COMMAND_VOCAB_ORIG:{
+                  Bottle* Coord = ObsReq.get(1).asList();
+                  for(int i = 0; i < 3; i++)	{
+					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
+					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+                  }
+                }break;
+
+                case COMMAND_VOCAB_REA :{
+                  //placing the arm close to the destination...
+                  if((GoalCodePMP==GoalCodePMP_DISC)||(GoalCodePMP==GoalCodePMP_CONT))	{
 					cout << "Goal REA Target recd from Client" << endl;
 					InitializeJan();
 				    ResPM=VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType); 
 					cout << "ResPM" << ResPM << endl;
 					int XmitGreen=0;
 					if(ResPM==1)   {
-						//cout << "Seems Doable::Transmiting motor commands" << endl;
-						XmitGreen=1;
-						ResPM=0;
+                      //cout << "Seems Doable::Transmiting motor commands" << endl;
+                      XmitGreen=1;
+                      ResPM=0;
 					}
-				}
-				
-				if(GoalCodePMP==GoalCodePMP_INIT)	{
-
+                  }
+                  
+                  
+                  if(GoalCodePMP==GoalCodePMP_INIT)	{
+                    
                    	ResPM=0;
                    	cout << "Goal INIT Robot recd from Client" << endl;
                    	initiCubUp();
                    	if (MSimExec == 1) { 
-                   		if (cmdInterfacePort.getOutputCount()) {
-                   	
-    						// Send output commands in a bottle to another module through interface  		
-    						cmdInterfacePassT();
-    						cmdInterfacePassR();
-    						cmdInterfacePassRhand();
-    						cmdInterfacePassL();
-    						cmdInterfacePassLhand();
-    					}
-    					else {
-                   			MessagePassT();
-                   			MessagePassR();
-                   			MessagePassL();
-                		}
+                      if (cmdInterfacePort.getOutputCount()) {
+                        
+                        // Send output commands in a bottle to another module through interface  		
+                        cmdInterfacePassT();
+                        cmdInterfacePassR();
+                        cmdInterfacePassRhand();
+                        cmdInterfacePassL();
+                        cmdInterfacePassLhand();
+                      }
+                      else {
+                        MessagePassT();
+                        MessagePassR();
+                        MessagePassL();
+                      }
                 	}
-				}
+                  }
+                }break;
+                  
+                default:{
+                  printf("Command not recognized \n");
+                }break; 
+                  
+                }
+
+                /*
+				cout<< "Received microgoal VOCAB ID from Client:Observer" <<cmd<<endl;
+
+			    ResPM=0;
+				*/
+                
+                //*************************************************************************************
+
+				
+                
+                //**********************************************************************************************
                 cout << "Sending out Result of requested Primitive behaviour to Client Observer" << endl;
                 ObsResp.addDouble(221);
                 ObsResp.addDouble(ResPM);
@@ -272,9 +337,10 @@ void PMPThread::run() {
 
                 PMPResponse.reply(ObsResp);
                 Time::delay(3);
+                
             }
             else {
-                cout<<"null requst"<<endl;
+                cout<<"null request"<<endl;
             }
 //========================================================================================  
         }
