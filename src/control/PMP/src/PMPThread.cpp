@@ -401,31 +401,53 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
 
  	computeJacobian(Jacob,JacobL,Jan,JanL);
 //=======================================================================================
+   
+    meanJan[0] =  0.5200; 
+    meanJan[1] =  0.0000;
+    meanJan[2] =  0.0000;
+    meanJan[3] = -0.7854;
+    meanJan[4] =  0.0000;
+    meanJan[5] =  0.7098;
+    meanJan[6] =  0.9730;
+    meanJan[7] =  1.2000;
+    meanJan[8] =  0.0000;
+    meanJan[9] =  0.0000;
 
-    Joint_Field[0]=(0.52-Jan[0])*J2H; // Multiply by Joint compliance 
-    Joint_Field[1]=(0-Jan[1])*0.000041; //0.52 / Modified in June at Crete
-    Joint_Field[2]=(0.0-Jan[2])*J3H;  //1.8
-    Joint_Field[3]=(-0.7854-Jan[3])*0.041;  //4.5 //0.95
-    Joint_Field[4]=(0-Jan[4])*0.041; 
-    Joint_Field[5]=(0.7098-Jan[5])*5; // Multiply by Joint compliance 
-    Joint_Field[6]=(0.9730-Jan[6])*0.041; //0.52 / Modified in June at Crete
-    Joint_Field[7]=(1.2-Jan[7])*75;  //1.8
-    Joint_Field[8]=(0-Jan[8])*J8H;  //4.5 //0.95
-    Joint_Field[9]=(0-Jan[9])*J9H;
+    Joint_Field[0]=(meanJan[0]-Jan[0])*J2H; // Multiply by Joint compliance 
+    Joint_Field[1]=(meanJan[1]-Jan[1])*0.000041; //0.52 / Modified in June at Crete
+    Joint_Field[2]=(meanJan[2]-Jan[2])*J3H;  //1.8
+    Joint_Field[3]=(meanJan[3]-Jan[3])*0.041;  //4.5 //0.95
+    Joint_Field[4]=(meanJan[4]-Jan[4])*0.041; 
+    Joint_Field[5]=(meanJan[5]-Jan[5])*5; // Multiply by Joint compliance 
+    Joint_Field[6]=(meanJan[6]-Jan[6])*0.041; //0.52 / Modified in June at Crete
+    Joint_Field[7]=(meanJan[7]-Jan[7])*75;  //1.8
+    Joint_Field[8]=(meanJan[8]-Jan[8])*J8H;  //4.5 //0.95
+    Joint_Field[9]=(meanJan[9]-Jan[9])*J9H;
 
 //=======================================================================================
 //=======================================================================================
 
-    Joint_FieldL[0]=(0.52-JanL[0])*J2H; // Multiply by Joint compliance 
-    Joint_FieldL[1]=(0.0-JanL[1])*0.000041; //0.52 / Modified in June at Crete
-    Joint_FieldL[2]=(0.0-JanL[2])*J3H;  //1.8
-    Joint_FieldL[3]=(-0.7854-JanL[3])*0.041;  //4.5 //0.95
-    Joint_FieldL[4]=(0-JanL[4])*0.041;
-    Joint_FieldL[5]=(0.7098-JanL[5])*5; // Multiply by Joint compliance 
-    Joint_FieldL[6]=(0.9730-JanL[6])*0.041; //0.52 / Modified in June at Crete
-    Joint_FieldL[7]=(1.2-JanL[7])*75;  //1.8
-    Joint_FieldL[8]=(0.0-JanL[8])*J8H;  //4.5 //0.95
-    Joint_FieldL[9]=(0.0-JanL[9])*J9H;
+    meanJanL[0] =  0.5200; 
+    meanJanL[1] =  0.0000;
+    meanJanL[2] =  0.0000;
+    meanJanL[3] = -0.7854;
+    meanJanL[4] =  0.0000;
+    meanJanL[5] =  0.7098;
+    meanJanL[6] =  0.9730;
+    meanJanL[7] =  1.2000;
+    meanJanL[8] =  0.0000;
+    meanJanL[9] =  0.0000;
+
+    Joint_FieldL[0]=(meanJanL[0]-JanL[0])*J2H; // Multiply by Joint compliance 
+    Joint_FieldL[1]=(meanJanL[1]-JanL[1])*0.000041; //0.52 / Modified in June at Crete
+    Joint_FieldL[2]=(meanJanL[2]-JanL[2])*J3H;  //1.8
+    Joint_FieldL[3]=(meanJanL[3]-JanL[3])*0.041;  //4.5 //0.95
+    Joint_FieldL[4]=(meanJanL[4]-JanL[4])*0.041;
+    Joint_FieldL[5]=(meanJanL[5]-JanL[5])*5; // Multiply by Joint compliance 
+    Joint_FieldL[6]=(meanJanL[6]-JanL[6])*0.041; //0.52 / Modified in June at Crete
+    Joint_FieldL[7]=(meanJanL[7]-JanL[7])*75;  //1.8
+    Joint_FieldL[8]=(meanJanL[8]-JanL[8])*J8H;  //4.5 //0.95
+    Joint_FieldL[9]=(meanJanL[9]-JanL[9])*J9H;
 
 //=======================================================================================
    	
@@ -2439,41 +2461,41 @@ void PMPThread::CubReleaseSoft()
  };
 
 void PMPThread::Grab()
- {
+{
   ang4=0;
- ang5=90;
- ang6=0;
- ang7=0;
- ang8=0;
- ang9=0;
- ang10=0;
- angCup=0;
- angT1=30;
- angT2=20;
- angT3=20;
- angI1=20;
- angI2=20;
- angM1=20;
- angM2=20;
- angRP=20;
-
- ang4L=-38;
- ang5L=-8;
- ang6L=0;
- ang7L=21;
- ang8L=120;
- ang9L=5;
- ang10L=-40;
- angCupL=0;
- angTL1=90;
- angTL2=90;
- angTL3=90;
- angIL1=90;
- angIL2=90;
- angML1=90;
- angML2=90;
- angRPL=90;
- };
+  ang5=90;
+  ang6=0;
+  ang7=0;
+  ang8=0;
+  ang9=0;
+  ang10=0;
+  angCup=0;
+  angT1=30;
+  angT2=20;
+  angT3=20;
+  angI1=20;
+  angI2=20;
+  angM1=20;
+  angM2=20;
+  angRP=20;
+  
+  ang4L=-38;
+  ang5L=-8;
+  ang6L=0;
+  ang7L=21;
+  ang8L=120;
+  ang9L=5;
+  ang10L=-40;
+  angCupL=0;
+  angTL1=90;
+  angTL2=90;
+  angTL3=90;
+  angIL1=90;
+  angIL2=90;
+  angML1=90;
+  angML2=90;
+  angRPL=90;
+};
 
 void PMPThread::Kompliance(int TagK)	{
  	// Close Space********************************** (0,-230,590)
