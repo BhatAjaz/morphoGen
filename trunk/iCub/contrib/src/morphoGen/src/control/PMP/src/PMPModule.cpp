@@ -57,13 +57,7 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
     inputPortName           = rf.check("inputPortName",
 			                Value(":i"),
                             "Input port name (string)").asString();
-    /*verboseFile             = rf.check("verboseFile",
-                            Value(false),
-                            "Generate output files (bool)").asBool();
-    verboseTerm             =   rf.check("verboseTerm",
-                            Value(false),
-                            "Generate output on terminal (bool)").asBool();
-    */
+
                             
     if (rf.check("verboseTerm")) {
         verboseTerm = true;
