@@ -107,7 +107,7 @@ bool PMPThread::threadInit() {
 	
 	
 	//initial Joint angles
-	memset(Jan,0,10*sizeof(double));
+	memset(Jan ,0,10*sizeof(double));
 	memset(JanL,0,10*sizeof(double));
      
 
@@ -221,7 +221,7 @@ void PMPThread::run() {
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
 					MiniGoal[i] = Coord->get(i).asDouble(); 
-					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+					cout << "GLEF : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
                 }break;
 
@@ -229,7 +229,7 @@ void PMPThread::run() {
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
 					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
-					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+					cout << "GRIG : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
                 }break;
 
@@ -237,7 +237,7 @@ void PMPThread::run() {
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
 					MiniGoal[3 + i] = Coord->get(i).asDouble(); 
-					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+					cout << "OLEF : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
                 }break;
 
@@ -245,7 +245,7 @@ void PMPThread::run() {
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
 					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
-					cout << "Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+					cout << "OLEF:Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
                 }break;
 
@@ -253,39 +253,37 @@ void PMPThread::run() {
                   //placing the arm close to the destination...
                   if((GoalCodePMP==GoalCodePMP_DISC)||(GoalCodePMP==GoalCodePMP_CONT))	{
 					cout << "Goal REA Target recd from Client" << endl;
-					InitializeJan();
-				    ResPM=VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType); 
-					cout << "ResPM" << ResPM << endl;
-					int XmitGreen=0;
-					if(ResPM==1)   {
+					//InitializeJan();
+				    //ResPM=VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType); 
+					//cout << "ResPM" << ResPM << endl;
+					//int XmitGreen=0;
+					//if(ResPM==1)   {
                       //cout << "Seems Doable::Transmiting motor commands" << endl;
-                      XmitGreen=1;
-                      ResPM=0;
-					}
+                      //XmitGreen=1;
+                    //ResPM=0;
+					//}
                   }
-                  
-                  
-                  if(GoalCodePMP==GoalCodePMP_INIT)	{
+                  else if(GoalCodePMP==GoalCodePMP_INIT)	{
                     
                    	ResPM=0;
                    	cout << "Goal INIT Robot recd from Client" << endl;
-                   	initiCubUp();
-                   	if (MSimExec == 1) { 
-                      if (cmdInterfacePort.getOutputCount()) {
+                   	//initiCubUp();
+                   	//if (MSimExec == 1) { 
+                    //if (cmdInterfacePort.getOutputCount()) {
                         
                         // Send output commands in a bottle to another module through interface  		
-                        cmdInterfacePassT();
-                        cmdInterfacePassR();
-                        cmdInterfacePassRhand();
-                        cmdInterfacePassL();
-                        cmdInterfacePassLhand();
-                      }
-                      else {
-                        MessagePassT();
-                        MessagePassR();
-                        MessagePassL();
-                      }
-                	}
+                    //  cmdInterfacePassT();
+                    //  cmdInterfacePassR();
+                    //  cmdInterfacePassRhand();
+                    //  cmdInterfacePassL();
+                    //  cmdInterfacePassLhand();
+                    //}
+                    //else {
+                    //  MessagePassT();
+                    //  MessagePassR();
+                    //  MessagePassL();
+                    //}
+                    //}
                   }
                 }break;
                   
@@ -307,6 +305,7 @@ void PMPThread::run() {
                 
                 //**********************************************************************************************
                 cout << "Sending out Result of requested Primitive behaviour to Client Observer" << endl;
+                /*
                 ObsResp.addDouble(221);
                 ObsResp.addDouble(ResPM);
                 for(int i=0;i<3;i++)	{
@@ -337,6 +336,7 @@ void PMPThread::run() {
 
                 PMPResponse.reply(ObsResp);
                 Time::delay(3);
+                */
                 
             }
             else {
