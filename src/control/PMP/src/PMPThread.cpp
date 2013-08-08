@@ -110,37 +110,57 @@ bool PMPThread::threadInit() {
 	memset(Jan ,0,10*sizeof(double));
 	memset(JanL,0,10*sizeof(double));
      
-
-	 if (verboseTerm) {      
-		// Stores Output Gamma Function
-    	wr.open("Gamma.txt");
-    	// Stores Solution in Joint angles
-    	// Output of Target Generator
-    	wr1.open("target.txt");
-    	// X/Y Position reached
-    	posi.open("position.txt");
-   		// Stores Output Gamma Function
-    	wrL.open("GammaL.txt");
-    	// Stores Solution in Joint angles
-    	wr_GamL.open("resultL.txt");
-    	// Output of Target Generator
-    	wr1L.open("targetL.txt");
-    	// X/Y Position reached
-    	posiL.open("positionL.txt");
-    	wr_Gam.open("result.txt");
+    // handling verbose option
+    if (verboseTerm) {      
+      // Stores Output Gamma Function
+      wr.open("Gamma.txt");
+      // Stores Solution in Joint angles
+      // Output of Target Generator
+      wr1.open("target.txt");
+      // X/Y Position reached
+      posi.open("position.txt");
+      // Stores Output Gamma Function
+      wrL.open("GammaL.txt");
+      // Stores Solution in Joint angles
+      wr_GamL.open("resultL.txt");
+      // Output of Target Generator
+      wr1L.open("targetL.txt");
+      // X/Y Position reached
+      posiL.open("positionL.txt");
+      wr_Gam.open("result.txt");
     }  
-
-
-
-
-
+    
+    //initialization of the state of PMP (default state)
+    GoalCodePMP  = 1;
+    BodyChain    = 0;
+    MSimExec     = 1;
+    TrajType     = 1;
+    WristO       = 0.5;
+    MiniGoal[0]  = -0.5;
+    MiniGoal[1]  = 0.0;
+    MiniGoal[2]  = 0.0;
+    MiniGoal[3]  = 0.0;
+    MiniGoal[4]  = 0.0;
+    MiniGoal[5]  = 0.0;
+    MiniGoal[6]  = -0.5;
+    MiniGoal[7]  = 0.0;
+    MiniGoal[8]  = 0.0;
+    MiniGoal[9]  = 0.0;
+    MiniGoal[10] = 0.0;
+    MiniGoal[11] = 0.0;
+    
+      
+    
+    printf("PMP Thread initialization: successfully completed \n");
+      
+      
     return true;
 }
 
 void PMPThread::setName(string str) {
 
     this->name=str;
-    printf("name: %s", name.c_str());
+    printf("name: %s \n", name.c_str());
 }
 
 
@@ -176,7 +196,10 @@ void PMPThread::run() {
             //double x = inPC->get(0).asDouble();
             //double y = inPC->get(1).asDouble();
             //double z = inPC->get(2).asDouble();
-//=====================================================================================================
+            //=====================================================================================================
+
+            bool ok  = false;
+            bool rec = false; // is the command recognized?
 
             PMPResponse.read(ObsReq,true);
             
@@ -185,71 +208,91 @@ void PMPThread::run() {
                 cout<<"ObsReq!=NULL"<<endl;
                 // request present
                 // reading the typology of the command first element
-                int cmd = ObsReq.get(0).asVocab();
+                int cmd = ObsReq.get(0).asVocab();                
                 
                 switch(cmd){
                 case COMMAND_VOCAB_CACT:{
+                  rec = true;
+                  //Choice Act:1, 21, 19
                   printf("Goal Code PMP - choice act \n");
                   GoalCodePMP=ObsReq.get(1).asInt();
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_BCHA:{
+                  rec = true;
                   printf("Body Chain \n");
                   //Body Chain: 0,1,2 
                   BodyChain=ObsReq.get(1).asInt();
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_MSIM:{
+                  rec = true;
                   printf("Mental Simulation\n");
                   //MSimExec: 0/1
                   MSimExec=ObsReq.get(1).asInt();
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_TRAT:{
+                  rec = true;
                   printf("Trajectory Type \n");
                   //TrajType: 0,1,2 for line bump and cusp if goal code is 21 i.e traj synthesis
                   TrajType=ObsReq.get(1).asInt();
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_WRIO:{
+                  rec = true;
                   printf("Wrist Orientation \n");
                   // wristO:orient: in angle degrees
                   WristO=ObsReq.get(1).asDouble();
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_GLEF:{
+                  rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
 					MiniGoal[i] = Coord->get(i).asDouble(); 
 					cout << "GLEF : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_GRIG:{
+                  rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
 					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
 					cout << "GRIG : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_OLEF:{
+                  rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
 					MiniGoal[3 + i] = Coord->get(i).asDouble(); 
 					cout << "OLEF : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_ORIG:{
+                  rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
-					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
+					MiniGoal[9 + i] = Coord->get(i).asDouble(); 
 					cout << "OLEF:Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
+                  ok = true;
                 }break;
 
                 case COMMAND_VOCAB_REA :{
+                  rec = true;
                   //placing the arm close to the destination...
                   if((GoalCodePMP==GoalCodePMP_DISC)||(GoalCodePMP==GoalCodePMP_CONT))	{
 					cout << "Goal REA Target recd from Client" << endl;
@@ -285,6 +328,7 @@ void PMPThread::run() {
                     //}
                     //}
                   }
+                  ok = true;
                 }break;
                   
                 default:{
@@ -293,9 +337,23 @@ void PMPThread::run() {
                   
                 }
 
+
+                if (!rec){
+                  ObsResp.addVocab(COMMAND_VOCAB_FAILED);
+                }
+                
+                
+                if (!ok) {
+                  ObsResp.clear();
+                  ObsResp.addVocab(COMMAND_VOCAB_FAILED);
+                }
+                else {
+                  ObsResp.addVocab(COMMAND_VOCAB_OK);
+                }
+                
+
                 /*
 				cout<< "Received microgoal VOCAB ID from Client:Observer" <<cmd<<endl;
-
 			    ResPM=0;
 				*/
                 
@@ -342,6 +400,10 @@ void PMPThread::run() {
             else {
                 cout<<"null request"<<endl;
             }
+
+
+            PMPResponse.reply(ObsResp);
+
 //========================================================================================  
         }
     }               
