@@ -120,6 +120,7 @@ bool PMPModule::close() {
     /* stop the thread */
     printf("stopping the thread \n");
     rThread->stop();
+    printf("PMPModule::close:end \n");
     return true;
 }
 

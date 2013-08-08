@@ -79,8 +79,7 @@ bool PMPThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
-    
-    
+        
     if (!cmdLeft_armPort.open(getName("/cmd/left_arm:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
@@ -95,13 +94,15 @@ bool PMPThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
+    
+    //deprecated hardcoded connections
+    
     //Network::connect("/cmd/right_arm:o","/icubSim/right_arm/rpc:i");
     //Network::connect("/cmd/left_arm:o","/icubSim/left_arm/rpc:i");
     //Network::connect("/cmd/torso:o","/icubSim/torso/rpc:i");
 
     //if (Network::exists("/v:o"))			
     //Network::connect("/v:o", "/input/moveRobots");  //check this
-
     //if (Network::exists("/input/joints:i"))
     //Network::connect("/output/alljoints","/input/joints:i");
 	
@@ -131,7 +132,7 @@ bool PMPThread::threadInit() {
     }  
     
     //initialization of the state of PMP (default state)
-    GoalCodePMP  = 1;
+    GoalCodePMP  = 19;
     BodyChain    = 0;
     MSimExec     = 1;
     TrajType     = 1;
@@ -151,7 +152,7 @@ bool PMPThread::threadInit() {
     
       
     
-    printf("PMP Thread initialization: successfully completed \n");
+    printf("\nPMP Thread initialization: successfully completed \n");
       
       
     return true;
@@ -183,6 +184,7 @@ void PMPThread::setRobotName(string robName) {
 void PMPThread::run() {    
 
     while (isStopping() != true) {
+      
 
         if (PMPResponse.getInputCount()) {        
             //this will be replaced with a client request from Observer that is responsible for executing
@@ -202,6 +204,7 @@ void PMPThread::run() {
             bool rec = false; // is the command recognized?
 
             PMPResponse.read(ObsReq,true);
+            printf("getting out from the blocking read \n");
             
             if(!ObsReq.isNull()) {
                 printf("%s \n",ObsReq.toString().c_str());
@@ -294,39 +297,39 @@ void PMPThread::run() {
                 case COMMAND_VOCAB_REA :{
                   rec = true;
                   //placing the arm close to the destination...
-                  if((GoalCodePMP==GoalCodePMP_DISC)||(GoalCodePMP==GoalCodePMP_CONT))	{
+                  if((GoalCodePMP == GoalCodePMP_DISC)||(GoalCodePMP == GoalCodePMP_CONT))	{
 					cout << "Goal REA Target recd from Client" << endl;
-					//InitializeJan();
-				    //ResPM=VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType); 
-					//cout << "ResPM" << ResPM << endl;
-					//int XmitGreen=0;
-					//if(ResPM==1)   {
-                      //cout << "Seems Doable::Transmiting motor commands" << endl;
-                      //XmitGreen=1;
-                    //ResPM=0;
-					//}
+					InitializeJan();
+				    //ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType); 
+					cout << "Response from PMP:" << ResPM << endl;
+					int XmitGreen=0;
+					if(ResPM)   {
+                      cout << "Seems Doable::Transmiting motor commands" << endl;
+                      XmitGreen=1;
+                      ResPM=0;
+					}
                   }
                   else if(GoalCodePMP==GoalCodePMP_INIT)	{
                     
                    	ResPM=0;
                    	cout << "Goal INIT Robot recd from Client" << endl;
-                   	//initiCubUp();
-                   	//if (MSimExec == 1) { 
-                    //if (cmdInterfacePort.getOutputCount()) {
-                        
-                        // Send output commands in a bottle to another module through interface  		
-                    //  cmdInterfacePassT();
-                    //  cmdInterfacePassR();
-                    //  cmdInterfacePassRhand();
-                    //  cmdInterfacePassL();
-                    //  cmdInterfacePassLhand();
-                    //}
-                    //else {
-                    //  MessagePassT();
-                    //  MessagePassR();
-                    //  MessagePassL();
-                    //}
-                    //}
+                   	initiCubUp();
+                   	if (MSimExec == 1) { 
+                      if (cmdInterfacePort.getOutputCount()) {                        
+                        //Send output commands in a bottle to motor interface  		
+                        cmdInterfacePassT();       // torso
+                        cmdInterfacePassR();       // right arm
+                        cmdInterfacePassRhand();   // right hand
+                        cmdInterfacePassL();       // left arm
+                        cmdInterfacePassLhand();   // left hand
+                      }
+                      else {
+                        //forcing to the rpc port of the controller
+                        MessagePassT();            
+                        MessagePassR();
+                        MessagePassL();
+                      }
+                    }
                   }
                   ok = true;
                 }break;
@@ -362,7 +365,7 @@ void PMPThread::run() {
 				
                 
                 //**********************************************************************************************
-                cout << "Sending out Result of requested Primitive behaviour to Client Observer" << endl;
+                //cout << "Sending out Result of requested Primitive behaviour to Client Observer" << endl;
                 /*
                 ObsResp.addDouble(221);
                 ObsResp.addDouble(ResPM);
@@ -412,34 +415,43 @@ void PMPThread::run() {
 
 
 void PMPThread::threadRelease() {
-    // nothing
-    cmdRight_armPort.interrupt();
-    cmdRight_armPort.close();
-    cmdLeft_armPort.interrupt();
-    cmdLeft_armPort.close();
-    cmdTorsoPort.interrupt();
-    cmdTorsoPort.close();
-    cmdInterfacePort.interrupt();
-    cmdInterfacePort.close();
-    PMPResponse.interrupt();
-    PMPResponse.close();
-    
-    if (verboseTerm) {
-    	wr_Gam.close();
-    	posiL.close();
-    	wr.close();
-    	wr1.close();
-    	posi.close();
-    	wr1L.close();
-    	wr_GamL.close();
-    }
-     
+  printf("PMPThread::threadRelease:beginning \n");
+  //cmdRight_armPort.interrupt();
+  //cmdRight_armPort.close();
+  //cmdLeft_armPort.interrupt();
+  //cmdLeft_armPort.close();
+  //cmdTorsoPort.interrupt();
+  //cmdTorsoPort.close();
+  //cmdInterfacePort.interrupt();
+  //cmdInterfacePort.close();
+  //PMPResponse.interrupt();
+  //PMPResponse.close();
+  
+  if (verboseTerm) {
+    wr_Gam.close();
+    posiL.close();
+    wr.close();
+    wr1.close();
+    posi.close();
+    wr1L.close();
+    wr_GamL.close();
+  }
+  printf("PMPThread::threadRelease:end \n"); 
 }
 
 void PMPThread::onStop() {
-    
-  	 //outputPort.interrupt();
-  	 //outputPort.close();
+  printf("PMPThread::onStop:beginning \n");
+  cmdLeft_armPort.interrupt();
+  cmdRight_armPort.interrupt();
+  cmdTorsoPort.interrupt();
+  cmdInterfacePort.interrupt();
+  PMPResponse.interrupt();
+  cmdLeft_armPort.close();
+  cmdRight_armPort.close();
+  cmdTorsoPort.close();
+  cmdInterfacePort.close();
+  PMPResponse.close();
+  printf("PMPThread::onStop:end \n");
 }
 
 
