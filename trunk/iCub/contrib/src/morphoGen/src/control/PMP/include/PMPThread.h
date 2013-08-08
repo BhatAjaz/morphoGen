@@ -48,7 +48,10 @@
 #define COMMAND_VOCAB_OLEF   VOCAB4('O','L','E','F')
 #define COMMAND_VOCAB_ORIG   VOCAB4('O','R','I','G')
 #define COMMAND_VOCAB_WRIO   VOCAB4('W','R','I','O')
+#define COMMAND_VOCAB_FAILED VOCAB4('F','A','I','L')
 #define COMMAND_VOCAB_REA    VOCAB3('R','E','A')
+#define COMMAND_VOCAB_OK     VOCAB2('O','K')
+
 
 
 class PMPThread : public yarp::os::Thread {
