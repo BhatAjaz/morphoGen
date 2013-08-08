@@ -244,11 +244,11 @@ public:
     void MessageDevDriverR();
     void MessageDevDriverL();
     void MessageDevDriverT();
-    void cmdInterfacePassR();
-    void cmdInterfacePassL();
-    void cmdInterfacePassT();
-    void cmdInterfacePassRhand();
-    void cmdInterfacePassLhand();
+    void cmdInterfacePassR( yarp::os::Bottle* b);
+    void cmdInterfacePassL( yarp::os::Bottle* b);
+    void cmdInterfacePassT( yarp::os::Bottle* b);
+    void cmdInterfacePassRhand( yarp::os::Bottle* b);
+    void cmdInterfacePassLhand( yarp::os::Bottle* b);
     void initiCubUp();
     void InitializeJan();
     void InitializeJanObst();
