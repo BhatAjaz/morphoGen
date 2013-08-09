@@ -337,13 +337,13 @@ void PMPThread::run() {
                       if (cmdInterfacePort.getOutputCount()) {
 
                         Bottle& outBot = cmdInterfacePort.prepare();
-
+                        //cmdInterfacePort.setStrict();
                         //Send output commands in a bottle to motor interface  		
-                        cmdInterfacePassT(&outBot);       // torso
-                        cmdInterfacePassR(&outBot);       // right arm
-                        cmdInterfacePassRhand(&outBot);   // right hand
-                        cmdInterfacePassL(&outBot);       // left arm
-                        cmdInterfacePassLhand(&outBot);   // left hand
+                        cmdInterfacePassT();       // torso
+                        cmdInterfacePassR();       // right arm
+                        cmdInterfacePassRhand();   // right hand
+                        cmdInterfacePassL();       // left arm
+                        cmdInterfacePassLhand();   // left hand
                       }
                       else {
                         //forcing to the rpc port of the controller
@@ -1546,16 +1546,16 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     		// Send output commands in a bottle to another module through interface
     		if (rightMove){
               Bottle& outBot = cmdInterfacePort.prepare();
-              cmdInterfacePassT(&outBot);
-              cmdInterfacePassR(&outBot);
-              cmdInterfacePassRhand(&outBot);
+              cmdInterfacePassT();
+              cmdInterfacePassR();
+              cmdInterfacePassRhand();
               rightMove = false;
     		}
     		if (leftMove) {
               Bottle& outBot = cmdInterfacePort.prepare();
-              cmdInterfacePassT(&outBot);
-              cmdInterfacePassL(&outBot);
-              cmdInterfacePassLhand(&outBot);
+              cmdInterfacePassT();
+              cmdInterfacePassL();
+              cmdInterfacePassLhand();
               leftMove = false;
     		}
     	}
@@ -2208,13 +2208,13 @@ void PMPThread::MessagePassT()
 
 
 
- void PMPThread::cmdInterfacePassR( Bottle* outBot)
+ void PMPThread::cmdInterfacePassR()
  {
            
-   //Bottle& outBot1 = cmdInterfacePort.prepare();   // Get the object
-    outBot->clear();
-    outBot->addVocab(CMD_RIGHT_ARM); // put "pos" command in the bottle
-    Bottle& listBot = outBot->addList();
+    Bottle& outBot = cmdInterfacePort.prepare();   // Get the object
+    outBot.clear();
+    outBot.addVocab(CMD_RIGHT_ARM); // put "pos" command in the bottle
+    Bottle& listBot = outBot.addList();
     listBot.addDouble(ang4);
     listBot.addDouble(ang5);
     listBot.addDouble(ang6);
@@ -2222,54 +2222,52 @@ void PMPThread::MessagePassT()
     listBot.addDouble(ang8);
     listBot.addDouble(ang9);
     listBot.addDouble(ang10);
-    printf("sending bottle right arm (%s)\n",outBot->toString().c_str());
-    cmdInterfacePort.write();                       
+    printf("Sending bottle right arm (%s)\n",outBot.toString().c_str());
+    cmdInterfacePort.writeStrict();                       
     //Time::delay(2);
 };
 
-void PMPThread::cmdInterfacePassL( Bottle* outBot)
+void PMPThread::cmdInterfacePassL()
  {
     
-   //Bottle& outBot2 = cmdInterfacePort.prepare();   // Get the object
-     outBot->clear();
-     outBot->addVocab(CMD_LEFT_ARM); // put "pos" command in the bottle
-     Bottle& listBot1 = outBot->addList();
-     listBot1.addDouble(ang4L);
-     listBot1.addDouble(ang5L);
-     listBot1.addDouble(ang6L);
-     listBot1.addDouble(ang7L);
-     listBot1.addDouble(ang8L);
-     listBot1.addDouble(ang9L);
-     listBot1.addDouble(ang10L);
-     printf("Sending bottle left arm (%s)\n",outBot->toString().c_str());
-     cmdInterfacePort.write(); 
-     //Time::delay(2);
-    // Sleep(3000);
+   Bottle& outBot = cmdInterfacePort.prepare();   // Get the object
+   outBot.clear();
+   outBot.addVocab(CMD_LEFT_ARM); // put "pos" command in the bottle
+   Bottle& listBot1 = outBot.addList();
+   listBot1.addDouble(ang4L);
+   listBot1.addDouble(ang5L);
+   listBot1.addDouble(ang6L);
+   listBot1.addDouble(ang7L);
+   listBot1.addDouble(ang8L);
+   listBot1.addDouble(ang9L);
+   listBot1.addDouble(ang10L);
+   printf("Sending bottle left arm (%s)\n",outBot.toString().c_str());
+   cmdInterfacePort.writeStrict(); 
+   //Time::delay(2);
  };
 
-void PMPThread::cmdInterfacePassT( Bottle* outBot){
-  //Bottle& outBot3 = cmdInterfacePort.prepare();   // Get the object
-    outBot->clear();
-    outBot->addVocab(CMD_TORSO); // put "pos" command in the bottle
-    Bottle& listBot2 = outBot->addList();
+void PMPThread::cmdInterfacePassT(){
+    Bottle& outBot = cmdInterfacePort.prepare();   // Get the object
+    outBot.clear();
+    outBot.addVocab(CMD_TORSO); // put "pos" command in the bottle
+    Bottle& listBot2 = outBot.addList();
     listBot2.addDouble(-1*ang3);
-    listBot2.addDouble(1*ang2);
-    listBot2.addDouble(1*ang1);
+    listBot2.addDouble( 1*ang2);
+    listBot2.addDouble( 1*ang1);
     
-    printf("\n\n Sending bottle torso (%s)\n",outBot->toString().c_str());
-    cmdInterfacePort.write();                       // Now send i  
-    //Time::delay(2);
-    //Sleep(1000);	
+    printf("\n\nSending bottle torso (%s)\n",outBot.toString().c_str());
+    cmdInterfacePort.writeStrict();                       // Now send i  
+    //Time::delay(2);	
 }
 
 
-void PMPThread::cmdInterfacePassRhand( Bottle* outBot)
+void PMPThread::cmdInterfacePassRhand()
  {
            
-   //Bottle& outBot1 = cmdInterfacePort.prepare();   // Get the object
-    outBot->clear();
-    outBot->addVocab(CMD_RIGHT_HAND); // put "pos" command in the bottle
-    Bottle& listBot = outBot->addList();
+    Bottle& outBot = cmdInterfacePort.prepare();   // Get the object
+    outBot.clear();
+    outBot.addVocab(CMD_RIGHT_HAND); // put "pos" command in the bottle
+    Bottle& listBot = outBot.addList();
     listBot.addDouble(angCup);
     listBot.addDouble(angT1);
     listBot.addDouble(angT2);
@@ -2279,19 +2277,19 @@ void PMPThread::cmdInterfacePassRhand( Bottle* outBot)
     listBot.addDouble(angM1);
     listBot.addDouble(angM2);
     listBot.addDouble(angRP);
-    printf("sending bottle right hand (%s)\n",outBot->toString().c_str());
-    cmdInterfacePort.write();                       
+    printf("Sending bottle right hand (%s)\n",outBot.toString().c_str());
+    cmdInterfacePort.writeStrict();                       
     //Time::delay(2);
 };
 
 
-void PMPThread::cmdInterfacePassLhand(Bottle* outBot)
+void PMPThread::cmdInterfacePassLhand()
  {
     
-   //Bottle& outBot2 = cmdInterfacePort.prepare();   // Get the object
-   outBot->clear();
-   outBot->addVocab(CMD_LEFT_HAND); // put "pos" command in the bottle
-   Bottle& listBot = outBot->addList();
+   Bottle& outBot = cmdInterfacePort.prepare();   // Get the object
+   outBot.clear();
+   outBot.addVocab(CMD_LEFT_HAND); // put "pos" command in the bottle
+   Bottle& listBot = outBot.addList();
    listBot.addDouble(angCupL);
    listBot.addDouble(angTL1);
    listBot.addDouble(angTL2);
@@ -2301,7 +2299,7 @@ void PMPThread::cmdInterfacePassLhand(Bottle* outBot)
    listBot.addDouble(angML1);
    listBot.addDouble(angML2);
    listBot.addDouble(angRPL);
-   printf("Sending bottle left hand (%s)\n",outBot->toString().c_str());
+   printf("Sending bottle left hand (%s)\n",outBot.toString().c_str());
    cmdInterfacePort.write(); 
    //Time::delay(2);
     // Sleep(3000);

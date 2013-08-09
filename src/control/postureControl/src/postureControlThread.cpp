@@ -61,6 +61,7 @@ bool postureControlThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
+    interfaceIn.setStrict(true);
     
     if (!inputLeftArm.open(getName("/leftArm:i").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
@@ -374,6 +375,7 @@ void postureControlThread::run() {
         //**********************************************************
         if (interfaceIn.getInputCount()) {
             
+            
             receivedBottle = interfaceIn.read(false);
             if(receivedBottle != NULL){
                 
@@ -385,6 +387,8 @@ void postureControlThread::run() {
                                 
                 switch(bodypart){
                 case COMMAND_RIGHT_ARM: {
+                    printf("################################### \n");
+                    printf("pending reads %d \n",interfaceIn.getPendingReads());
                     printf("right_arm: %s \n", value->toString().c_str());
                     //printf("right_arm: %s \n", lvalue.toString().c_str());
                     bool rightArmOk = checkArm(value);
@@ -400,7 +404,8 @@ void postureControlThread::run() {
                         printf("sending command\n %s \n", command_position.toString().c_str());
                         //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
                         
-                        bool ok = posRightArm->positionMove(command_position.data());
+                        bool ok; 
+                        //ok = posRightArm->positionMove(command_position.data());
                         if(!ok){
                             break;
                         }
@@ -411,7 +416,8 @@ void postureControlThread::run() {
                     
                 } break;
                 case COMMAND_LEFT_ARM:  {
-                    
+                    printf("################################### \n");
+                    printf("pending reads %d \n",interfaceIn.getPendingReads());
                     printf("left_arm: %s \n", value->toString().c_str());
                     bool leftArmOk = checkArm(value);
 
@@ -426,7 +432,8 @@ void postureControlThread::run() {
                         printf("sending command\n %s \n", command_position.toString().c_str());
                         //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
                         
-                        bool ok = posLeftArm->positionMove(command_position.data());
+                        bool ok;
+                        //ok = posLeftArm->positionMove(command_position.data());
                         if(!ok){
                             break;
                         }
@@ -437,7 +444,8 @@ void postureControlThread::run() {
                     
                 } break;
                 case COMMAND_TORSO_ARM: {
-                    
+                    printf("################################### \n");
+                    printf("pending reads %d \n",interfaceIn.getPendingReads());
                     printf("torso: %s \n", value->toString().c_str());
                     bool torsoOk = checkTorso(value);
 
@@ -452,7 +460,8 @@ void postureControlThread::run() {
                         printf("sending command\n %s \n", command_position.toString().c_str());
                         //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
                         
-                        bool ok = posTorso->positionMove(command_position.data());
+                        bool ok;
+                        //ok = posTorso->positionMove(command_position.data());
                         if(!ok){
                             break;
                         }
@@ -463,7 +472,8 @@ void postureControlThread::run() {
                     
                 } break;
                 case COMMAND_RIGHT_HAND:{
-                    /*
+                    printf("################################### \n");
+                    printf("pending reads %d \n",interfaceIn.getPendingReads());
                     printf("right_hand: %s \n", value->toString().c_str());
                     bool rightArmOk = checkArm(value);
 
@@ -478,7 +488,8 @@ void postureControlThread::run() {
                         printf("sending command\n %s \n", command_position.toString().c_str());
                         //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
                         
-                        bool ok = posRightArm->positionMove(command_position.data());
+                        bool ok;
+                        //ok = posRightArm->positionMove(command_position.data());
                         if(!ok){
                             break;
                         }
@@ -486,10 +497,11 @@ void postureControlThread::run() {
                     else {
                         printf("detected out of limits control \n");
                     }
-                    */
+                    
                 } break;
                 case COMMAND_LEFT_HAND:  {
-                    /*
+                    printf("################################### \n");
+                    printf("pending reads %d \n",interfaceIn.getPendingReads());
                     printf("left_hand: %s \n", value->toString().c_str());
                     bool rightArmOk = checkArm(value);
                     
@@ -504,7 +516,8 @@ void postureControlThread::run() {
                         printf("sending command\n %s \n", command_position.toString().c_str());
                         //printf("temporary command\n %s \n", command_position_temp.toString().c_str());
                         
-                        bool ok = posRightArm->positionMove(command_position.data());
+                        bool ok;
+                        //ok = posRightArm->positionMove(command_position.data());
                         if(!ok){
                             break;
                         }
@@ -512,7 +525,7 @@ void postureControlThread::run() {
                     else {
                         printf("detected out of limits control \n");
                     }
-                    */
+                    
                 } break;
                 default:{
                     printf("command not recognized \n");
