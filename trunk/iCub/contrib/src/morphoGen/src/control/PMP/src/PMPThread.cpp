@@ -2300,7 +2300,7 @@ void PMPThread::cmdInterfacePassLhand()
    listBot.addDouble(angML2);
    listBot.addDouble(angRPL);
    printf("Sending bottle left hand (%s)\n",outBot.toString().c_str());
-   cmdInterfacePort.write(); 
+   cmdInterfacePort.writeStrict(); 
    //Time::delay(2);
     // Sleep(3000);
  };
