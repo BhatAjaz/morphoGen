@@ -564,7 +564,7 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
  	computeJacobian(Jacob,JacobL,Jan,JanL);
 //=======================================================================================
    
-    meanJan[0] =  0.5200; 
+    meanJan[0] =  0.3200; // orig: 0.52
     meanJan[1] =  0.0000;
     meanJan[2] =  0.0000;
     meanJan[3] = -0.7854;
@@ -575,15 +575,15 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
     meanJan[8] =  0.0000;
     meanJan[9] =  0.0000;
 
-    Joint_Field[0]=(meanJan[0]-Jan[0])*J2H; // Multiply by Joint compliance 
+    Joint_Field[0]=(meanJan[0]-Jan[0])*0.000030;      // Multiply by Joint compliance  orig: J2H
     Joint_Field[1]=(meanJan[1]-Jan[1])*0.000041; //0.52 / Modified in June at Crete
-    Joint_Field[2]=(meanJan[2]-Jan[2])*J3H;  //1.8
-    Joint_Field[3]=(meanJan[3]-Jan[3])*0.041;  //4.5 //0.95
+    Joint_Field[2]=(meanJan[2]-Jan[2])*J3H;      //1.8
+    Joint_Field[3]=(meanJan[3]-Jan[3])*0.041;    //4.5 //0.95
     Joint_Field[4]=(meanJan[4]-Jan[4])*0.041; 
-    Joint_Field[5]=(meanJan[5]-Jan[5])*5; // Multiply by Joint compliance 
-    Joint_Field[6]=(meanJan[6]-Jan[6])*0.041; //0.52 / Modified in June at Crete
-    Joint_Field[7]=(meanJan[7]-Jan[7])*75;  //1.8
-    Joint_Field[8]=(meanJan[8]-Jan[8])*J8H;  //4.5 //0.95
+    Joint_Field[5]=(meanJan[5]-Jan[5])*5;        // Multiply by Joint compliance 
+    Joint_Field[6]=(meanJan[6]-Jan[6])*0.041;    //0.52 / Modified in June at Crete
+    Joint_Field[7]=(meanJan[7]-Jan[7])*75;       //1.8
+    Joint_Field[8]=(meanJan[8]-Jan[8])*J8H;      //4.5 //0.95
     Joint_Field[9]=(meanJan[9]-Jan[9])*J9H;
 
 //=======================================================================================
@@ -2662,23 +2662,24 @@ void PMPThread::Grab()
 void PMPThread::Kompliance(int TagK)	{
  	// Close Space********************************** (0,-230,590)
     if (TagK==0) {
-          
+        t_dur=5;  
        	printf ("Adjusting Compliances 1 \n");
-       	KFORCE=0.006;
-       	ITERATION=1000;              
-        RAMP_KONSTANT=0.005;
-        t_dur=5;
-        KOMP_JANG=0.006;
-        KOMP_WAISZT=0.000003;
-        KOMP_WAISZT2=0.000003;
-        J2H=0.041;
-        J3H=0.000005;
-        J7H=0.041;
-        J8H=0.041;
-        J9H=0.041;
+       	KFORCE        = 0.006;
+       	ITERATION     = 1000;              
+        RAMP_KONSTANT = 0.005;
+        KOMP_JANG     = 0.006;
+        KOMP_WAISZT   = 0.000003;
+        KOMP_WAISZT2  = 0.000003;
+
+        J2H = 0.041;
+        J3H = 0.000005;
+        J7H = 0.041;
+        J8H = 0.041;
+        J9H = 0.041;
         //J7H=10;
         //J8H=10;
-        //J9H=10;  
+        //J9H=10;
+  
         printf ("\n Initiating System Dynamics \n");
     } 
        
@@ -2687,12 +2688,11 @@ void PMPThread::Kompliance(int TagK)	{
 
 // Far Space *****************************
     if (TagK==1)  {
-         
+        t_dur=5; 
         printf ("Adjusting Compliances 1 \n");
         KFORCE=0.01; //0.005
         ITERATION=1000;              
         RAMP_KONSTANT=0.005;
-        t_dur=5;
         KOMP_JANG=0.002;
         KOMP_WAISZT=0.0004;
         //KOMP_WAISZT3=0.00002;
@@ -2718,31 +2718,35 @@ void PMPThread::Kompliance(int TagK)	{
         KOMP_WAISZT=0.0001;
         //KOMP_WAISZT3=0.00002;
         KOMP_WAISZT2=0.0006;
+        
         J2H=50; //800
         J3H=0.2;
         J7H=50;
         J8H=0.041;
         J9H=0.041;
+
         // Far Space ***************************** 
         printf ("\n Initiating System Dynamics \n");
     } 
      
     if (TagK==3)  {
-         
+        t_dur=5; 
         printf ("Adjusting Compliances 1 \n");
         KFORCE=0.01; //0.005
         ITERATION=1000;              
         RAMP_KONSTANT=0.005;
-        t_dur=5;
+        
         KOMP_JANG=0.002;
         KOMP_WAISZT=0.0001;
         //KOMP_WAISZT3=0.00002;
         KOMP_WAISZT2=0.0011;
+        
         J2H=50; //800
         J3H=0.2;
         J7H=50;
         J8H=0.041;
         J9H=0.041;
+
         // Far Space ***************************** 
         printf ("\n Initiating System Dynamics \n");
     } 
