@@ -68,7 +68,8 @@ int main(int argc, char * argv[])
                 printf("empty line \n");
                 break;
             }
-            char text[line.length()];
+            const int linelength = line.length(); // Rea: to make constant
+            char text[10];  // forced to const int value. To convert back
             char * pch;
             double value[3];
 
