@@ -227,7 +227,7 @@ bool postureControlThread::initController() {
     double offset    = 0.0;         // torque offset,         units are Nm
     bool okImpP, okImpO, okImp;
     
-    if(robot!="icubSim"){
+    if(strcmp(robot.c_str(),"icubSim")){
         okImpP = iimpRightArm->setImpedance(3, stiffness, damping);  
         okImpO = iimpRightArm->setImpedanceOffset(3,offset);
         okImp  = ictrlRightArm->setImpedancePositionMode(3);
@@ -247,7 +247,7 @@ bool postureControlThread::initController() {
     //double jnt_torque= 0.0; //expressed in Nm
     //itrqLeftArm->setRefTorque(3,jnt_torque); 
 
-    if(robot!="icubSim"){
+    if(strcmp(robot.c_str(),"icubSim")){
 
         okImpP = iimpLeftArm->setImpedance(3, stiffness, damping);  
         okImpO = iimpLeftArm->setImpedanceOffset(3,offset);
