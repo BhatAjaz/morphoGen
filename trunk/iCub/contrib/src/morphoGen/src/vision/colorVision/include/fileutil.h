@@ -15,7 +15,7 @@ void load_numeric_array( const char *name, int *nrows, int *ncols, T **X )
   fid = fopen(name,"r");
   if ( !fid ) {
     fprintf(stderr,"Error: Cannot open file <%s>.\n",name);
-    exit(1);
+    std::exit(1);
   }
   *ncols = *nrows = 0;
   int BOF = 1;
