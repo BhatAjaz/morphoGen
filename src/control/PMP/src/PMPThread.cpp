@@ -132,22 +132,22 @@ bool PMPThread::threadInit() {
      
     // handling verbose option
     if (verboseTerm) {      
-      // Stores Output Gamma Function
-      wr.open("Gamma.txt");
-      // Stores Solution in Joint angles
-      // Output of Target Generator
-      wr1.open("target.txt");
-      // X/Y Position reached
-      posi.open("position.txt");
-      // Stores Output Gamma Function
-      wrL.open("GammaL.txt");
-      // Stores Solution in Joint angles
-      wr_GamL.open("resultL.txt");
-      // Output of Target Generator
-      wr1L.open("targetL.txt");
-      // X/Y Position reached
-      posiL.open("positionL.txt");
-      wr_Gam.open("result.txt");
+        // Stores Output Gamma Function
+        wr.open("Gamma.txt");
+        // Stores Solution in Joint angles
+        // Output of Target Generator
+        wr1.open("target.txt");
+        // X/Y Position reached
+        posi.open("position.txt");
+        // Stores Output Gamma Function
+        wrL.open("GammaL.txt");
+        // Stores Solution in Joint angles
+        wr_GamL.open("resultL.txt");
+        // Output of Target Generator
+        wr1L.open("targetL.txt");
+        // X/Y Position reached
+        posiL.open("positionL.txt");
+        wr_Gam.open("result.txt");
     }  
     
     //initialization of the state of PMP (default state)
@@ -155,21 +155,19 @@ bool PMPThread::threadInit() {
     BodyChain    = 0;
     MSimExec     = 1;
     TrajType     = 1;
-    WristO       = 0.5;
+    WristO       =  0.5;
     MiniGoal[0]  = -0.5;
-    MiniGoal[1]  = 0.0;
-    MiniGoal[2]  = 0.0;
-    MiniGoal[3]  = 0.0;
-    MiniGoal[4]  = 0.0;
-    MiniGoal[5]  = 0.0;
+    MiniGoal[1]  =  0.0;
+    MiniGoal[2]  =  0.0;
+    MiniGoal[3]  =  0.0;
+    MiniGoal[4]  =  0.0;
+    MiniGoal[5]  =  0.0;
     MiniGoal[6]  = -0.5;
-    MiniGoal[7]  = 0.0;
-    MiniGoal[8]  = 0.0;
-    MiniGoal[9]  = 0.0;
-    MiniGoal[10] = 0.0;
-    MiniGoal[11] = 0.0;
-    
-      
+    MiniGoal[7]  =  0.0;
+    MiniGoal[8]  =  0.0;
+    MiniGoal[9]  =  0.0;
+    MiniGoal[10] =  0.0;
+    MiniGoal[11] =  0.0;      
     
     printf("\nPMP Thread initialization: successfully completed \n");
       
@@ -564,7 +562,7 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
  	computeJacobian(Jacob,JacobL,Jan,JanL);
 //=======================================================================================
    
-    meanJan[0] =  0.3200; // orig: 0.52
+    meanJan[0] =  0.5200; 
     meanJan[1] =  0.0000;
     meanJan[2] =  0.0000;
     meanJan[3] = -0.7854;
@@ -574,17 +572,28 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
     meanJan[7] =  1.2000;
     meanJan[8] =  0.0000;
     meanJan[9] =  0.0000;
+    
+    JHd[0] = J2H;
+    JHd[1] = 0.000041;
+    JHd[2] = J3H;
+    JHd[3] = 0.041;
+    JHd[4] = 0.041;
+    JHd[5] = 5;
+    JHd[6] = 0.041;
+    JHd[7] = 75;
+    JHd[8] = J8H;
+    JHd[9] = J9H;
 
-    Joint_Field[0]=(meanJan[0]-Jan[0])*0.000030;      // Multiply by Joint compliance  orig: J2H
-    Joint_Field[1]=(meanJan[1]-Jan[1])*0.000041; //0.52 / Modified in June at Crete
-    Joint_Field[2]=(meanJan[2]-Jan[2])*J3H;      //1.8
-    Joint_Field[3]=(meanJan[3]-Jan[3])*0.041;    //4.5 //0.95
-    Joint_Field[4]=(meanJan[4]-Jan[4])*0.041; 
-    Joint_Field[5]=(meanJan[5]-Jan[5])*5;        // Multiply by Joint compliance 
-    Joint_Field[6]=(meanJan[6]-Jan[6])*0.041;    //0.52 / Modified in June at Crete
-    Joint_Field[7]=(meanJan[7]-Jan[7])*75;       //1.8
-    Joint_Field[8]=(meanJan[8]-Jan[8])*J8H;      //4.5 //0.95
-    Joint_Field[9]=(meanJan[9]-Jan[9])*J9H;
+    Joint_Field[0]=(meanJan[0]-Jan[0]) * JHd[0]; // Multiply by Joint compliance  
+    Joint_Field[1]=(meanJan[1]-Jan[1]) * JHd[1]; //0.52 / Modified in June at Crete
+    Joint_Field[2]=(meanJan[2]-Jan[2]) * JHd[2];      //1.8
+    Joint_Field[3]=(meanJan[3]-Jan[3]) * JHd[3];    //4.5 //0.95
+    Joint_Field[4]=(meanJan[4]-Jan[4]) * JHd[4]; 
+    Joint_Field[5]=(meanJan[5]-Jan[5]) * JHd[5];        // Multiply by Joint compliance 
+    Joint_Field[6]=(meanJan[6]-Jan[6]) * JHd[6];    //0.52 / Modified in June at Crete
+    Joint_Field[7]=(meanJan[7]-Jan[7]) * JHd[7];       //1.8
+    Joint_Field[8]=(meanJan[8]-Jan[8]) * JHd[8];      //4.5 //0.95
+    Joint_Field[9]=(meanJan[9]-Jan[9]) * JHd[9];
 
 //=======================================================================================
 //=======================================================================================
@@ -600,16 +609,27 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
     meanJanL[8] =  0.0000;
     meanJanL[9] =  0.0000;
 
-    Joint_FieldL[0]=(meanJanL[0]-JanL[0])*J2H; // Multiply by Joint compliance 
-    Joint_FieldL[1]=(meanJanL[1]-JanL[1])*0.000041; //0.52 / Modified in June at Crete
-    Joint_FieldL[2]=(meanJanL[2]-JanL[2])*J3H;  //1.8
-    Joint_FieldL[3]=(meanJanL[3]-JanL[3])*0.041;  //4.5 //0.95
-    Joint_FieldL[4]=(meanJanL[4]-JanL[4])*0.041;
-    Joint_FieldL[5]=(meanJanL[5]-JanL[5])*5; // Multiply by Joint compliance 
-    Joint_FieldL[6]=(meanJanL[6]-JanL[6])*0.041; //0.52 / Modified in June at Crete
-    Joint_FieldL[7]=(meanJanL[7]-JanL[7])*75;  //1.8
-    Joint_FieldL[8]=(meanJanL[8]-JanL[8])*J8H;  //4.5 //0.95
-    Joint_FieldL[9]=(meanJanL[9]-JanL[9])*J9H;
+    JHdL[0] = J2H;
+    JHdL[1] = 0.000041;
+    JHdL[2] = J3H;
+    JHdL[3] = 0.041;
+    JHdL[4] = 0.041;
+    JHdL[5] = 5;
+    JHdL[6] = 0.041;
+    JHdL[7] = 75;
+    JHdL[8] = J8H;
+    JHdL[9] = J9H
+
+    Joint_FieldL[0]=(meanJanL[0]-JanL[0]) * JHdL[0]; // Multiply by Joint compliance 
+    Joint_FieldL[1]=(meanJanL[1]-JanL[1]) * JHdL[1]; //0.52 / Modified in June at Crete
+    Joint_FieldL[2]=(meanJanL[2]-JanL[2]) * JHdL[2];  //1.8
+    Joint_FieldL[3]=(meanJanL[3]-JanL[3]) * JHdL[3];  //4.5 //0.95
+    Joint_FieldL[4]=(meanJanL[4]-JanL[4]) * JHdL[4];
+    Joint_FieldL[5]=(meanJanL[5]-JanL[5]) * JHdL[5]; // Multiply by Joint compliance 
+    Joint_FieldL[6]=(meanJanL[6]-JanL[6]) * JHdL[6]; //0.52 / Modified in June at Crete
+    Joint_FieldL[7]=(meanJanL[7]-JanL[7]) * JHdL[7];  //1.8
+    Joint_FieldL[8]=(meanJanL[8]-JanL[8]) * JHdL[8];  //4.5 //0.95
+    Joint_FieldL[9]=(meanJanL[9]-JanL[9]) * JHdL[9];
 
 //=======================================================================================
    	
@@ -824,9 +844,10 @@ void PMPThread::InitializeJan()	 {	// init for normal reaching
     Jan[6]=1.3;
     Jan[7]=0;
     Jan[8]=0;
-     Jan[9]=0;
+    Jan[9]=0;
     
     janini0=0;
+    // janini1 missing because we dont use one of the dof of the torso
     janini2=0;
     janini3=-1.74;// -0.6981
     janini4=0.78;
@@ -2309,18 +2330,19 @@ void PMPThread::cmdInterfacePassLhand()
 
 
 void PMPThread::initiCubUp() {
- 
- 	ang1=15;
- 	ang2=0;
- 	ang3=0;
- 	ang4=-100;
- 	ang5=45;
- 	ang6=0;
- 	ang7=70;
- 	ang8=0;
- 	ang9=0;
- 	ang10=0;
- 	angCup=50;
+ 	ang1   = 15;
+ 	ang2   = 0;
+ 	ang3   = 0;
+
+ 	ang4   = -90;
+ 	ang5   = 45;
+ 	ang6   = 0;
+ 	ang7   = 70;
+ 	ang8   = 0;
+ 	ang9   = 0;
+ 	ang10  = 0;
+ 	angCup = 50;
+
  	/*angT1=-15;
  	angT2=0;
  	angT3=0;
@@ -2330,7 +2352,7 @@ void PMPThread::initiCubUp() {
 	angM2=0;
  	angRP=0;*/
 
- 	ang4L=-100;
+ 	ang4L=-90;
  	ang5L=45;
  	ang6L=0;
  	ang7L=70;
@@ -2338,6 +2360,7 @@ void PMPThread::initiCubUp() {
  	ang9L=0;
  	ang10L=0;
  	angCupL=48;
+
  	/*angTL1=-15;
  	angTL2=0;
  	angTL3=0;
@@ -2348,169 +2371,163 @@ void PMPThread::initiCubUp() {
  	angRPL=0;*/
 };
 
-void PMPThread::CubGrazp3()
- {
- angCup=51;
- angT1=70;
- angT2=0;
- angT3=0;
- angI1=47;
- angI2=0;
- angM1=50;
- angM2=0;
- angRP=2;
- };
+void PMPThread::CubGrazp3(){
+    angCup=51;
+    angT1=70;
+    angT2=0;
+    angT3=0;
+    angI1=47;
+    angI2=0;
+    angM1=50;
+    angM2=0;
+    angRP=2;
+};
 
-void PMPThread::CubGrazp4()
- {
-/* angCup=51;
- angT1=90;
- angT2=34;
- angT3=25;
- angI1=67;
- angI2=27;
- angM1=50;
- angM2=25;
- angRP=2;*/ 
+void PMPThread::CubGrazp4(){
+    /* angCup=51;
+       angT1=90;
+       angT2=34;
+       angT3=25;
+       angI1=67;
+       angI2=27;
+       angM1=50;
+       angM2=25;
+       angRP=2;*/ 
 
- angCup=51;
- angT1=90;
- angT2=54;
- angT3=55;
- angI1=77;
- angI2=67;
- angM1=60;
- angM2=55;
- angRP=2;
- };
+    angCup=51;
+    angT1=90;
+    angT2=54;
+    angT3=55;
+    angI1=77;
+    angI2=67;
+    angM1=60;
+    angM2=55;
+    angRP=2;
+};
 
-void PMPThread::CubGrazpL3()
- {
- angCupL=48;
- angTL1=70;
- angTL2=20;
- angTL3=0;
- angIL1=5;
- angIL2=0;
- angML1=10;
- angML2=0;
- angRPL=2; 
-  };
+void PMPThread::CubGrazpL3(){
+    angCupL=48;
+    angTL1=70;
+    angTL2=20;
+    angTL3=0;
+    angIL1=5;
+    angIL2=0;
+    angML1=10;
+    angML2=0;
+    angRPL=2; 
+};
 
-void PMPThread::CubGrazpL4()
- {
- /*angCupL=48;
- angTL1=87;
- angTL2=64;
- angTL3=55;
- angIL1=67;
- angIL2=57;
- angML1=50;
- angML2=35;
- angRPL=0; */ 
+void PMPThread::CubGrazpL4(){
+    /*angCupL=48;
+      angTL1=87;
+      angTL2=64;
+      angTL3=55;
+      angIL1=67;
+      angIL2=57;
+      angML1=50;
+      angML2=35;
+      angRPL=0; */ 
 
- angCupL=48;
- angTL1=87;
- angTL2=64;
- angTL3=55;
- angIL1=77;
- angIL2=67;
- angML1=60;
- angML2=55;
- angRPL=0; 
- };
+    angCupL=48;
+    angTL1=87;
+    angTL2=64;
+    angTL3=55;
+    angIL1=77;
+    angIL2=67;
+    angML1=60;
+    angML2=55;
+    angRPL=0; 
+};
 
-void PMPThread::CubGrazp1()
- {
+void PMPThread::CubGrazp1(){
     /*ang4=ang4;
- ang5=ang5;
- ang6=ang6;
- ang7=ang7;
- ang8=ang8;
- ang9=ang9;
- ang10=ang10;*/ 
- //ang9=0;
-     //ang8=0;
- angCup=36;
- angT1=90;
- angT2=0;
- angT3=0;
- angI1=67;
- angI2=0;
- angM1=60;
- angM2=0;
- angRP=2;
+      ang5=ang5;
+      ang6=ang6;
+      ang7=ang7;
+      ang8=ang8;
+      ang9=ang9;
+      ang10=ang10;*/ 
+    //ang9=0;
+    //ang8=0;
+    angCup=36;
+    angT1=90;
+    angT2=0;
+    angT3=0;
+    angI1=67;
+    angI2=0;
+    angM1=60;
+    angM2=0;
+    angRP=2;
 
- /*ang4L=ang4;
- ang5L=ang5;
- ang6L=ang6;
- ang7L=ang7;
- ang8L=ang8;
- ang9L=ang9;
- ang10L=ang10;
- ang8L=0;
- angCupL=36;
- angTL1=90;
- angTL2=37;
- angTL3=10;
- angIL1=33;
- angIL2=0;
- angML1=33;
- angML2=0;
- angRPL=0;*/ 
- //ang9L=0;
+    /*ang4L=ang4;
+      ang5L=ang5;
+      ang6L=ang6;
+      ang7L=ang7;
+      ang8L=ang8;
+      ang9L=ang9;
+      ang10L=ang10;
+      ang8L=0;
+      angCupL=36;
+      angTL1=90;
+      angTL2=37;
+      angTL3=10;
+      angIL1=33;
+      angIL2=0;
+      angML1=33;
+      angML2=0;
+      angRPL=0;*/ 
+    //ang9L=0;
 
- printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
+    printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
      
 
- };
+};
 
 void PMPThread::CubGrazp2()
  {
-    /*ang4=ang4;
- ang5=ang5;
- ang6=ang6;
- ang7=ang7;
- ang8=ang8;
- ang9=ang9;
- ang10=ang10;*/ 
- //ang9=0;
+     /*ang4=ang4;
+       ang5=ang5;
+       ang6=ang6;
+       ang7=ang7;
+       ang8=ang8;
+       ang9=ang9;
+       ang10=ang10;*/ 
+     //ang9=0;
      //ang8=0;
- angCup=36;
- angT1=90;
- angT2=44;
- angT3=25;
- angI1=67;
- angI2=23;
- angM1=60;
- angM2=25;
- angRP=2;
+     angCup=36;
+     angT1=90;
+     angT2=44;
+     angT3=25;
+     angI1=67;
+     angI2=23;
+     angM1=60;
+     angM2=25;
+     angRP=2;
 
- /*ang4L=ang4;
- ang5L=ang5;
- ang6L=ang6;
- ang7L=ang7;
- ang8L=ang8;
- ang9L=ang9;
- ang10L=ang10;
- //ang9L=0;
- angCupL=36;
- angTL1=90;
- angTL2=45;
- angTL3=20;
- angIL1=67;
- angIL2=9;
- angML1=67;
- angML2=0;
- angRPL=0;*/ 
+     /*ang4L=ang4;
+       ang5L=ang5;
+       ang6L=ang6;
+       ang7L=ang7;
+       ang8L=ang8;
+       ang9L=ang9;
+       ang10L=ang10;
+       //ang9L=0;
+       angCupL=36;
+       angTL1=90;
+       angTL2=45;
+       angTL3=20;
+       angIL1=67;
+       angIL2=9;
+       angML1=67;
+       angML2=0;
+       angRPL=0;*/ 
 
-printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
+     printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
      
  };
 
 
-void PMPThread::CubUp(int HandUp)
- {
+void PMPThread::CubUp(int HandUp) {
   if(HandUp==0)
       {
           ang4=ang4+15;
@@ -2537,126 +2554,123 @@ void PMPThread::CubUp(int HandUp)
          angML2=25;
          angRPL=0; 
       }
-printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
+  printf("Angles of Solution \n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang4,ang5, ang6,ang7,ang8,ang9,ang10,angT1,angI1,angM1);
      
  };
 
 
-void PMPThread::CubRelease()
- {
- /*ang4=ang4;
- ang5=ang5;
- ang6=ang6;
- ang7=ang7;
- ang8=ang8;
- ang9=ang9;
- ang10=ang10;*/ 
- //ang9=0;
- angCup=0;
- angT1=0;
- angT2=0;
- angT3=0;
- angI1=0;
- angI2=0;
- angM1=0;
- angM2=0;
- angRP=0;
+void PMPThread::CubRelease() {
+    /*ang4=ang4;
+      ang5=ang5;
+      ang6=ang6;
+      ang7=ang7;
+      ang8=ang8;
+      ang9=ang9;
+      ang10=ang10;*/ 
+    //ang9=0;
+    angCup=0;
+    angT1=0;
+    angT2=0;
+    angT3=0;
+    angI1=0;
+    angI2=0;
+    angM1=0;
+    angM2=0;
+    angRP=0;
 
- /*ang4L=ang4;
- ang5L=ang5;
- ang6L=ang6;
- ang7L=ang7;
- ang8L=ang8;
- ang9L=ang9;
- ang10L=ang10;*/ 
- //ang9L=0;
- angCupL=0;
- angTL1=0;
- angTL2=0;
- angTL3=0;
- angIL1=0;
- angIL2=0;
- angML1=0;
- angML2=0;
- angRPL=0;
+    /*ang4L=ang4;
+      ang5L=ang5;
+      ang6L=ang6;
+      ang7L=ang7;
+      ang8L=ang8;
+      ang9L=ang9;
+      ang10L=ang10;*/ 
+    //ang9L=0;
+    angCupL=0;
+    angTL1=0;
+    angTL2=0;
+    angTL3=0;
+    angIL1=0;
+    angIL2=0;
+    angML1=0;
+    angML2=0;
+    angRPL=0;
 
- };
+};
 
-void PMPThread::CubReleaseSoft()
- {
- /*ang4=ang4;
- ang5=ang5;
- ang6=ang6;
- ang7=ang7;
- ang8=ang8;
- ang9=ang9;
- ang10=ang10;*/ 
- //ang9=0;
- angCup=51;
- angT1=90;
- angT2=15;
- angT3=5;
- angI1=30;
- angI2=10;
- angM1=10;
- angM2=0;
- angRP=2;
+void PMPThread::CubReleaseSoft() {
+    /*ang4=ang4;
+      ang5=ang5;
+      ang6=ang6;
+      ang7=ang7;
+      ang8=ang8;
+      ang9=ang9;
+      ang10=ang10;*/ 
+    //ang9=0;
+    angCup=51;
+    angT1=90;
+    angT2=15;
+    angT3=5;
+    angI1=30;
+    angI2=10;
+    angM1=10;
+    angM2=0;
+    angRP=2;
  
- /*ang4L=ang4;
- ang5L=ang5;
- ang6L=ang6;
- ang7L=ang7;
- ang8L=ang8;
- ang9L=ang9;
- ang10L=ang10;*/ 
- //ang9L=0;
- angCupL=51;
- angTL1=90;
- angTL2=15;
- angTL3=5;
- angIL1=30;
- angIL2=10;
- angML1=10;
- angML2=0;
- angRPL=2;
+    /*ang4L=ang4;
+      ang5L=ang5;
+      ang6L=ang6;
+      ang7L=ang7;
+      ang8L=ang8;
+      ang9L=ang9;
+      ang10L=ang10;*/ 
+    //ang9L=0;
+    angCupL=51;
+    angTL1=90;
+    angTL2=15;
+    angTL3=5;
+    angIL1=30;
+    angIL2=10;
+    angML1=10;
+    angML2=0;
+    angRPL=2;
 
- };
+};
 
-void PMPThread::Grab()
-{
-  ang4=0;
-  ang5=90;
-  ang6=0;
-  ang7=0;
-  ang8=0;
-  ang9=0;
-  ang10=0;
-  angCup=0;
-  angT1=30;
-  angT2=20;
-  angT3=20;
-  angI1=20;
-  angI2=20;
-  angM1=20;
-  angM2=20;
-  angRP=20;
+void PMPThread::Grab(){
+    ang4=0;
+    ang5=90;
+    ang6=0;
+    ang7=0;
+    ang8=0;
+    ang9=0;
+    ang10=0;
+    angCup=0;
+    angT1=30;
+    angT2=20;
+    angT3=20;
+    angI1=20;
+    angI2=20;
+    angM1=20;
+    angM2=20;
+    angRP=20;
   
-  ang4L=-38;
-  ang5L=-8;
-  ang6L=0;
-  ang7L=21;
-  ang8L=120;
-  ang9L=5;
-  ang10L=-40;
-  angCupL=0;
-  angTL1=90;
-  angTL2=90;
-  angTL3=90;
-  angIL1=90;
-  angIL2=90;
-  angML1=90;
-  angML2=90;
-  angRPL=90;
+    ang4L=-38;
+    ang5L=-8;
+    ang6L=0;
+    ang7L=21;
+    ang8L=120;
+    ang9L=5;
+    ang10L=-40;
+    angCupL=0;
+    angTL1=90;
+    angTL2=90;
+    angTL3=90;
+    angIL1=90;
+    angIL2=90;
+    angML1=90;
+    angML2=90;
+    angRPL=90;
 };
 
 void PMPThread::Kompliance(int TagK)	{
@@ -2668,6 +2682,7 @@ void PMPThread::Kompliance(int TagK)	{
        	ITERATION     = 1000;              
         RAMP_KONSTANT = 0.005;
         KOMP_JANG     = 0.006;
+        // low values of KOMP (admittance) of the torso reduces the contribution of the torso
         KOMP_WAISZT   = 0.000003;
         KOMP_WAISZT2  = 0.000003;
 
@@ -2708,7 +2723,7 @@ void PMPThread::Kompliance(int TagK)	{
 
   
     if (TagK==2)  {
-         
+        // toy crane experimental set-up 
         printf ("Adjusting Compliances 1 \n");
         KFORCE=0.009; //0.005
         ITERATION=1000;              
