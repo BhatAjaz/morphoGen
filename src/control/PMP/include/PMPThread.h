@@ -59,8 +59,10 @@ private:
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
-        
-  
+    std::string weights1Path, weights2Path, weights3Path, biases1Path, biases2Path, biases3Path;  // paths to files containing weights and biases  
+    FILE *Weight1,*Weight2,*Weight3,*bias1,*bias2,*bias3;
+    const static int inputL=10,hiddenL1=48,hiddenL2=55,outputL=3;
+    double w1[hiddenL1][inputL],w2[hiddenL2][hiddenL1],w3[outputL][hiddenL2],b1[hiddenL1],b2[hiddenL2],b3[outputL];
 	//yarp::os::BufferedPort<yarp::os::Bottle > MotCom;     // output port to command the robot
 	//yarp::os::BufferedPort<yarp::os::Bottle > Inp3D;      // input port to receive 3d information 
 	//yarp::os::BufferedPort<yarp::os::Bottle > Inpjoints;
@@ -74,7 +76,9 @@ private:
 	std::string name;           // rootname of all the ports opened by this thread
     bool verboseFile, verboseTerm;
     std::ofstream wr,wr1,posi,wrL,wr_GamL,wr1L,posiL,wr_Gam; //output file pointers
-    /*	double Jan[6];
+    FILE  *jacFile;
+    /*	
+        double Jan[6];
 		double x_ini; 
 		double y_ini;
 		double z_ini; 
@@ -142,7 +146,7 @@ private:
     double MiniGoal[12], PlaceMap[10][10],BodyTrack[2][15],GoalSpace[10][23],WristOrR,WristOrL;
     double PickX,PickY,PickZ,PlacX,PlacY,PlacZ, WristO;
     double Proprioceptive[2];
-    double meanJan[10], meanJanL[10];
+    double meanJan[10],JHd[10], meanJanL[10],JHdL[10];
 
 public:
     /**
@@ -211,8 +215,18 @@ public:
     */
     void setVerbose(bool vFile, bool vTerm) {verboseFile = vFile; verboseTerm = vTerm;};
     
-    
 
+    /*
+    * functions that set path variables to corresponding paths of weight and bias files
+    */
+    void setWeightsPath(std::string s, int i);
+    void setBiasesPath(std::string s, int i);
+
+    /*
+    * function loads weight and bias values from the corresponding files
+    */
+    void loadNeuralNetwork();
+    void computeNeuralJacobian(double* Jacob, double* Jan);
     /*
     * function that sets the inputPort name
     */

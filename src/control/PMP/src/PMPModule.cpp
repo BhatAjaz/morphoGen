@@ -95,12 +95,78 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
     else {
         configFile.clear();
     }
+
+    
+
+    
  
 	/* create the thread and pass pointers to the module parameters */
     rThread = new PMPThread(robotName, configFile);
     rThread->setName(getName().c_str());
     rThread->setRobotName(robotName);
     rThread->setVerbose(verboseFile,verboseTerm);
+
+    if (rf.check("neuralNet")) {
+        int nLayers  = rf.check("nLayers",
+			                Value(3),
+                            "number of layers in the neural network (int)").asInt();
+        printf("\n working with neural network of size %d \n", nLayers);
+
+        
+        std::ostringstream o;
+        for(int i=1; i <=nLayers; i++){
+            printf("checking for layer %d characteristics \n",i);
+            string s,s1="weights",s2="biases";
+
+         
+
+            //o << i;
+            //s = o.str();
+            
+            string sLayerN(" ");
+            sprintf((char*)sLayerN.c_str(),"%d",i);
+            s1.append(sLayerN);
+            
+            printf("string: %s \n",s1.c_str());
+            if (rf.check(s1)) {
+                weightsPath = rf.findFile(rf.find(s1).asString().c_str());
+                if (weightsPath=="") {
+                    return false;
+                }
+                else {
+                    printf("found weight file %s \n", weightsPath.c_str());
+                }
+            }
+            else {
+                weightsPath.clear();
+            }        
+            
+            rThread->setWeightsPath(weightsPath,i);
+
+            s2.append(sLayerN);    
+
+            if (rf.check(s2)) {
+                biasesPath = rf.findFile(rf.find(s2).asString().c_str());
+                if (biasesPath=="") {
+                    return false;
+                }
+                else {
+                    printf("found biase file %s \n", biasesPath.c_str());
+                }
+            }
+            else {
+                biasesPath.clear();
+            }        
+            
+            rThread->setBiasesPath(biasesPath,i);
+
+        }
+
+        //rThread->setNeuralNetwork(true);
+    }
+    
+
+    
 	//=======================================================================
 
     /* now start the thread to do the work */

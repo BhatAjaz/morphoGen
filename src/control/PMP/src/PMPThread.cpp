@@ -22,7 +22,7 @@
 #include <utils.h>
 #include <cstring>
 #include <string>
-#include<time.h>
+#include <time.h>
 #include <math.h>
 #include <vector>
 #include <iostream>
@@ -49,6 +49,9 @@ using namespace std;
 #define Wrist_SIDEGRASP		0
 #define Wrist_TOPGRASP		90
 #define rad2degree          180/3.14159
+
+
+#define NEURALNETWORK   0
 
 #define CMD_RIGHT_ARM	VOCAB4('r','a','r','m')
 #define CMD_LEFT_ARM	VOCAB4('l','a','r','m')
@@ -148,23 +151,27 @@ bool PMPThread::threadInit() {
         // X/Y Position reached
         posiL.open("positionL.txt");
         wr_Gam.open("result.txt");
+        jacFile = fopen ("jacobian.txt" , "w");
     }  
-    
+#ifdef NEURALNETWORK
+    printf("Loading Neural Network \n");
+    loadNeuralNetwork();
+#endif     
     //initialization of the state of PMP (default state)
     GoalCodePMP  = 19;
     BodyChain    = 0;
     MSimExec     = 1;
     TrajType     = 1;
-    WristO       =  0.5;
-    MiniGoal[0]  = -0.5;
-    MiniGoal[1]  =  0.0;
-    MiniGoal[2]  =  0.0;
-    MiniGoal[3]  =  0.0;
+    WristO       =  0;
+    MiniGoal[0]  =  -300;  // target right arm x
+    MiniGoal[1]  =  0.0;   // target right arm y
+    MiniGoal[2]  =  50;
+    MiniGoal[3]  =  0.0;   //obstacle x
     MiniGoal[4]  =  0.0;
     MiniGoal[5]  =  0.0;
-    MiniGoal[6]  = -0.5;
+    MiniGoal[6]  = -300;   //target left arm x
     MiniGoal[7]  =  0.0;
-    MiniGoal[8]  =  0.0;
+    MiniGoal[8]  =  50;
     MiniGoal[9]  =  0.0;
     MiniGoal[10] =  0.0;
     MiniGoal[11] =  0.0;      
@@ -189,9 +196,118 @@ std::string PMPThread::getName(const char* p) {
     return str;
 }
 
+
+void PMPThread::setWeightsPath(std::string s, int i) {
+    switch(i){
+    case 1: {weights1Path = s;} break;
+    case 2: {weights2Path = s;} break;
+    case 3: {weights3Path = s;} break;
+    }
+
+}
+
+void PMPThread::setBiasesPath(std::string s, int i) {
+    switch(i){
+    case 1: {biases1Path = s;} break;
+    case 2: {biases2Path = s;} break;
+    case 3: {biases3Path = s;} break; 
+    }
+
+}
+
 void PMPThread::setInputPortName(string InpPort) {
     
 }
+
+void PMPThread::loadNeuralNetwork(){
+    printf("\n loading Neural Network.... \n");
+    int u,i;
+    float s=0;
+    int dec;
+    Weight1=fopen(weights1Path.c_str(),"r");//input file to be given to the program	
+  	Weight2=fopen(weights2Path.c_str(),"r");
+  	Weight3=fopen(weights3Path.c_str(),"r");
+  	bias1=fopen(biases1Path.c_str(),"r");
+  	bias2=fopen(biases2Path.c_str(),"r");
+  	bias3=fopen(biases3Path.c_str(),"r");
+    
+
+	if(	bias1==NULL) {
+		printf("Cant read the input file for bias1\n");
+		return;
+	}
+	for(u=0;u<hiddenL1;u++) {
+  		fscanf(bias1,"%f",&s);
+  		//printf("\n\ndata testing  %f",s);
+   		b1[u]=s;
+        //printf("bias1 inserted values %f \n",b1[u]);
+	}
+
+
+	if(	Weight1==NULL) {
+		printf("Cant read the input file for weights1 \n");
+		return;
+	}
+
+	for(u=0;u<hiddenL1;u++) {
+		for(i=0;i<inputL;i++) {
+      		fscanf(Weight1,"%f",&s);
+	  		//printf("\n\ndata testing  %f",s);
+	   		w1[u][i]=s;   
+	    }
+	}
+
+	if(	bias2==NULL) {
+		printf("Cant read the input file for bias2\n");
+		return;
+	}
+	for(u=0;u<hiddenL2;u++) {
+  		fscanf(bias2,"%f",&s);
+  		//printf("\n\ndata testing  %f",s);
+   		b2[u]=s;     
+
+	}
+
+	if(	Weight2==NULL)	{
+		printf("Cant read the input file for weights2\n");
+		return;
+	}
+	for(u=0;u<hiddenL2;u++) {
+		for(i=0;i<hiddenL1;i++) {
+      		fscanf(Weight2,"%f",&s);
+	 		//printf("\n\ndata testing  %f",s);
+	  		w2[u][i]=s; 
+	 	}
+	}
+
+	if(	Weight3==NULL){
+		printf("Cant read the input file for weights3\n");
+		return;
+	}
+	for(u=0;u<outputL;u++) {
+		for(i=0;i<hiddenL2;i++) {
+      		fscanf(Weight3,"%f",&s);
+  			//printf("\n\ndata testing  %f",s);
+	   		w3[u][i]=s;     
+		}
+	}
+
+	if(	bias3==NULL) {
+		printf("Cant read the input file for bias3\n");
+		return;
+	}
+	for(u=0;u<outputL;u++) {
+  		fscanf(bias3,"%f",&s);
+  		//printf("\n\ndata testing  %f",s);
+   		b3[u]=s;     
+		
+	}
+
+    printf(" Neural network correctly loaded \n");
+
+}
+
+
 void PMPThread::setRobotName(string robName) {
 
     this->robot = robName;
@@ -317,7 +433,7 @@ void PMPThread::run() {
                   if((GoalCodePMP == GoalCodePMP_DISC)||(GoalCodePMP == GoalCodePMP_CONT))	{
 					cout << "Goal REA Target recd from Client" << endl;
 					InitializeJan();
-				    //ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType); 
+				    ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType); 
 					cout << "Response from PMP:" << ResPM << endl;
 					int XmitGreen=0;
 					if(ResPM)   {
@@ -455,6 +571,7 @@ void PMPThread::threadRelease() {
     posi.close();
     wr1L.close();
     wr_GamL.close();
+    fclose(jacFile);
   }
   printf("PMPThread::threadRelease:end \n"); 
 }
@@ -477,11 +594,41 @@ void PMPThread::onStop() {
 
 double* PMPThread::forward_Kinematics(double *u , int l)	{
     
-   	double *p;
+   	double *p,h1[hiddenL1],h2[hiddenL2],a[outputL];
    	//double a[3];
    	double T_Len=0; double T_Ori=0;
-	
+
+
+#ifdef NEURALNETWORK
+    for(int v=0;v<hiddenL1;v++) {
+		double sum = 0;
+		for(int i=0;i<inputL;i++) {
+      		sum = sum + w1[v][i]*u[i];   
+	    }
+		h1[v] = sum + b1[v];
+		h1[v] = tanh(h1[v]);
+	}
+
+	for(int v=0;v<hiddenL2;v++) {
+		double sum = 0;
+		for(int i=0;i<hiddenL1;i++) {
+      		sum = sum + w2[v][i]*h1[i];   
+	    }
+		h2[v] = sum + b2[v];
+		h2[v] = tanh(h2[v]);
+	}
+
+	for(int v=0;v<outputL;v++) {
+		double sum = 0;
+		for(int i=0;i<hiddenL2;i++) {
+      		sum = sum + w3[v][i]*h2[i];   
+	    }
+		a[v] = sum + b3[v];
+		//a[v] = tanh(a[v]);
+	}  
+#else	
 	computeJac(a,u);
+#endif
    	
    	p=a;
    	return p;
@@ -534,6 +681,64 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
     return ptrLFK;
 };
 
+
+
+
+
+
+
+void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
+    
+	int i,u;
+	double h[hiddenL1],z[hiddenL1],p[hiddenL2],hinter[hiddenL1],p1[hiddenL2],pinter[hiddenL2],Jack[outputL][inputL];
+    double *Jacob = JacobIn;
+    double *Jan = JanIn;
+//==================== Loading Weights, Biases for the ANN ====================
+
+	for(u=0;u<hiddenL1;u++) {
+		double sum=0;
+		for(i=0;i<inputL;i++){
+       		sum=sum+(w1[u][i]*Jan[i]);
+	   	}
+		h[u]=sum+b1[u]; // Inner variable of Layer 1
+		z[u]=tanh(h[u]);// output of layer 1
+	    hinter[u]=1-(pow(z[u],2));    //(1-tanh(h(b,1))^2)
+	}
+
+//================W1/B1work over here, u have 'h' and 'z'===================
+
+	for(u=0;u<hiddenL2;u++) {
+		double sum2=0;
+		for(i=0;i<hiddenL1;i++) {
+      		
+       		sum2=sum2+w2[u][i]*z[i];
+		}
+		p[u]=sum2+b2[u]; // here u get p int variable of layer 2 ////////
+		p1[u]=tanh(p[u]);// output of layer 2
+		pinter[u]=1-(pow(p1[u],2));
+		
+	}
+
+	for(int k=0;k<outputL;k++) {
+		for(int n=0;n<inputL;n++) {
+			double inter1=0;
+			for(int a=0;a<hiddenL2;a++) {
+				for(int b=0;b<hiddenL1;b++) {
+    				inter1=inter1 +((w3[k][a]*pinter[a])*((w2[a][b]*hinter[b])*w1[b][n]));
+				}
+			}
+			Jack[k][n]=inter1;
+			//fprintf(writeJ,"\n \t  %f",Jack[k][n]);
+		}	
+	}
+
+    for (int a=0; a<inputL; a++) {
+        for (int n=0; n<outputL; n++)
+            Jacob[a*outputL + n] = Jack[n][a];    
+    
+    }	
+}
+
  double* PMPThread::PMP(double *force,double *forceL)	{
     int i;
     double pi=3.14;
@@ -557,9 +762,20 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
 
     
 //=======================================================================================
-   // Jacobian for the arms and torso
+// Jacobian for the arms and torso
 
+#ifdef NEURALNETWORK
+    computeNeuralJacobian(Jacob, Jan);
+#else
  	computeJacobian(Jacob,JacobL,Jan,JanL);
+#endif
+    
+    
+    for(int i = 0; i < 30 ; i++) {
+        fprintf(jacFile,"%f ", Jacob[i]);
+    }
+    fprintf(jacFile,"\n\n\n");
+    
 //=======================================================================================
    
     meanJan[0] =  0.5200; 
@@ -618,7 +834,7 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
     JHdL[6] = 0.041;
     JHdL[7] = 75;
     JHdL[8] = J8H;
-    JHdL[9] = J9H
+    JHdL[9] = J9H;
 
     Joint_FieldL[0]=(meanJanL[0]-JanL[0]) * JHdL[0]; // Multiply by Joint compliance 
     Joint_FieldL[1]=(meanJanL[1]-JanL[1]) * JHdL[1]; //0.52 / Modified in June at Crete
@@ -664,6 +880,8 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
     foof=Jvel;
     return foof;
 };
+
+
 
 
 double PMPThread::Gamma(int _Time)	{
@@ -876,19 +1094,19 @@ void PMPThread::InitializeJan()	 {	// init for normal reaching
     janini8L=0;
     janini9L=0;
     
-    x_iniIC=-263;
-    y_iniIC=-160;
-    z_iniIC=380;
-    x_iniICL=256;
-    y_iniICL=-160;
-    z_iniICL=380;
+    x_iniIC  =-160;
+    y_iniIC  = 263;
+    z_iniIC  = 380;
+    x_iniICL =-160;
+    y_iniICL =-256;
+    z_iniICL = 380;
 
-    x_ini=-263;
-    y_ini=-160;
-    z_ini=380;
-    x_iniL=256;
-    y_iniL=-160;
-    z_iniL=380;
+    x_ini  =-160;
+    y_ini  = 263;
+    z_ini  = 380;
+    x_iniL =-160;
+    y_iniL =-256;
+    z_iniL = 380;
 };
 
 
@@ -1002,9 +1220,6 @@ int PMPThread::FrameGoal()	{
 };
 
 int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, double Wrist,int TrajT)	{
-   
-
-   
         
     int time;
     double Gam;
@@ -1017,16 +1232,16 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         Kompliance(1);
         if((MiniGoal[0]==0)&&(MiniGoal[1]==0)&&(MiniGoal[2]==0)) {	//note this is for iCub , for icubSim we need to divide by 1000
      
-            MiniGoal[0]=-263;
-            MiniGoal[1]=-160;
-            MiniGoal[2]=378;
+            MiniGoal[0]=-160;  // corrected swap x and y
+            MiniGoal[1]= 263;  // corrected swap x and y
+            MiniGoal[2]= 378;
         }
 
         if((MiniGoal[6]==0)&&(MiniGoal[7]==0)&&(MiniGoal[8]==0))	{
 
-            MiniGoal[6]=263;
-            MiniGoal[7]=-160;
-            MiniGoal[8]=378;
+            MiniGoal[6]=-160; // corrected swap x and y
+            MiniGoal[7]=-263; // corrected swap x and y
+            MiniGoal[8]= 378;
         }
 
         fin[0]=MiniGoal[0]; //Final Position X
@@ -1260,8 +1475,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 		if((MiniGoal[0]==0)&&(MiniGoal[1]==0)&&(MiniGoal[2]==0))  {	//note this is for iCub , for icubSim we need to divide by 1000
    
      		MiniGoal[0]=-263;
-     		MiniGoal[1]=-160;
-     		
+     		MiniGoal[1]=-160;     		
      		MiniGoal[2]=378;
     	}
 
@@ -2705,10 +2919,10 @@ void PMPThread::Kompliance(int TagK)	{
     if (TagK==1)  {
         t_dur=5; 
         printf ("Adjusting Compliances 1 \n");
-        KFORCE=0.01; //0.005
+        KFORCE=0.001; //Vishuu 6/9/13 reduced force file  //0.01; //0.005
         ITERATION=1000;              
         RAMP_KONSTANT=0.005;
-        KOMP_JANG=0.002;
+        KOMP_JANG=0.002; //Vishuu 6/9/13 reduced from 0.002;
         KOMP_WAISZT=0.0004;
         //KOMP_WAISZT3=0.00002;
         KOMP_WAISZT2=0.0009;
