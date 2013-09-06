@@ -127,7 +127,7 @@
 
 #include <iostream>
 #include <string>
-
+#include<sstream>
 #include <yarp/sig/all.h>
 #include <yarp/os/all.h>
 #include <yarp/os/RFModule.h>
@@ -148,6 +148,7 @@ class PMPModule:public yarp::os::RFModule {
     std::string outputPortName;              // name of output port
     std::string handlerPortName;             // name of handler port
     std::string configFile;                  // name of the configFile that the resource Finder will seek
+    std::string weightsPath, biasesPath;                // path of the file weights and biases
 	bool verboseTerm, verboseFile;           // name of booleans that enable outputs on terminals and files respectively
     yarp::os::Port handlerPort;              // a port to handle messages 
     /*  */

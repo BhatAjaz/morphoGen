@@ -34,11 +34,10 @@ int main(int argc, char * argv[])
     
     Network yarp;
     PMPModule pmpiCubClient; 
-
     ResourceFinder rf;
     rf.setVerbose(true);
-    rf.setDefaultConfigFile("pmp.ini");    //overridden by --from parameter
-    rf.setDefaultContext("morphoGenApp/conf");    //overridden by --context parameter
+    rf.setDefaultConfigFile("pmpConfig.ini");    //overridden by --from parameter
+    rf.setDefaultContext("perceptionActionCycleApp");    //overridden by --context parameter
     rf.configure("ICUB_ROOT", argc, argv);  
     pmpiCubClient.runModule(rf);
     return 0;
