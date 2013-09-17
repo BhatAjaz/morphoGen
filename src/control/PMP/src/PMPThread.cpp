@@ -163,14 +163,14 @@ bool PMPThread::threadInit() {
     MSimExec     = 1;
     TrajType     = 1;
     WristO       =  0;
-    MiniGoal[0]  =  -300;  // target right arm x
-    MiniGoal[1]  =  0.0;   // target right arm y
-    MiniGoal[2]  =  50;
+    MiniGoal[0]  =  -320;  // target right arm x
+    MiniGoal[1]  =  100;   // target right arm y
+    MiniGoal[2]  =  80;
     MiniGoal[3]  =  0.0;   //obstacle x
     MiniGoal[4]  =  0.0;
     MiniGoal[5]  =  0.0;
     MiniGoal[6]  = -300;   //target left arm x
-    MiniGoal[7]  =  0.0;
+    MiniGoal[7]  =  -100;
     MiniGoal[8]  =  50;
     MiniGoal[9]  =  0.0;
     MiniGoal[10] =  0.0;
@@ -253,7 +253,8 @@ void PMPThread::loadNeuralNetwork(){
 		for(i=0;i<inputL;i++) {
       		fscanf(Weight1,"%f",&s);
 	  		//printf("\n\ndata testing  %f",s);
-	   		w1[u][i]=s;   
+	   		w1[u][i]=s;
+            //printf("bias1 inserted values %f \n",w1[u][i]);   
 	    }
 	}
 
@@ -387,37 +388,37 @@ void PMPThread::run() {
                   ok = true;
                 }break;
 
-                case COMMAND_VOCAB_GLEF:{
-                  rec = true;
-                  Bottle* Coord = ObsReq.get(1).asList();
-                  for(int i = 0; i < 3; i++)	{
-					MiniGoal[i] = Coord->get(i).asDouble(); 
-					cout << "GLEF : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
-                  }
-                  ok = true;
-                }break;
-
                 case COMMAND_VOCAB_GRIG:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
-					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
+					MiniGoal[i] = Coord->get(i).asDouble(); 
 					cout << "GRIG : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
                   ok = true;
                 }break;
 
-                case COMMAND_VOCAB_OLEF:{
+                case COMMAND_VOCAB_GLEF:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
-					MiniGoal[3 + i] = Coord->get(i).asDouble(); 
-					cout << "OLEF : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+					MiniGoal[6 + i] = Coord->get(i).asDouble(); 
+					cout << "GLEF : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
                   }
                   ok = true;
                 }break;
 
                 case COMMAND_VOCAB_ORIG:{
+                  rec = true;
+                  Bottle* Coord = ObsReq.get(1).asList();
+                  for(int i = 0; i < 3; i++)	{
+					MiniGoal[3 + i] = Coord->get(i).asDouble(); 
+					cout << "ORIG : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+                  }
+                  ok = true;
+                }break;
+
+                case COMMAND_VOCAB_OLEF:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
@@ -594,13 +595,15 @@ void PMPThread::onStop() {
 
 double* PMPThread::forward_Kinematics(double *u , int l)	{
     
-   	double *p,h1[hiddenL1],h2[hiddenL2],a[outputL];
+   	double *p,h1[hiddenL1],h2[hiddenL2];//,a[outputL];
    	//double a[3];
    	double T_Len=0; double T_Ori=0;
 
 
 #ifdef NEURALNETWORK
-    for(int v=0;v<hiddenL1;v++) {
+    //double *p;
+	//double h1[48],h2[55],a[3];
+   	for(int v=0;v<hiddenL1;v++) {
 		double sum = 0;
 		for(int i=0;i<inputL;i++) {
       		sum = sum + w1[v][i]*u[i];   
@@ -625,7 +628,8 @@ double* PMPThread::forward_Kinematics(double *u , int l)	{
 	    }
 		a[v] = sum + b3[v];
 		//a[v] = tanh(a[v]);
-	}  
+	}
+
 #else	
 	computeJac(a,u);
 #endif
@@ -740,7 +744,136 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 }
 
  double* PMPThread::PMP(double *force,double *forceL)	{
-    int i;
+//##############################################################################################
+
+
+int i,u;
+    double pi=3.14;
+    double ff[3],ffLFK[3],Jacob[30],JacobL[30],Joint_Field[10],Joint_FieldL[10];
+	
+
+    for(i=0;i<3;i++)
+	{
+	ff[i]=*(force+i);
+   	}
+    ff[0]=ff[0]*1;
+	ff[1]=ff[1]*1;
+	ff[2]=ff[2]*1;
+   // cout<< ff[0] <<  ff[1] <<  ff[2] << endl;
+
+	for(i=0;i<3;i++)
+	{
+	ffLFK[i]=*(forceL+i);
+   	}
+    ffLFK[0]=ffLFK[0]*1;
+	ffLFK[1]=ffLFK[1]*1;
+	ffLFK[2]=ffLFK[2]*1;
+//==========================ANN implementation =====//
+	
+	double h[48][1],z[48][1],p[55][1],hinter[48][1],p1[55][1],pinter[55][1],Jack[3][10],JacT[10][3];
+//==================== Loading Weights, Biases for the ANN ====================
+
+	for(u=0;u<hiddenL1;u++) {
+		double sum=0;
+		for(i=0;i<inputL;i++){
+       		sum=sum+(w1[u][i]*Jan[i]);
+	   	}
+		h[u][0]=sum+b1[u]; // Inner variable of Layer 1
+		z[u][0]=tanh(h[u][0]);// output of layer 1
+	hinter[u][0]=1-(pow(z[u][0],2));    //(1-tanh(h(b,1))^2)
+	}
+//================W1/B1work over here, u have 'h' and 'z'===================
+
+	for(u=0;u<hiddenL2;u++) {
+		double sum2=0;
+		for(i=0;i<hiddenL1;i++) {
+      		
+       		sum2=sum2+w2[u][i]*z[i][0];
+		}
+		p[u][0]=sum2+b2[u]; // here u get p int variable of layer 2 ////////
+		p1[u][0]=tanh(p[u][0]);// output of layer 1
+		pinter[u][0]=1-(pow(p1[u][0],2));
+		
+	}
+
+	//int l=hiddenL2,j=hiddenL1,k,n,a,b;
+
+	for(int k=0;k<outputL;k++) {
+		for(int n=0;n<inputL;n++) {
+			double inter1=0;
+			for(int a=0;a<hiddenL2;a++) {
+				for(int b=0;b<hiddenL1;b++) {
+    				inter1=inter1 +((w3[k][a]*pinter[a][0])*((w2[a][b]*hinter[b][0])*w1[b][n]));
+				}
+			}
+			Jack[k][n]=inter1;
+			//fprintf(writeJ,"\n \t  %f",Jack[k][n]);
+		}	
+	}	
+
+    //=======================================================================================
+    meanJan[0] =  0.0000; 
+    meanJan[1] =  0.0000;
+    meanJan[2] =  0.0000;
+    meanJan[3] = -0.7854;
+    meanJan[4] =  0.0000;
+    meanJan[5] =  0.7098;
+    meanJan[6] =  0.9730;
+    meanJan[7] =  1.2000;
+    meanJan[8] =  0.0000;
+    meanJan[9] =  0.0000;
+
+
+    Joint_Field[0]=(meanJan[0]-Jan[0]) * J0H; // Multiply by Joint compliance 
+    Joint_Field[1]=(meanJan[1]-Jan[1]) * J1H; //0.000041; //0.52 / Modified in June at Crete
+    Joint_Field[2]=(meanJan[2]-Jan[2]) * J2H;     //1.8
+    Joint_Field[3]=(meanJan[3]-Jan[3]) * J3H;   //4.5 //0.95
+    Joint_Field[4]=(meanJan[4]-Jan[4]) * J4H; //J3H 
+    Joint_Field[5]=(meanJan[5]-Jan[5]) * J5H;  //5; // Multiply by Joint compliance      
+    Joint_Field[6]=(meanJan[6]-Jan[6]) * J6H;  //0.041; //0.52 / Modified in June at Crete  
+    Joint_Field[7]=(meanJan[7]-Jan[7]) * J7H;    //75;  //1.8 
+    Joint_Field[8]=(meanJan[8]-Jan[8]) * J8H;     //4.5 //0.95
+    Joint_Field[9]=(meanJan[9]-Jan[9]) * J9H;
+
+/* 
+    Joint_Field[0]=(0-Jan[0])*J0H; // Multiply by Joint compliance 
+    Joint_Field[1]=(0-Jan[1])*J1H;//0.000041; //0.52 / Modified in June at Crete
+	Joint_Field[2]=(0.0-Jan[2])*J2H;  //1.8
+	Joint_Field[3]=(-0.7854-Jan[3])*J3H;  //4.5 //0.95
+	Joint_Field[4]=(0-Jan[4])*J4H;//J3H 
+	Joint_Field[5]=(0.7098-Jan[5])*J5H; //5; // Multiply by Joint compliance 
+    Joint_Field[6]=(0.9730-Jan[6])*J6H;//0.041; //0.52 / Modified in June at Crete
+	Joint_Field[7]=(1.2-Jan[7])*J7H;//75;  //1.8
+	Joint_Field[8]=(0-Jan[8])*J8H;  //4.5 //0.95
+	Joint_Field[9]=(0-Jan[9])*J9H;
+*/
+//=======================================================================================
+	for(int a=0;a<inputL;a++) {
+		double jvelo=0;
+    	for(int n=0;n<outputL;n++) {
+	   		JacT[a][n]=Jack[n][a];
+       		jvelo=jvelo+(JacT[a][n]*ff[n]);
+		}
+    	Jvel[a]=0.002*(jvelo+Joint_Field[a]);
+   //cout << Jvel[a]<< endl;
+	} 
+
+
+    Jvel[10]=0;
+	Jvel[11]=0;
+	Jvel[12]=0;
+	Jvel[13]=0;
+	Jvel[14]=0;
+	Jvel[15]=0;
+	Jvel[16]=0;
+	Jvel[17]=0;
+	Jvel[18]=0;
+	Jvel[19]=0;
+   
+
+
+//##############################################################################################
+/*    int i;
     double pi=3.14;
     double ff[3],ffLFK[3],Jacob[30],JacobL[30],Joint_Field[10],Joint_FieldL[10];//,Jvel[20];
     double visco[5]={1,1,1,1,1};
@@ -789,9 +922,9 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     meanJan[8] =  0.0000;
     meanJan[9] =  0.0000;
     
-    JHd[0] = J2H;
+    JHd[0] = J0H;
     JHd[1] = 0.000041;
-    JHd[2] = J3H;
+    JHd[2] = J2H;
     JHd[3] = 0.041;
     JHd[4] = 0.041;
     JHd[5] = 5;
@@ -825,9 +958,9 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     meanJanL[8] =  0.0000;
     meanJanL[9] =  0.0000;
 
-    JHdL[0] = J2H;
+    JHdL[0] = J0H;
     JHdL[1] = 0.000041;
-    JHdL[2] = J3H;
+    JHdL[2] = J2H;
     JHdL[3] = 0.041;
     JHdL[4] = 0.041;
     JHdL[5] = 5;
@@ -876,7 +1009,7 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     Jvel[0]=KOMP_WAISZT*(Jvel[0]+ Jvel[10]);
     Jvel[1]=KOMP_WAISZT*(Jvel[1]+ Jvel[11]);
     Jvel[2]=KOMP_WAISZT2*(Jvel[2]+ Jvel[12]);
-   
+ */  
     foof=Jvel;
     return foof;
 };
@@ -1094,19 +1227,19 @@ void PMPThread::InitializeJan()	 {	// init for normal reaching
     janini8L=0;
     janini9L=0;
     
-    x_iniIC  =-160;
-    y_iniIC  = 263;
-    z_iniIC  = 380;
-    x_iniICL =-160;
-    y_iniICL =-256;
-    z_iniICL = 380;
+    x_iniIC  =-48;
+	y_iniIC  = 227;
+	z_iniIC  = 411;
+	x_iniICL =-160;
+	y_iniICL =-256;
+	z_iniICL = 380;
 
-    x_ini  =-160;
-    y_ini  = 263;
-    z_ini  = 380;
-    x_iniL =-160;
-    y_iniL =-256;
-    z_iniL = 380;
+	x_ini  =-48;
+	y_ini  = 227;
+	z_ini  = 411;
+	x_iniL =-160;
+	y_iniL =-256;
+	z_iniL = 380;
 };
 
 
@@ -1883,8 +2016,9 @@ void PMPThread::GraspL()
                  };
 
 void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, double TL3, int time, double Gam, int HAct)	{
+ // cout<< HAct<< endl;
 
-    double *ang = Jan;
+  /*  double *ang = Jan;
     double *angL = JanL;
     int len=1,i;
     double *topmp, *topmpL,*force=0,*forceL=0;
@@ -2087,6 +2221,213 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
         }
     }   
     // From Q >> X > Force > Torques >Q_dots >Q ....................
+//=================================================================== */
+    
+    double *ang = Jan;
+	double *angL = JanL;
+	int len=1,i;
+	double *topmp, *topmpL;
+//===============================================================
+   if((HAct==0)||(HAct==2))
+   {
+		double *nFK = forward_Kinematics(ang,len); // Joint Angles to Positions 3>>>>>2
+		
+		for(i=0;i<3;i++)
+		{
+		X_pos[i]=*(nFK+i);
+		}
+
+		if((HAct==0))
+		{
+		X_posL[0]=x_iniL;
+		X_posL[1]=y_iniL;
+		X_posL[2]=z_iniL;
+		}
+		double *po=X_pos;
+		//===================================================================
+		target[0]=T1;
+		target[1]=T2;
+		target[2]=T3;
+
+		double *ta=target;
+		if(HAct==1)
+		{
+		ta=po;
+		}
+		double *force=forcefield(po,ta); // Position to Force 3>>>>>3
+		 for(i=0;i<3;i++)
+		{
+		ffield[i]=*(force+i);
+		ffieldL[i]=0;
+		}
+		topmp= ffield;
+		topmpL= ffieldL;
+
+        
+   }
+    
+   if((HAct==1)||(HAct==2))
+   {
+		double *nLeft = forward_KinematicsL(angL,len); // Joint Angles to Positions 3>>>>>2
+		
+		for(i=0;i<3;i++)
+		{
+		X_posL[i]=*(nLeft+i);
+		}
+   		if((HAct==1))
+		{
+		X_pos[0]=x_ini;
+		X_pos[1]=y_ini;
+		X_pos[2]=z_ini;
+		}
+		
+		double *poL=X_posL;
+		targetL[0]=TL1;
+		targetL[1]=TL2;
+		targetL[2]=TL3;
+
+		double *taL=targetL;
+		if(HAct==0)
+		{
+		taL=poL;
+		}
+		double *forceL=forcefieldL(poL,taL); // Position to Force 3>>>>>3
+		 for(i=0;i<3;i++)
+		{
+        ffield[i]=0;
+        ffieldL[i]=*(forceL+i);
+		}
+		topmp= ffield;
+		topmpL= ffieldL;
+   }
+//===================================================================
+	//                  PASSIVE MOTION PARADIGM
+//===================================================================
+   	double *Q_Dot=PMP(topmp,topmpL);  //Force to Torque to Q_dot 2>>>>>3
+//===================================================================
+//===================================================================
+
+	for(i=0;i<20;i++)          //MODIFY
+		{
+		JoVel[i]=Jvel[i]*Gam;
+        //cout<<JoVel[i]<<endl;
+		}
+//===================================================================
+	// Q1-Q3 :W , JAN 0 - JAN 2 : W = JANL 0 - JANL 2;   JAN 3-JAN 9 RIGHT ARM; JANL 13-JANL19 LEFT ARM
+//===================================================================
+	// From Q_dots to Q >>>>>
+    q1[time]=JoVel[0];
+   	double *j1=q1;
+	double joi1=Gamma_Int(j1,time);
+	Jan[0]=joi1+janini0;
+	JanL[0]=joi1+janini0;
+
+
+	q2[time]=JoVel[1];
+    double *j2=q2;
+	double joi2=Gamma_Int(j2,time);
+	Jan[1]=joi2;
+    JanL[1]=joi2;
+
+	q3[time]=JoVel[2];
+    double *j3=q3;
+	double joi3=Gamma_Int(j3,time);
+	Jan[2]=joi3+janini2;
+	JanL[2]=joi3+janini2;
+
+if((HAct==0)||(HAct==2))
+   {
+	q4[time]=JoVel[3];
+    double *j4=q4;
+	double joi4=Gamma_Int(j4,time);
+	Jan[3]=joi4+janini3;
+
+	q5[time]=JoVel[4];
+    double *j5=q5;
+	double joi5=Gamma_Int(j5,time);
+	Jan[4]=joi5+janini4;
+
+	q6[time]=JoVel[5];
+    double *j6=q6;
+	double joi6=Gamma_Int(j6,time);
+	Jan[5]=joi6+janini5;
+
+	q7[time]=JoVel[6];
+    double *j7=q7;
+	double joi7=Gamma_Int(j7,time);
+	Jan[6]=joi7+janini6;
+
+	q8[time]=JoVel[7];
+    double *j8=q8;
+	double joi8=Gamma_Int(j8,time);
+	Jan[7]=joi8+janini7;
+
+	q9[time]=JoVel[8];
+    double *j9=q9;
+	double joi9=Gamma_Int(j9,time);
+	Jan[8]=joi9+janini8;
+
+	q10[time]=JoVel[9];
+    double *j10=q10;
+	double joi10=Gamma_Int(j10,time);
+	Jan[9]=joi10+janini9;
+
+	        JanL[3]=-1.74;// -0.6981
+	        JanL[4]=0.78;
+			JanL[5]=0;
+			JanL[6]=1.3;
+			JanL[7]=0;
+			JanL[8]=0;
+			JanL[9]=0;
+}
+
+	// for LEFT HAND 
+if((HAct==1)||(HAct==2))
+   {
+	q4L[time]=JoVel[13];
+    double *j4L=q4L;
+	double joi4L=Gamma_Int(j4L,time);
+	JanL[3]=joi4L+janini3L;
+
+	q5L[time]=JoVel[14];
+    double *j5L=q5L;
+	double joi5L=Gamma_Int(j5L,time);
+	JanL[4]=joi5L+janini4L;
+
+	q6L[time]=JoVel[15];
+    double *j6L=q6L;
+	double joi6L=Gamma_Int(j6L,time);
+	JanL[5]=joi6L+janini5L;
+
+	q7L[time]=JoVel[16];
+    double *j7L=q7L;
+	double joi7L=Gamma_Int(j7L,time);
+	JanL[6]=joi7L+janini6L;
+
+	q8L[time]=JoVel[17];
+    double *j8L=q8L;
+	double joi8L=Gamma_Int(j8L,time);
+	JanL[7]=joi8L+janini7L;
+
+	q9L[time]=JoVel[18];
+    double *j9L=q9L;
+	double joi9L=Gamma_Int(j9L,time);
+	JanL[8]=joi9L+janini8L;
+
+	q10L[time]=JoVel[19];
+    double *j10L=q10L;
+	double joi10L=Gamma_Int(j10L,time);
+	JanL[9]=joi10L+janini9L;
+
+	        Jan[3]=-1.74;// -0.6981
+	        Jan[4]=0.78;
+			Jan[5]=0;
+			Jan[6]=1.3;
+			Jan[7]=0;
+			Jan[8]=0;
+			Jan[9]=0;
+}   
+	// From Q >> X > Force > Torques >Q_dots >Q ....................
 //===================================================================
 }
 
@@ -2900,8 +3241,8 @@ void PMPThread::Kompliance(int TagK)	{
         KOMP_WAISZT   = 0.000003;
         KOMP_WAISZT2  = 0.000003;
 
-        J2H = 0.041;
-        J3H = 0.000005;
+        J0H = 0.041;
+        J2H = 0.000005;
         J7H = 0.041;
         J8H = 0.041;
         J9H = 0.041;
@@ -2916,24 +3257,30 @@ void PMPThread::Kompliance(int TagK)	{
 // Close Space ends **********************
 
 // Far Space *****************************
-    if (TagK==1)  {
-        t_dur=5; 
+     if (TagK==1)
+	      {
         printf ("Adjusting Compliances 1 \n");
-        KFORCE=0.001; //Vishuu 6/9/13 reduced force file  //0.01; //0.005
-        ITERATION=1000;              
-        RAMP_KONSTANT=0.005;
-        KOMP_JANG=0.002; //Vishuu 6/9/13 reduced from 0.002;
-        KOMP_WAISZT=0.0004;
-        //KOMP_WAISZT3=0.00002;
-        KOMP_WAISZT2=0.0009;
-        J2H=50; //800
-        J3H=0.2;
-        J7H=50;
-        J8H=0.041;
-        J9H=0.041;
+        KFORCE=0.005; // 0.0094
+		ITERATION=1000;              
+		RAMP_KONSTANT=0.005;
+		t_dur=5;
+		//KOMP_JANG=0.0009;
+		//KOMP_WAISZT=0.0001;
+		//KOMP_WAISZT3=0.00002
+		//KOMP_WAISZT2=0.0009;
+		J0H=1; //400 //800
+        J1H=0.52;
+		J2H=400; //1 //400;
+		J3H=300; //4.5 //1 //20;
+        J4H=50; //4.5
+        J5H=5; //1
+        J6H=10; //0.041;
+		J7H=10; //1
+		J8H=0.041; //1
+		J9H=0.041; //1
         // Far Space ***************************** 
-        printf ("\n Initiating System Dynamics \n");
-    } 
+		printf ("\n Initiating System Dynamics \n");
+	 } 
 
   
     if (TagK==2)  {
@@ -2948,8 +3295,8 @@ void PMPThread::Kompliance(int TagK)	{
         //KOMP_WAISZT3=0.00002;
         KOMP_WAISZT2=0.0006;
         
-        J2H=50; //800
-        J3H=0.2;
+        J0H=50; //800
+        J2H=0.2;
         J7H=50;
         J8H=0.041;
         J9H=0.041;
@@ -2970,8 +3317,8 @@ void PMPThread::Kompliance(int TagK)	{
         //KOMP_WAISZT3=0.00002;
         KOMP_WAISZT2=0.0011;
         
-        J2H=50; //800
-        J3H=0.2;
+        J0H=50; //800
+        J2H=0.2;
         J7H=50;
         J8H=0.041;
         J9H=0.041;

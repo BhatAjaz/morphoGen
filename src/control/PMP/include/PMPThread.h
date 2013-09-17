@@ -72,7 +72,7 @@ private:
 	   
 	//PMPServer to Observer
 	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result and motor commands
-   	
+   	double *foof;
 	std::string name;           // rootname of all the ports opened by this thread
     bool verboseFile, verboseTerm;
     std::ofstream wr,wr1,posi,wrL,wr_GamL,wr1L,posiL,wr_Gam; //output file pointers
@@ -100,8 +100,8 @@ private:
     double VTGSIN[14]; // Comment VM 27 Feb: this has to be updated if we are usign both robots and making a choice which one will move
     
     double Jan[10];
-    double JanL[10]; //initial Joint angles
-    double a[3], aL[3], aLRH[3], res[3], resL[3],Jvel[20];
+    double JanL[10],Jvel[20]; //initial Joint angles
+    double a[3], aL[3], aLRH[3], res[3], resL[3];
     
     double x_ini; // Using PMP+ Symmetry So Right and Left Arm movements are
     // coordinated by the forward inverse model of the left arm only
@@ -132,7 +132,7 @@ private:
     double target[3],targetL[3];
     double X_pos[3],ffield[3],JoVel[20],X_posL[3],ffieldL[3];
     double *ptr;
-    double KFORCE,ITERATION,RAMP_KONSTANT,t_dur,KOMP_JANG,KOMP_WAISZT,KOMP_WAISZT2,J2H,J7H,J8H,J9H,J3H;
+    double KFORCE,ITERATION,RAMP_KONSTANT,t_dur,KOMP_JANG,KOMP_WAISZT,KOMP_WAISZT2,J0H,J1H,J2H,J5H,J6H,J7H,J8H,J9H,J3H,J4H;
     float s[5000];
     //		int ParamStiff;
     double x_fin1,y_fin1,z_fin1,x_fin2,y_fin2,z_fin2,x_fin1L,y_fin1L,z_fin1L,x_fin2L,y_fin2L,z_fin2L;
