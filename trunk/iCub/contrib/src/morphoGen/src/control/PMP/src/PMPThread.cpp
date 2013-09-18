@@ -163,7 +163,7 @@ bool PMPThread::threadInit() {
     MSimExec     = 1;
     TrajType     = 1;
     WristO       =  0;
-    MiniGoal[0]  =  -320;  // target right arm x
+    MiniGoal[0]  =  -250;  // target right arm x
     MiniGoal[1]  =  100;   // target right arm y
     MiniGoal[2]  =  80;
     MiniGoal[3]  =  0.0;   //obstacle x
@@ -2263,6 +2263,7 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
 		topmp= ffield;
 		topmpL= ffieldL;
 
+
         
    }
     
@@ -3260,7 +3261,7 @@ void PMPThread::Kompliance(int TagK)	{
      if (TagK==1)
 	      {
         printf ("Adjusting Compliances 1 \n");
-        KFORCE=0.005; // 0.0094
+        KFORCE=0.0065;//0.005 // 0.0094
 		ITERATION=1000;              
 		RAMP_KONSTANT=0.005;
 		t_dur=5;
@@ -3268,14 +3269,14 @@ void PMPThread::Kompliance(int TagK)	{
 		//KOMP_WAISZT=0.0001;
 		//KOMP_WAISZT3=0.00002
 		//KOMP_WAISZT2=0.0009;
-		J0H=1; //400 //800
+		J0H=200; //400 //800
         J1H=0.52;
-		J2H=400; //1 //400;
-		J3H=300; //4.5 //1 //20;
-        J4H=50; //4.5
-        J5H=5; //1
-        J6H=10; //0.041;
-		J7H=10; //1
+		J2H=800; //1 //400;
+		J3H=200; //4.5 //1 //20;
+        J4H=1; //4.5
+        J5H=200; //1
+        J6H=200; //0.041;
+		J7H=400; //1
 		J8H=0.041; //1
 		J9H=0.041; //1
         // Far Space ***************************** 
