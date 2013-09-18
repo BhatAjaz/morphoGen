@@ -6,51 +6,52 @@
 %    tr_bin_file, tr_yml_file
 %    You should offer either of these two files.
 table_method: 1
-be_ori_pi: 1
-be_blur: 1
-tr_bin_file: data_blocks/tr_data_blocks.bin
-tr_yml_file: data_blocks/tr_data_blocks.yml
+tr_bin_file: data/tr_data_cmp8toys.bin
+tr_yml_file: data/tr_data_cmp8toys.yml
 norm_para:
-   h_fix: 120
-   w_fix: 120
+   h_fix: 48
+   w_fix: 48
 test_para:
    max_cols_rows: 640
    scale_factor: 1.20
    aspect_factor: 1.15
-   min_scale: -5
-   max_scale: 0
+   min_scale: -10
+   max_scale: -1
    min_aspect: 0
    max_aspect: 0
-   canny_thigh: 70.
-   canny_tlow: 120.
-   min_edge_pt: 350
-   max_edge_pt: 1600
-   th_overlap_out: 0.4
+   canny_thigh: 180.
+   canny_tlow: 90.
+   min_edge_pt: 120
+   th_overlap_out: 0.3
    nmin_matches: 12
    sliding_step: 3
 chamfer_para:
-   th_dis: 5.1
+   th_dis: 3.1
    th_ori: 3.4906587004661560e-01
-   th_match_score: 0.47
-   k_linear: 0.6666667
-   b_linear: 136.59607183
+   th_match_score: 0.64
+   k_linear: 0.7143
+   b_linear: 51.4
 quantize_para:
    n_bin_dis: 4
-   n_bin_ori_PI: 6
-   MAX_range_dis: 28.
+   n_bin_ori: 8
+   MAX_range_dis: 12.
+   MAX_range_ori: 6.2831854820251465
 grouppt_para:
    n_pt: 3
    n_table: 50
-   nmin_matches: 3
+   nmin_matches: 4
+cluster_para:
+   K: 1000
+   sigma_2: 6.25e-02
 inds_para:
    n_cell_x: 8
    n_cell_y: 8
-n_obj_cls: 7
-obj0: BlockUp
-obj1: ColorTowerUp
-obj2: RedTowerUp
-obj3: MushroomUp
-obj4: BlockDown
-obj5: ColorTowerDown
-obj6: RedTowerDown
-
+n_obj_cls: 8
+obj0: block
+obj1: eye
+obj2: screw
+obj3: driver
+obj4: bridge
+obj5: whiteblock
+obj6: cup
+obj7: lid
