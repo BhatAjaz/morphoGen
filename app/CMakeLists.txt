@@ -23,7 +23,7 @@ add_subdirectory(morphoGenApp)
 add_subdirectory(cognitiveGuiApp)
 add_subdirectory(perceptionActionCycleApp)
 ## make all applications show up as single target
-icub_app_all()
+#icub_app_all()
 
 
 
