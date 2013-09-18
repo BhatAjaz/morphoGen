@@ -11,9 +11,14 @@ project (morphoGen)
 
 find_package(YARP REQUIRED)
 find_package(ICUB REQUIRED)
+find_package(ICUBcontrib REQUIRED)
 
-set(CMAKE_MODULE_PATH ${YARP_MODULE_PATH} ${ICUB_MODULE_PATH} ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ICUB_DIR}/conf ${YARP_DIR}/conf) 
+#set(CMAKE_MODULE_PATH ${YARP_MODULE_PATH} ${ICUB_MODULE_PATH} ${CMAKE_MODULE_PATH})
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ICUB_DIR}/conf ${YARP_DIR}/conf) 
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${YARP_MODULE_PATH} ${ICUB_MODULE_PATH})
+
+include(YarpInstallationHelpers)
 
 #find_package(IPP REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -23,7 +28,7 @@ find_package(IPOPT)
 
 INCLUDE(iCubOptions)
 include(iCubHelpers)
-icub_install_with_rpath()
+#qicub_install_with_rpath()
 
 SET(MORPHOGENLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/attentionLib/include)
 
