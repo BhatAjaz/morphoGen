@@ -34,17 +34,27 @@
 #include <fstream>
 #include <time.h>
 
+#include <iCub/plotterThread.h>
+
+#define WIDTH  320
+#define HEIGHT 240
+
 
 class tutorialThread : public yarp::os::Thread {
 private:
+    int width, height;
+
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
 
-    yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
+    yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;     // image generated in the processing
 
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > outputPort;     // output port to plot event
+    plotterThread* pt;                                       // rateThread responsible for the visualization of the generated images
+
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputPort;  //inputport for processing
+    yarp::os::BufferedPort<yarp::os::Bottle> outputPort;     // output port , result of the processing
+    yarp::os::Semaphore checkImage;                          // semaphore responsible for the access to the inputImage     
     std::string name;                                                                // rootname of all the ports opened by this thread
     
 public:
@@ -102,7 +112,10 @@ public:
     */
     void setInputPortName(std::string inpPrtName);
 
-
+/**
+ * function of main processing in the thread
+ */
+int processing();
 
 };
 

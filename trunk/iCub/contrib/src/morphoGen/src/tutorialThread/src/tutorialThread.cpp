@@ -44,17 +44,30 @@ tutorialThread::~tutorialThread() {
 }
 
 bool tutorialThread::threadInit() {
+    // initialization of the attributes
+    width  = WIDTH;
+    height = HEIGHT;
 
-    
-   
-    if (!outputPort.open(getName("/img:o").c_str())) {
+    inputImage = new ImageOf<PixelRgb>();
+    inputImage->resize(width, height);
+
+    // opening the port for direct input
+    if (!inputPort.open(getName("/image:i").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }  
+
+    // opening the port for direct output
+    if (!outputPort.open(getName("/result:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }    
 
-    return true;
-    
+    //starting the plotterThread
+    pt = new plotterThread();
+    pt->start();
 
+    return true;
 }
 
 void tutorialThread::setName(string str) {
@@ -75,15 +88,35 @@ void tutorialThread::setInputPortName(string InpPort) {
 
 void tutorialThread::run() {    
     while (isStopping() != true) {
+        int result;
+        
+        if(inputPort.getInputCount()) {
+            checkImage.wait();
+            inputImage = inputPort.read(true);   //blocking reading for synchr with the input
+            result = processing();
+            checkImage.post();
 
-        //code here .....
+            //passing the image to the plotter
+            checkImage.wait();
+            pt->copyLeft(inputImage);
+            checkImage.post();            
+        }
+        else {
+             result = 0;
+        }
+        
         
 
         if (outputPort.getOutputCount()) {
-            outputPort.prepare() = *inputImage;
+            Bottle b = outputPort.prepare();
+            b.addInt(result);
             outputPort.write();  
         }
     }               
+}
+
+int tutorialThread::processing(){
+    return 1;
 }
 
 void tutorialThread::threadRelease() {
@@ -92,10 +125,11 @@ void tutorialThread::threadRelease() {
 }
 
 void tutorialThread::onStop() {
-    
-    outputPort.interrupt();
-
-    
+    delete inputImage;
+    printf("stopping the plotter thread \n");
+    pt->stop();
+    printf("closing the ports \n");
+    outputPort.interrupt();   
     outputPort.close();
 }
 
