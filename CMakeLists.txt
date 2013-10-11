@@ -16,7 +16,15 @@ find_package(ICUBcontrib REQUIRED)
 #set(CMAKE_MODULE_PATH ${YARP_MODULE_PATH} ${ICUB_MODULE_PATH} ${CMAKE_MODULE_PATH})
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ICUB_DIR}/conf ${YARP_DIR}/conf) 
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${YARP_MODULE_PATH} ${ICUB_MODULE_PATH})
+set(CMAKE_MODULE_PATH 
+  ${CMAKE_MODULE_PATH} 
+  ${YARP_MODULE_PATH} 
+  ${ICUB_MODULE_PATH}
+  ${ICUBCONTRIB_MODULE_PATH} # note 10/10/13 aligned to the standard Rea
+)
+
+include(ICUBcontribHelpers)
+set_contrib_default_prefix() #set CMAKE_INSTALL_PREFIX to the ICUBcontrib one; print warning if user modifies it
 
 include(YarpInstallationHelpers)
 
