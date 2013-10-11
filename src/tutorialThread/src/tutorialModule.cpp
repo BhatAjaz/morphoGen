@@ -113,20 +113,184 @@ bool tutorialModule::close() {
 
 bool tutorialModule::respond(const Bottle& command, Bottle& reply) 
 {
+    bool ok = false;
+    bool rec = false; // is the command recognized?
+
     string helpMessage =  string(getName().c_str()) + 
                 " commands are: \n" +  
                 "help \n" +
                 "quit \n";
     reply.clear(); 
 
-    if (command.get(0).asString()=="quit") {
-        reply.addString("quitting");
-        return false;     
+    //if (command.get(0).asString()=="quit") {
+    //    reply.addString("quitting");
+    //    return false;     
+    //}
+    //else if (command.get(0).asString()=="help") {
+    //    cout << helpMessage;
+    //    reply.addString("ok");
+    //}
+
+    respondLock.wait();
+    switch (command.get(0).asVocab()) {
+    case COMMAND_VOCAB_HELP:
+        rec = true;
+        {
+            //reply.addString("many");    // what used to work
+            reply.addString("help");
+            reply.addString("commands are:");
+            reply.addString(" help  : to get help");
+            reply.addString(" quit  : to quit the module");
+            reply.addString(" ");
+            reply.addString(" ");
+            reply.addString(" sus   chr : to suspend chrom thread");
+            reply.addString(" sus   edg : to suspend edges thread");
+            reply.addString(" res   chr : to resume chrom thread");
+            reply.addString(" res   chr : to resume edges thread");
+            reply.addString(" ");
+            reply.addString(" ");
+            reply.addString(" set w   hor <float> : to change the weightage of horizontal orientation");
+            reply.addString(" set w   o45 <float> : to change the weightage of 45 deg orientation");
+            reply.addString(" set w   ver <float> : to change the weightage of vertical orientation");
+            reply.addString(" set w   oM45 <float> : to change the weightage of -45 deg orientation");
+            reply.addString("    ");
+            reply.addString(" get w   hor  : to get the weightage of horizontal orientation");
+            reply.addString(" get w   o45  : to get the weightage of 45 deg orientation");
+            reply.addString(" get w   ver  : to get the weightage of vertical orientation");
+            reply.addString(" get w   oM45 : to get the weightage of -45 deg orientation");
+            reply.addString(" get int      : to get the intensity value in fovea");
+            reply.addString(" get ori 0    : to get the orientation the saliency of feature in fovea ");
+            reply.addString(" get ori 45   : to get the orientation the saliency of feature in fovea ");
+            reply.addString(" get ori 90   : to get the orientation the saliency of feature in fovea ");
+            reply.addString(" get ori M45  : to get the orientation the saliency of feature in fovea ");
+            reply.addString(" get chr      : get the value in thechrominance feature map in fovea ");
+            reply.addString(" ");
+            reply.addString(" ");
+            //reply.addString(helpMessage.c_str());
+            ok = true;
+        }
+        break;
+    case COMMAND_VOCAB_QUIT:
+        rec = true;
+        {
+            reply.addString("quitting");
+            ok = false;
+        }
+        break;
+    case COMMAND_VOCAB_SET:
+        {
+            switch(command.get(1).asVocab()){
+            case COMMAND_VOCAB_WEIGHT:
+                {
+                    switch(command.get(2).asVocab()){
+                    case COMMAND_VOCAB_HOR:
+                        
+                        reply.addString("changed weight for horizontal orientation");
+                        rec = true;
+                        ok = true;
+                        break;
+                    
+                    default:
+                        rec = false;
+                        ok  = false;
+                    
+                    }
+
+                }
+            break;
+            }
+        }
+        break;
+
+    case COMMAND_VOCAB_GET:
+        {
+            switch(command.get(1).asVocab()){
+            case COMMAND_VOCAB_WEIGHT:
+                {
+                    switch(command.get(2).asVocab()){
+                    case COMMAND_VOCAB_HOR:
+                        
+                        reply.clear();
+                        reply.addVocab(COMMAND_VOCAB_HOR); // ?? Needed
+                        //reply.addDouble(wt);
+                        rec = true;
+                        ok = true;
+                        break;
+                                                   
+                    default:
+                        rec = false;
+                        ok  = false;
+                    
+                    }
+
+                }
+            break;
+            
+            }
+        }
+        break;
+
+    case COMMAND_VOCAB_SUSPEND:
+        {
+            switch(command.get(1).asVocab()){
+            case COMMAND_VOCAB_CHROME_THREAD:
+                
+                reply.addString("suspending chrome thread");
+                rec = true;
+                ok = true;
+                break;
+            case COMMAND_VOCAB_EDGES_THREAD:
+                
+                reply.addString("suspending edges thread");
+                rec = true;
+                ok = true;
+                break;
+            default:
+                rec = false;
+                ok = false;
+                break;
+            }
+        }
+        break;
+    case COMMAND_VOCAB_RESUME:
+        {
+            switch(command.get(1).asVocab()){
+            case COMMAND_VOCAB_CHROME_THREAD:
+                
+                reply.addString("resuming chrome thread");
+                rec = true;
+                ok = true;
+                break;
+            case COMMAND_VOCAB_EDGES_THREAD:
+                
+                reply.addString("resuming edges thread");
+                rec = true;
+                ok = true;
+                break;
+            default:
+                rec = false;
+                ok = false;
+                break;
+            }
+        }
+        break;
+    default:
+        rec = false;
+        ok  = false;
+    }    
+
+    respondLock.post();
+
+    if (!rec){
+        ok = RFModule::respond(command,reply);
     }
-    else if (command.get(0).asString()=="help") {
-        cout << helpMessage;
-        reply.addString("ok");
+    
+    if (!ok) {
+        reply.clear();
+        reply.addVocab(COMMAND_VOCAB_FAILED);
     }
+    else
+        reply.addVocab(COMMAND_VOCAB_OK);
     
     return true;
 }
