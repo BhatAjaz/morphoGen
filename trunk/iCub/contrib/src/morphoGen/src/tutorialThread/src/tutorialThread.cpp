@@ -47,6 +47,7 @@ bool tutorialThread::threadInit() {
     // initialization of the attributes
     width  = WIDTH;
     height = HEIGHT;
+    idle   = false;
 
     inputImage = new ImageOf<PixelRgb>();
     inputImage->resize(width, height);
@@ -65,7 +66,10 @@ bool tutorialThread::threadInit() {
 
     //starting the plotterThread
     pt = new plotterThread();
+    pt->setName(getName("").c_str());
     pt->start();
+
+    printf("Initialization of the processing thread correctly ended\n");
 
     return true;
 }
@@ -86,31 +90,57 @@ void tutorialThread::setInputPortName(string InpPort) {
     
 }
 
+void tutorialThread::visualizationResume(){
+    pt->resume();
+}
+
+void tutorialThread::visualizationSuspend(){
+    pt->suspend();
+}
+
+bool tutorialThread::test(){
+    bool reply = true;
+
+    if(pt==NULL){
+        reply = false;
+    }
+    else {
+        reply &= pt->test();
+    }
+
+    reply  &= Network::exists(getName("/image:i").c_str());
+
+    return reply;
+}
+
 void tutorialThread::run() {    
     while (isStopping() != true) {
         int result;
         
-        if(inputPort.getInputCount()) {
-            checkImage.wait();
-            inputImage = inputPort.read(true);   //blocking reading for synchr with the input
-            result = processing();
-            checkImage.post();
-
-            //passing the image to the plotter
-            checkImage.wait();
-            pt->copyLeft(inputImage);
-            checkImage.post();            
-        }
-        else {
-             result = 0;
-        }
+        if(!idle){
+            if(inputPort.getInputCount()) {
+                checkImage.wait();
+                inputImage = inputPort.read(true);   //blocking reading for synchr with the input
+                result = processing();
+                checkImage.post();
+                
+                //passing the image to the plotter
+                checkImage.wait();
+                pt->copyLeft(inputImage);
+                checkImage.post();            
+            }
+            else {
+                result = 0;
+            }
+            
+            
+            
+            if (outputPort.getOutputCount()) {
+                Bottle b = outputPort.prepare();
+                b.addInt(result);
+                outputPort.write();  
+            }
         
-        
-
-        if (outputPort.getOutputCount()) {
-            Bottle b = outputPort.prepare();
-            b.addInt(result);
-            outputPort.write();  
         }
     }               
 }
@@ -126,8 +156,10 @@ void tutorialThread::threadRelease() {
 
 void tutorialThread::onStop() {
     delete inputImage;
-    printf("stopping the plotter thread \n");
-    pt->stop();
+    if(pt!=NULL){
+        printf("stopping the plotter thread \n");
+        pt->stop();
+    }
     printf("closing the ports \n");
     outputPort.interrupt();   
     outputPort.close();

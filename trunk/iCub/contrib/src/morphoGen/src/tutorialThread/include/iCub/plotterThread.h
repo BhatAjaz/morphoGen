@@ -30,6 +30,7 @@
 #include <yarp/os/RateThread.h>
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
+#include <yarp/os/Network.h>
 #include <yarp/sig/all.h>
 #include <iostream>
 
@@ -42,24 +43,12 @@ private:
     int width, height;                    // dimension of the squared retina
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > leftPort;                 // port whre the output (left) is sent
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > rightPort;                // port whre the output (right) is sent
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > leftIntPort;              // port whre the output (left integral) is sent
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > rightIntPort;             // port whre the output (right integral) is sent
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > leftGrayPort;              // port whre the output (left integral) is sent
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > rightGrayPort;             // port whre the output (right integral) is sent
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > leftThresholdPort;              // port whre the output (left integral) is sent
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > rightThresholdPort;             // port whre the output (r
+    
 
     yarp::os::BufferedPort<yarp::sig::Vector > eventPort;
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* imageLeft;                                        //image representing the signal on the leftcamera
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* imageRight;                                       //image representing the signal on the right camera
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageLeftBW;                                       //image representing the signal on the right camera
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageRightBW;                                       //image representing the signal on the right camera   
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageLeftInt;                                     //image representing the signal on the leftcamera (integrated)
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageRightInt;                                    //image representing the signal on the right camera (integrated)
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageLeftGrey;                                     //image representing the signal on the leftcamera (integrated)
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageRightGrey;                                    //image representing the signal on the right camera (integrated)
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageLeftThreshold;                                     //image representing the signal on the leftcamera (threshold)
-    yarp::sig::ImageOf<yarp::sig::PixelMono>* imageRightThreshold;                                    //image representing the signal on the right camera (threshold)
+    
     std::string name;                           // rootname of all the ports opened by this thread
     bool synchronised;                          // flag to check whether the microsecond counter has been synchronised
     bool stereo;                                // flag indicating the stereo characteristic of the synchronization
@@ -151,6 +140,13 @@ public:
      */
     void setRetinalSize(int value) {
     }
+
+
+    /**
+     * @brief function that test the network and feature of the thread
+     * @return the result of the analysis true/false for success/unsuccess in the test
+     */
+    bool test();
     
 
 };

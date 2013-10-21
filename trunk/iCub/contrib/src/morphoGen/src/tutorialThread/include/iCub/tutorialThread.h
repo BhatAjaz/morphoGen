@@ -19,7 +19,7 @@
 
 /**
  * @file tutorialThread.h
- * @brief Definition of a thread that receives an RGN image from input port and sends it to the output port.
+ * @brief Definition of a thread that receives an RGB image from input port and sends it to the output port.
  */
 
 
@@ -43,6 +43,8 @@
 class tutorialThread : public yarp::os::Thread {
 private:
     int width, height;
+    bool idle;                      // flag that interrupts the processing 
+    yarp::os::Semaphore idleLock;   // semaphore that checks access to the resource
 
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
@@ -112,10 +114,36 @@ public:
     */
     void setInputPortName(std::string inpPrtName);
 
-/**
- * function of main processing in the thread
- */
-int processing();
+    /**
+     * @brief function of main processing in the thread
+     */
+    int processing();
+
+    /**
+     * @brief suspend the processing of the module
+     */
+    void suspend(){idleLock.wait(); idle=true; idleLock.post();};
+
+    /**
+     * @brief resume the processing of the module
+     */
+    void resume(){idleLock.wait(); idle=false; idleLock.post();};
+
+    /**
+     * @brief visualization suspend method
+     */
+    void visualizationSuspend();
+
+    /**
+     * @brief visualization resume method
+     */
+    void visualizationResume();
+
+    /**
+     * @brief function that test the network and feature of the thread
+     * @return the result of the analysis true/false for success/unsuccess in the test
+     */
+    bool test();
 
 };
 

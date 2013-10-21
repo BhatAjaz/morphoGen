@@ -136,34 +136,21 @@ bool tutorialModule::respond(const Bottle& command, Bottle& reply)
     case COMMAND_VOCAB_HELP:
         rec = true;
         {
-            //reply.addString("many");    // what used to work
+            reply.addVocab(Vocab::encode("many"));
             reply.addString("help");
             reply.addString("commands are:");
-            reply.addString(" help  : to get help");
-            reply.addString(" quit  : to quit the module");
+            reply.addString(" help    : to get help");
+            reply.addString(" quit    : to quit the module");
             reply.addString(" ");
             reply.addString(" ");
-            reply.addString(" sus   chr : to suspend chrom thread");
-            reply.addString(" sus   edg : to suspend edges thread");
-            reply.addString(" res   chr : to resume chrom thread");
-            reply.addString(" res   chr : to resume edges thread");
+            reply.addString(" sus     : to suspend the processing");
+            reply.addString(" res     : to resume  the processing");
             reply.addString(" ");
             reply.addString(" ");
-            reply.addString(" set w   hor <float> : to change the weightage of horizontal orientation");
-            reply.addString(" set w   o45 <float> : to change the weightage of 45 deg orientation");
-            reply.addString(" set w   ver <float> : to change the weightage of vertical orientation");
-            reply.addString(" set w   oM45 <float> : to change the weightage of -45 deg orientation");
+            reply.addString(" vis on  : to enable  the visualization");
+            reply.addString(" vis off : to disable the visualization");
             reply.addString("    ");
-            reply.addString(" get w   hor  : to get the weightage of horizontal orientation");
-            reply.addString(" get w   o45  : to get the weightage of 45 deg orientation");
-            reply.addString(" get w   ver  : to get the weightage of vertical orientation");
-            reply.addString(" get w   oM45 : to get the weightage of -45 deg orientation");
-            reply.addString(" get int      : to get the intensity value in fovea");
-            reply.addString(" get ori 0    : to get the orientation the saliency of feature in fovea ");
-            reply.addString(" get ori 45   : to get the orientation the saliency of feature in fovea ");
-            reply.addString(" get ori 90   : to get the orientation the saliency of feature in fovea ");
-            reply.addString(" get ori M45  : to get the orientation the saliency of feature in fovea ");
-            reply.addString(" get chr      : get the value in thechrominance feature map in fovea ");
+            reply.addString(" test    : automatic test of the features of the module");
             reply.addString(" ");
             reply.addString(" ");
             //reply.addString(helpMessage.c_str());
@@ -174,28 +161,41 @@ bool tutorialModule::respond(const Bottle& command, Bottle& reply)
         rec = true;
         {
             reply.addString("quitting");
-            ok = false;
+            
+            ok = true;
         }
         break;
-    case COMMAND_VOCAB_SET:
+    case COMMAND_VOCAB_TEST:
+        rec = true;
         {
+            reply.addString("testing");
+            bool res = rThread->test();
+            if(res){ 
+                reply.addString("test:success");
+                ok = true;
+            }
+            else{
+                reply.addString("test:insuccess");
+                ok = true;
+            }
+        }
+        break;
+    case COMMAND_VOCAB_VIS:
+        {
+            rec = true;
             switch(command.get(1).asVocab()){
-            case COMMAND_VOCAB_WEIGHT:
+            case COMMAND_VOCAB_ON:
                 {
-                    switch(command.get(2).asVocab()){
-                    case COMMAND_VOCAB_HOR:
-                        
-                        reply.addString("changed weight for horizontal orientation");
-                        rec = true;
-                        ok = true;
-                        break;
-                    
-                    default:
-                        rec = false;
-                        ok  = false;
-                    
-                    }
-
+                    reply.addString("visualization ON");
+                    rThread->visualizationResume();
+                    ok = true;   
+                }
+            break;
+            case COMMAND_VOCAB_OFF:
+                {
+                    reply.addString("visualization OFF");
+                    rThread->visualizationSuspend();
+                    ok = true;   
                 }
             break;
             }
@@ -204,6 +204,7 @@ bool tutorialModule::respond(const Bottle& command, Bottle& reply)
 
     case COMMAND_VOCAB_GET:
         {
+            rec = true;
             switch(command.get(1).asVocab()){
             case COMMAND_VOCAB_WEIGHT:
                 {
@@ -231,47 +232,19 @@ bool tutorialModule::respond(const Bottle& command, Bottle& reply)
         break;
 
     case COMMAND_VOCAB_SUSPEND:
+        rec = true;
         {
-            switch(command.get(1).asVocab()){
-            case COMMAND_VOCAB_CHROME_THREAD:
-                
-                reply.addString("suspending chrome thread");
-                rec = true;
-                ok = true;
-                break;
-            case COMMAND_VOCAB_EDGES_THREAD:
-                
-                reply.addString("suspending edges thread");
-                rec = true;
-                ok = true;
-                break;
-            default:
-                rec = false;
-                ok = false;
-                break;
-            }
+            reply.addString("suspending processing");
+            rThread->suspend();
+            ok = true;   
         }
         break;
     case COMMAND_VOCAB_RESUME:
+        rec = true;
         {
-            switch(command.get(1).asVocab()){
-            case COMMAND_VOCAB_CHROME_THREAD:
-                
-                reply.addString("resuming chrome thread");
-                rec = true;
-                ok = true;
-                break;
-            case COMMAND_VOCAB_EDGES_THREAD:
-                
-                reply.addString("resuming edges thread");
-                rec = true;
-                ok = true;
-                break;
-            default:
-                rec = false;
-                ok = false;
-                break;
-            }
+            reply.addString("resuming processing");
+            rThread->resume();
+            ok = true;
         }
         break;
     default:
