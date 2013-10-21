@@ -138,6 +138,7 @@
 #define COMMAND_VOCAB_HELP    VOCAB4('h','e','l','p')
 #define COMMAND_VOCAB_QUIT    VOCAB4('q','u','i','t')
 #define COMMAND_VOCAB_FAILED  VOCAB4('f','a','i','l')
+#define COMMAND_VOCAB_TEST    VOCAB4('t','e','s','t')
 
 #define COMMAND_VOCAB_OK      VOCAB2('o','k')
 #define COMMAND_VOCAB_P0      VOCAB2('p','0')
@@ -154,12 +155,12 @@
 #define COMMAND_VOCAB_M45     VOCAB3('M','4','5')
 #define COMMAND_VOCAB_P90     VOCAB3('p','9','0')
 #define COMMAND_VOCAB_ORI     VOCAB3('o','r','i')
-#define COMMAND_VOCAB_CHR     VOCAB3('c','h','r')
-#define COMMAND_VOCAB_BRIGHT  VOCAB3('b','r','t')
+#define COMMAND_VOCAB_VIS     VOCAB3('v','i','s')
+#define COMMAND_VOCAB_OFF     VOCAB3('o','f','f')
+
 
 #define COMMAND_VOCAB_WEIGHT  VOCAB1('w')
-#define COMMAND_VOCAB_CHROME_THREAD VOCAB3('c','h', 'r')
-#define COMMAND_VOCAB_EDGES_THREAD  VOCAB3('e','d','g')
+#define COMMAND_VOCAB_ON      VOCAB2('o','n')
 
 
 #include <iostream>
