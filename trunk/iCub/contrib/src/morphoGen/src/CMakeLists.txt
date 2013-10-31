@@ -11,7 +11,7 @@ add_subdirectory( gui             )
 add_subdirectory( reasoning       )
 add_subdirectory( tutorials       )
 add_subdirectory( vision          )
-
+add_subdirectory( tutorialThread  )
 
 
 
