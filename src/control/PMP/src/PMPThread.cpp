@@ -51,7 +51,7 @@ using namespace std;
 #define rad2degree          180/3.14159
 
 
-//#define NEURALNETWORK   0
+#define NEURALNETWORK   0
 
 #define CMD_RIGHT_ARM	VOCAB4('r','a','r','m')
 #define CMD_LEFT_ARM	VOCAB4('l','a','r','m')
@@ -117,7 +117,7 @@ bool PMPThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }
     
-    //depreciated hardcoded connections
+    //deprecated hardcoded connections
     
     //Network::connect("/cmd/right_arm:o","/icubSim/right_arm/rpc:i");
     //Network::connect("/cmd/left_arm:o","/icubSim/left_arm/rpc:i");
@@ -158,7 +158,7 @@ bool PMPThread::threadInit() {
     loadNeuralNetwork();
 #endif     
     //initialization of the state of PMP (default state)
-    GoalCodePMP  = 1;
+    GoalCodePMP  = 19;
     BodyChain    = 0;
     MSimExec     = 1;
     TrajType     = 1;
@@ -768,10 +768,6 @@ int i,u;
     ffLFK[0]=ffLFK[0]*1;
 	ffLFK[1]=ffLFK[1]*1;
 	ffLFK[2]=ffLFK[2]*1;
-
-
-
-#ifdef NEURALNETWORK
 //==========================ANN implementation =====//
 	
 	double h[48][1],z[48][1],p[55][1],hinter[48][1],p1[55][1],pinter[55][1],Jack[3][10],JacT[10][3];
@@ -873,135 +869,7 @@ int i,u;
 	Jvel[17]=0;
 	Jvel[18]=0;
 	Jvel[19]=0;
-
-
-
-
-#else
- 	computeJacobian(Jacob,JacobL,Jan,JanL);
-
-    
-    for(int i = 0; i < 30 ; i++) {
-        fprintf(jacFile,"%f ", Jacob[i]);
-    }
-    fprintf(jacFile,"\n\n\n");
-    
-//=======================================================================================
    
-
-    meanJan[0] =  0.5200; 
-    meanJan[1] =  0.0000;
-    meanJan[2] =  0.0000;
-    meanJan[3] = -0.7854;
-    meanJan[4] =  0.0000;
-
-    meanJan[5] =  0.7098;
-    meanJan[6] =  0.9730;
-    meanJan[7] =  1.2000;
-    meanJan[8] =  0.0000;
-
-    meanJan[9] =  0.0000;
-    
-    JHd[0] = J0H;
-    JHd[1] = 0.000041;
-
-    JHd[2] = J2H;
-    JHd[3] = 0.041;
-    JHd[4] = 0.041;
-    JHd[5] = 5;
-
-    JHd[6] = 0.041;
-    JHd[7] = 75;
-    JHd[8] = J8H;
-    JHd[9] = J9H;
-
-
-    Joint_Field[0]=(meanJan[0]-Jan[0]) * JHd[0]; // Multiply by Joint compliance  
-    Joint_Field[1]=(meanJan[1]-Jan[1]) * JHd[1]; //0.52 / Modified in June at Crete
-    Joint_Field[2]=(meanJan[2]-Jan[2]) * JHd[2];      //1.8
-
-    Joint_Field[3]=(meanJan[3]-Jan[3]) * JHd[3];    //4.5 //0.95
-    Joint_Field[4]=(meanJan[4]-Jan[4]) * JHd[4]; 
-    Joint_Field[5]=(meanJan[5]-Jan[5]) * JHd[5];        // Multiply by Joint compliance 
-    Joint_Field[6]=(meanJan[6]-Jan[6]) * JHd[6];    //0.52 / Modified in June at Crete
-    Joint_Field[7]=(meanJan[7]-Jan[7]) * JHd[7];       //1.8
-
-    Joint_Field[8]=(meanJan[8]-Jan[8]) * JHd[8];      //4.5 //0.95
-    Joint_Field[9]=(meanJan[9]-Jan[9]) * JHd[9];
-
-//=======================================================================================
-
-//=======================================================================================
-
-    meanJanL[0] =  0.5200; 
-    meanJanL[1] =  0.0000;
-
-    meanJanL[2] =  0.0000;
-    meanJanL[3] = -0.7854;
-    meanJanL[4] =  0.0000;
-    meanJanL[5] =  0.7098;
-
-    meanJanL[6] =  0.9730;
-    meanJanL[7] =  1.2000;
-    meanJanL[8] =  0.0000;
-    meanJanL[9] =  0.0000;
-
-
-
-    JHdL[0] = J0H;
-    JHdL[1] = 0.000041;
-    JHdL[2] = J2H;
-    JHdL[3] = 0.041;
-    JHdL[4] = 0.041;
-    JHdL[5] = 5;
-    JHdL[6] = 0.041;
-    JHdL[7] = 75;
-    JHdL[8] = J8H;
-    JHdL[9] = J9H;
-
-    Joint_FieldL[0]=(meanJanL[0]-JanL[0]) * JHdL[0]; // Multiply by Joint compliance 
-
-    Joint_FieldL[1]=(meanJanL[1]-JanL[1]) * JHdL[1]; //0.52 / Modified in June at Crete
-    Joint_FieldL[2]=(meanJanL[2]-JanL[2]) * JHdL[2];  //1.8
-    Joint_FieldL[3]=(meanJanL[3]-JanL[3]) * JHdL[3];  //4.5 //0.95
-    Joint_FieldL[4]=(meanJanL[4]-JanL[4]) * JHdL[4];
-    Joint_FieldL[5]=(meanJanL[5]-JanL[5]) * JHdL[5]; // Multiply by Joint compliance 
-    Joint_FieldL[6]=(meanJanL[6]-JanL[6]) * JHdL[6]; //0.52 / Modified in June at Crete
-    Joint_FieldL[7]=(meanJanL[7]-JanL[7]) * JHdL[7];  //1.8
-    Joint_FieldL[8]=(meanJanL[8]-JanL[8]) * JHdL[8];  //4.5 //0.95
-    Joint_FieldL[9]=(meanJanL[9]-JanL[9]) * JHdL[9];
-
-//=======================================================================================
-   	
-   	//double arig=0.00061;
-    Jvel[0]= 1*((ff[0]*Jacob[0])+(ff[1]*Jacob[10])+(ff[2]*Jacob[20])+Joint_Field[0]);
-    Jvel[1]= 0*((ff[0]*Jacob[1])+(ff[1]*Jacob[11])+(ff[2]*Jacob[21])+Joint_Field[1]);
-    Jvel[2]= 1*((ff[0]*Jacob[2])+(ff[1]*Jacob[12])+(ff[2]*Jacob[22])+Joint_Field[2]);
-    Jvel[3]= 1*KOMP_JANG*((ff[0]*Jacob[3])+(ff[1]*Jacob[13])+(ff[2]*Jacob[23])+Joint_Field[3]);
-    Jvel[4]= 1*KOMP_JANG*((ff[0]*Jacob[4])+(ff[1]*Jacob[14])+(ff[2]*Jacob[24])+Joint_Field[4]);
-    Jvel[5]= 1*KOMP_JANG*((ff[0]*Jacob[5])+(ff[1]*Jacob[15])+(ff[2]*Jacob[25])+Joint_Field[5]);
-    Jvel[6]= 1*KOMP_JANG*((ff[0]*Jacob[6])+(ff[1]*Jacob[16])+(ff[2]*Jacob[26])+Joint_Field[6]);
-    Jvel[7]= 1*KOMP_JANG*((ff[0]*Jacob[7])+(ff[1]*Jacob[17])+(ff[2]*Jacob[27])+Joint_Field[7]);
-    Jvel[8]= 1*KOMP_JANG*((ff[0]*Jacob[8])+(ff[1]*Jacob[18])+(ff[2]*Jacob[28])+Joint_Field[8]);
-    Jvel[9]= 1*KOMP_JANG*((ff[0]*Jacob[9])+(ff[1]*Jacob[19])+(ff[2]*Jacob[29])+Joint_Field[9]);
-
-    Jvel[10]= 1*((ffLFK[0]*JacobL[0])+(ffLFK[1]*JacobL[10])+(ffLFK[2]*JacobL[20])+Joint_FieldL[0]);
-    Jvel[11]= 0*((ffLFK[0]*JacobL[1])+(ffLFK[1]*JacobL[11])+(ffLFK[2]*JacobL[21])+Joint_FieldL[1]);
-    Jvel[12]= 1*((ffLFK[0]*JacobL[2])+(ffLFK[1]*JacobL[12])+(ffLFK[2]*JacobL[22])+Joint_FieldL[2]);
-    Jvel[13]= KOMP_JANG*((ffLFK[0]*JacobL[3])+(ffLFK[1]*JacobL[13])+(ffLFK[2]*JacobL[23])+Joint_FieldL[3]);
-    Jvel[14]= KOMP_JANG*((ffLFK[0]*JacobL[4])+(ffLFK[1]*JacobL[14])+(ffLFK[2]*JacobL[24])+Joint_FieldL[4]);
-    Jvel[15]= KOMP_JANG*((ffLFK[0]*JacobL[5])+(ffLFK[1]*JacobL[15])+(ffLFK[2]*JacobL[25])+Joint_FieldL[5]);
-    Jvel[16]= KOMP_JANG*((ffLFK[0]*JacobL[6])+(ffLFK[1]*JacobL[16])+(ffLFK[2]*JacobL[26])+Joint_FieldL[6]);
-    Jvel[17]= KOMP_JANG*((ffLFK[0]*JacobL[7])+(ffLFK[1]*JacobL[17])+(ffLFK[2]*JacobL[27])+Joint_FieldL[7]);
-    Jvel[18]= KOMP_JANG*((ffLFK[0]*JacobL[8])+(ffLFK[1]*JacobL[18])+(ffLFK[2]*JacobL[28])+Joint_FieldL[8]);
-    Jvel[19]= KOMP_JANG*((ffLFK[0]*JacobL[9])+(ffLFK[1]*JacobL[19])+(ffLFK[2]*JacobL[29])+Joint_FieldL[9]);
-
-
-    //double b_WAIST=0.00001; // one zero less //0.000003
-    Jvel[0]=KOMP_WAISZT*(Jvel[0]+ Jvel[10]);
-    Jvel[1]=KOMP_WAISZT*(Jvel[1]+ Jvel[11]);
-    Jvel[2]=KOMP_WAISZT2*(Jvel[2]+ Jvel[12]);
-#endif   
 
 
 //##############################################################################################
@@ -2397,6 +2265,8 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
 
 
 
+
+
         
    }
     
@@ -2848,7 +2718,7 @@ void PMPThread::MessageDevDriverT()
     listBot.addDouble(ang5);
     listBot.addDouble(ang6);
     listBot.addDouble(ang7);
-    listBot.addDouble(ang8);
+    listBot.addDouble(53);
     listBot.addDouble(ang9);
     listBot.addDouble(ang10);
     listBot.addDouble(angCup);
@@ -3383,6 +3253,8 @@ void PMPThread::Kompliance(int TagK)	{
         //J7H=10;
         //J8H=10;
         //J9H=10;
+
+
   
         printf ("\n Initiating System Dynamics \n");
     } 
@@ -3394,7 +3266,7 @@ void PMPThread::Kompliance(int TagK)	{
      if (TagK==1)
 	      {
         printf ("Adjusting Compliances 1 \n");
-        KFORCE=0.0094;//0.06;//0.005 // 0.0094
+        KFORCE=0.1;//0.005 // 0.0094
 		ITERATION=1000;              
 		RAMP_KONSTANT=0.005;
 		t_dur=5;
@@ -3402,16 +3274,26 @@ void PMPThread::Kompliance(int TagK)	{
 		//KOMP_WAISZT=0.0001;
 		//KOMP_WAISZT3=0.00002
 		//KOMP_WAISZT2=0.0009;
-		J0H=800;//200; //400 //800
+		J0H=50; //400 //800
         J1H=0.52;
-		J2H=400; //1 //400;
+		J2H=50; //1 //400;
 		J3H=20; //4.5 //1 //20;
         J4H=1; //4.5
-        J5H=1;//200; //1
-        J6H=0.41;//200; //0.041;
-		J7H=1;//400; //1
+        J5H=20; //1
+        J6H=20; //0.041;
+		J7H=40; //1
 		J8H=0.041; //1
 		J9H=0.041; //1
+/*J0H=500; //400 //800
+        J1H=0.52;
+		J2H=500; //1 //400;
+		J3H=200; //4.5 //1 //20;
+        J4H=1; //4.5
+        J5H=200; //1
+        J6H=200; //0.041;
+		J7H=400; //1
+		J8H=0.041; //1
+		J9H=0.041; //1*/ 
         // Far Space ***************************** 
 		printf ("\n Initiating System Dynamics \n");
 	 } 
