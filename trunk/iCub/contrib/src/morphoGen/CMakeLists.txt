@@ -23,8 +23,13 @@ set(CMAKE_MODULE_PATH
   ${ICUBCONTRIB_MODULE_PATH} # note 10/10/13 aligned to the standard Rea
 )
 
-include(ICUBcontribHelpers)
-icubcontrib_set_default_prefix() #set CMAKE_INSTALL_PREFIX to the ICUBcontrib one; print warning if user modifies it
+if (ICUBcontrib_FOUND)
+  include(ICUBcontribHelpers)
+  set_contrib_default_prefix() #set CMAKE_INSTALL_PREFIX to the ICUBcontrib one; print warning if user modifies it
+else()
+  set(ICUBCONTRIB_CONTEXTS_INSTALL_DIR share/morphoGen/contexts)
+  set(ICUBCONTRIB_APPLICATIONS_TEMPLATES_INSTALL share/morphoGen/templates/applications)
+endif() #note 5/11/13 introduced manually to help DARWIN partners
 
 include(YarpInstallationHelpers)
 
