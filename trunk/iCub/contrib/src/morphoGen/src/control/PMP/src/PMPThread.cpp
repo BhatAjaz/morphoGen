@@ -596,7 +596,7 @@ void PMPThread::onStop() {
 double* PMPThread::forward_Kinematics(double *u , int l)	{
     
    	double *p,h1[hiddenL1],h2[hiddenL2];//,a[outputL];
-   	//double a[3];
+   	double a[3];
    	double T_Len=0; double T_Ori=0;
 
 
@@ -632,7 +632,7 @@ double* PMPThread::forward_Kinematics(double *u , int l)	{
 
 #else	
 	computeJac(a,u);
-    //printf("values from compute Jac and targets %f %f %f %f   %f  %f\n,a[0],a[1],a[2],u[0],[u1],[u2]");
+    printf("values from compute Jac and targets %f %f %f %f %f  %f\n",a[0],a[1],a[2],u[0],u[1],u[2]);
 #endif
    	
    	p=a;
@@ -882,10 +882,10 @@ int i,u;
  	computeJacobian(Jacob,JacobL,Jan,JanL);
 
     
-    for(int i = 0; i < 30 ; i++) {
-        fprintf(jacFile,"%f ", Jacob[i]);
-    }
-    fprintf(jacFile,"\n\n\n");
+    //for(int i = 0; i < 30 ; i++) {
+    //    fprintf(jacFile,"%f ", Jacob[i]);
+    //}
+    //fprintf(jacFile,"\n\n\n");
     
 //=======================================================================================
    
