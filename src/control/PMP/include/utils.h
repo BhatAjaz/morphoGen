@@ -1096,7 +1096,9 @@ inline void computeJacLRH(double* aLRH, double* uLRH )	{
 
 }
 
-
+/**
+* function that returns jacobians from jointangles
+*/
 inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* JanL )	{
 
     
@@ -1199,7 +1201,7 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
 +16.01*sJ[8]*cJ[6]*cJ[4]*sJ[1]*cJ2*sJ[3]
 -62.50*cJ[9]*cJ[8]*sJ[6]*sJ5*sJ[1]*cJ2*cJ[3]
 +137.3*cJ[6]*cJ[4]*cJ[1]*cJ[3];
-    
+    printf("jacobian: %f \n",Jacob[1]);
     
     Jacob[2]= 
 -16.01*cJ[8]*sJ[7]*cJ[6]*cJ5*cJ[1]*cJ2*cJ[4]
@@ -1250,7 +1252,7 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
 -137.3*sJ[6]*cJ5*sJ[4]*cJ[1]*sJ2*sJ[3]
 -152.3*cJ[1]*cJ2*sJ[4]
 -23.36*cJ[1]*sJ2;
-
+    printf("jacobian: %f \n",Jacob[2]);
 
     Jacob[3]
 =62.50*sJ[9]*cJ[7]*cJ[6]*cJ5*sJ[4]*sJ[1]*sJ[3]
@@ -1309,7 +1311,7 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
 +62.50*cJ[9]*cJ[8]*cJ[6]*cJ[4]*cJ[1]*cJ2*cJ[3]
 -62.50*cJ[9]*sJ[8]*cJ[7]*cJ5*sJ[1]*cJ[3]
 -16.01*cJ[8]*sJ[7]*cJ[6]*cJ5*sJ[4]*cJ[1]*cJ2*cJ[3];
-
+    printf("jacobian: %f \n",Jacob[3]);
 
     Jacob[4]=
 -152.3*sJ[4]*sJ[1]*cJ[3]
