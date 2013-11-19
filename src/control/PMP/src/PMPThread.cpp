@@ -159,10 +159,10 @@ bool PMPThread::threadInit() {
     loadNeuralNetwork();
 #endif     
     //initialization of the state of PMP (default state)
-    GoalCodePMP  = 1;
-    BodyChain    = 0;
-    MSimExec     = 1;
-    TrajType     = 1;
+    GoalCodePMP  = 19; // 19 init, 1 discrete, 21 continuous
+    BodyChain    = 0; // 0 right, 1 left, 
+    MSimExec     = 1; // 1 executed 0 simulated
+    TrajType     = 1; // 0 line 1 bump 2cusp
     WristO       =  0;
     MiniGoal[0]  =  -250;  // target right arm x
     MiniGoal[1]  =  100;   // target right arm y
@@ -170,16 +170,16 @@ bool PMPThread::threadInit() {
     MiniGoal[3]  =  0.0;   //obstacle x
     MiniGoal[4]  =  0.0;
     MiniGoal[5]  =  0.0;
+
     MiniGoal[6]  = -300;   //target left arm x
     MiniGoal[7]  =  -100;
     MiniGoal[8]  =  50;
     MiniGoal[9]  =  0.0;
     MiniGoal[10] =  0.0;
-    MiniGoal[11] =  0.0;      
+    MiniGoal[11] =  0.0;
     
     printf("\nPMP Thread initialization: successfully completed \n");
-      
-      
+
     return true;
 }
 
@@ -599,7 +599,7 @@ void PMPThread::onStop() {
 * @param l lenght of the vector
 */
 double* PMPThread::forward_Kinematics(double *u , int l)	{
-    printf("\nforward_Kinematics %f %f %f \n", u[0], u[1], u[2]);
+    //printf("\nforward_Kinematics %f %f %f \n", u[0], u[1], u[2]);
     double *p,h1[hiddenL1],h2[hiddenL2];//,a[outputL];
     double a[3];
     double T_Len=0; double T_Ori=0;
@@ -636,8 +636,8 @@ double* PMPThread::forward_Kinematics(double *u , int l)	{
     }
 
 #else	
-    computeJac(a,u);
-    printf("values from compute Jac and targets %f %f %f %f %f  %f\n",a[0],a[1],a[2],u[0],u[1],u[2]);
+    computeKinm(a,u);
+    //printf("values from jangle and targets %f %f %f %f %f  %f\n",a[0],a[1],a[2],u[0],u[1],u[2]);
 #endif
     
     p=a;
@@ -650,7 +650,7 @@ double* PMPThread::forward_KinematicsL(double *uL , int lef)	{
     double *pLFK;
     //double aL[3];
     
-    computeJacL(aL,uL);
+    computeKinmL(aL,uL);
     pLFK=aL;
     return pLFK;
 };
@@ -659,7 +659,7 @@ double* PMPThread::forward_KinematicsL(double *uL , int lef)	{
     double *pLFKRH;
     //double aLRH[3];
    
-    computeJacLRH(aLRH,uLRH);
+    computeKinmLRH(aLRH,uLRH);
     pLFKRH=aLRH;
     return pLFKRH;
 };
@@ -876,12 +876,12 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 #else
     computeJacobian(Jacob,JacobL,Jan,JanL);
 
-    printf("\n Jacobian after computeJacobian \n");
-    for(int i = 0; i < 30 ; i++) {
+    //printf("\n Jacobian after computeJacobian \n");
+    //for(int i = 0; i < 30 ; i++) {
     //    fprintf(jacFile,"%f ", Jacob[i]);
-        printf("%f ", Jacob[i]);
-    }
-    printf("\n");
+    //    printf("%f ", Jacob[i]);
+    //}
+    //printf("\n");
     //fprintf(jacFile,"\n\n\n");
     
 //=======================================================================================
@@ -1524,8 +1524,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         int replan=0;
         double xoffsL=0,yoffsL=0,zoffsL=0;
     
- 
-        x_fin=fin[0]+xoffs; //Final Position X
+        x_fin=fin[0]+xoffs;    //Final Position X
         y_fin=fin[1]+yoffs;
         z_fin=fin[2]+zoffs;
 
@@ -1536,16 +1535,17 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         printf("\n Targets");
         printf("\n \n %f, \t  %f, \t %f ",x_fin,y_fin,z_fin);
         printf("\n \n %f, \t  %f, \t %f ",x_finL,y_finL,z_finL);
+        printf("\n");
     
-        janini0=Jan[0];
-        janini2=Jan[2];
+        janini0=Jan[0]; printf(">%f \n", Jan[0]);
+        janini2=Jan[2]; printf(">%f \n", Jan[2]);
         janini3=Jan[3];//-0.9425
-        janini4=Jan[4];
-        janini5=Jan[5];
-        janini6=Jan[6];
-        janini7=Jan[7];
-        janini8=Jan[8];
-        janini9=Jan[9];
+        janini4=Jan[4]; printf(">%f \n", Jan[4]);
+        janini5=Jan[5]; printf(">%f \n", Jan[5]);
+        janini6=Jan[6]; printf(">%f \n", Jan[6]);
+        janini7=Jan[7]; printf(">%f \n", Jan[7]);
+        janini8=Jan[8]; printf(">%f \n", Jan[8]);
+        janini9=Jan[9]; printf(">%f \n", Jan[9]);
 
         janini3L=JanL[3];//-0.9425
         janini4L=JanL[4];
@@ -1567,7 +1567,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
             Gam=GammaDisc(time);
             wr << time << "    " << Gam << endl; 
 
-            //  ====================Target Generation //=========================
+            //  ====================Target Generation Right //=========================
             if((HandAct==BodyTorsoArm_RIGHT)||(HandAct==BodyTorsoArm_BOTH))	{
                     
                 double inter_x=(x_fin-x_ini)*Gam;
@@ -1607,12 +1607,15 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
                 wr1L << x_iniL << "    " << y_iniL << "    " << z_iniL <<endl;
                 wr1  << x_ini << "    " << y_ini << "    " << z_ini  <<endl;
             }
+            //***********************************************************************************************************//
+            // Running the motor control
             MotCon(x_ini,y_ini,z_ini, x_iniL,y_iniL,z_iniL,time,Gam,HandAct);
-            
+            //***********************************************************************************************************//
             if (verboseTerm) {
                 posiL << X_posL[0] << "    " << X_posL[1] << "    " << X_posL[2] <<endl;
                 posi  << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] <<endl;
-                wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
+                wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<<endl;
+                wr_GamL << JanL[0] << "  " << JanL[1]<< "  " << JanL[2]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
             }
         }
         
@@ -1636,7 +1639,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         ang10L=28;//
         angCupL=48;
 
-        printf(" JOINT ANGLE: RIGHT and LEFT \n");
+        printf("\n JOINT ANGLE: RIGHT and LEFT \n");
         printf("\n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
         printf("\n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang1,ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
         printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],X_posL[1],X_posL[2]);
@@ -1762,7 +1765,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
             MiniGoal[9]=263;
             MiniGoal[10]=-160;
             MiniGoal[11]=378;
-        }	
+        }
       
         janini0=Jan[0];
         janini2=Jan[2];
@@ -2140,23 +2143,22 @@ void PMPThread::GraspR()
                        //may add grasp detect vision here to confim if the object is grasped
                  };
 
-void PMPThread::GraspL()  
-             {
-                      //Sleep(4000);
-                      CubGrazpL3();
-                      if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>=0)&&(ang5L<100)))
-                       {
-                            MessagePassL();
-                        }
-                           //Sleep(4000);
-                           CubGrazpL4();
-                       if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>=0)&&(ang5L<100)))
-                        {
-                            MessagePassL();
-                        }
-                       //Sleep(10000);
-                       // may add grasp detect vision to confirm if the object was grasped
-                 };
+void PMPThread::GraspL()  {
+    //Sleep(4000);
+    CubGrazpL3();
+    if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>=0)&&(ang5L<100)))
+    {
+        MessagePassL();
+    }
+        //Sleep(4000);
+        CubGrazpL4();
+    if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>=0)&&(ang5L<100)))
+    {
+        MessagePassL();
+    }
+    //Sleep(10000);
+    // may add grasp detect vision to confirm if the object was grasped
+};
 
 void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, double TL3, int time, double Gam, int HAct)	{
  // cout<< HAct<< endl;
@@ -2370,6 +2372,11 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
     double *angL = JanL;
     int len=1,i;
     double *topmp, *topmpL;
+
+    for(i=0;i<8;i++)
+        {
+        printf("Jan%d >> %f \n",i, Jan[i]);
+        }
 //===============================================================
     if((HAct==0)||(HAct==2))
     {
@@ -2448,15 +2455,14 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
     double *Q_Dot=PMP(topmp,topmpL);  //Force to Torque to Q_dot 2>>>>>3
 //===================================================================
 //===================================================================
-
-    for(i=0;i<20;i++)          //MODIFY
-        {
+    //MODIFY ????????
+    for(i=0;i<20;i++){
         JoVel[i]=Jvel[i]*Gam;
         //cout<<JoVel[i]<<endl;
-        }
-//===================================================================
+    }
+    //===================================================================
     // Q1-Q3 :W , JAN 0 - JAN 2 : W = JANL 0 - JANL 2;   JAN 3-JAN 9 RIGHT ARM; JANL 13-JANL19 LEFT ARM
-//===================================================================
+    //===================================================================
     // From Q_dots to Q >>>>>
     q1[time]=JoVel[0];
     double *j1=q1;
@@ -2476,98 +2482,98 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
     Jan[2]=joi3+janini2;
     JanL[2]=joi3+janini2;
 
-    if((HAct==0)||(HAct==2))
-    {
-    q4[time]=JoVel[3];
-    double *j4=q4;
-    double joi4=Gamma_Int(j4,time);
-    Jan[3]=joi4+janini3;
+    // Right or Both
+    if((HAct==0)||(HAct==2)){
 
-    q5[time]=JoVel[4];
-    double *j5=q5;
-    double joi5=Gamma_Int(j5,time);
-    Jan[4]=joi5+janini4;
+        q4[time]=JoVel[3];
+        double *j4=q4;
+        double joi4=Gamma_Int(j4,time);
+        Jan[3]=joi4+janini3;
 
-    q6[time]=JoVel[5];
-    double *j6=q6;
-    double joi6=Gamma_Int(j6,time);
-    Jan[5]=joi6+janini5;
+        q5[time]=JoVel[4];
+        double *j5=q5;
+        double joi5=Gamma_Int(j5,time);
+        Jan[4]=joi5+janini4;
 
-    q7[time]=JoVel[6];
-    double *j7=q7;
-    double joi7=Gamma_Int(j7,time);
-    Jan[6]=joi7+janini6;
+        q6[time]=JoVel[5];
+        double *j6=q6;
+        double joi6=Gamma_Int(j6,time);
+        Jan[5]=joi6+janini5;
 
-    q8[time]=JoVel[7];
-    double *j8=q8;
-    double joi8=Gamma_Int(j8,time);
-    Jan[7]=joi8+janini7;
+        q7[time]=JoVel[6];
+        double *j7=q7;
+        double joi7=Gamma_Int(j7,time);
+        Jan[6]=joi7+janini6;
 
-    q9[time]=JoVel[8];
-    double *j9=q9;
-    double joi9=Gamma_Int(j9,time);
-    Jan[8]=joi9+janini8;
+        q8[time]=JoVel[7];
+        double *j8=q8;
+        double joi8=Gamma_Int(j8,time);
+        Jan[7]=joi8+janini7;
 
-    q10[time]=JoVel[9];
-    double *j10=q10;
-    double joi10=Gamma_Int(j10,time);
-    Jan[9]=joi10+janini9;
+        q9[time]=JoVel[8];
+        double *j9=q9;
+        double joi9=Gamma_Int(j9,time);
+        Jan[8]=joi9+janini8;
 
-    JanL[3]=-1.74;// -0.6981
-    JanL[4]=0.78;
-    JanL[5]=0;
-    JanL[6]=1.3;
-    JanL[7]=0;
-    JanL[8]=0;
-    JanL[9]=0;
-}
+        q10[time]=JoVel[9];
+        double *j10=q10;
+        double joi10=Gamma_Int(j10,time);
+        Jan[9]=joi10+janini9;
 
-    // for LEFT HAND 
-    if((HAct==1)||(HAct==2))
-    {
-    q4L[time]=JoVel[13];
-    double *j4L=q4L;
-    double joi4L=Gamma_Int(j4L,time);
-    JanL[3]=joi4L+janini3L;
+        JanL[3]=-1.74;// -0.6981
+        JanL[4]=0.78;
+        JanL[5]=0;
+        JanL[6]=1.3;
+        JanL[7]=0;
+        JanL[8]=0;
+        JanL[9]=0;
+    }
 
-    q5L[time]=JoVel[14];
-    double *j5L=q5L;
-    double joi5L=Gamma_Int(j5L,time);
-    JanL[4]=joi5L+janini4L;
+    // LEFT or BOTH
+    if((HAct==1)||(HAct==2)){
+        q4L[time]=JoVel[13];
+        double *j4L=q4L;
+        double joi4L=Gamma_Int(j4L,time);
+        JanL[3]=joi4L+janini3L;
 
-    q6L[time]=JoVel[15];
-    double *j6L=q6L;
-    double joi6L=Gamma_Int(j6L,time);
-    JanL[5]=joi6L+janini5L;
+        q5L[time]=JoVel[14];
+        double *j5L=q5L;
+        double joi5L=Gamma_Int(j5L,time);
+        JanL[4]=joi5L+janini4L;
 
-    q7L[time]=JoVel[16];
-    double *j7L=q7L;
-    double joi7L=Gamma_Int(j7L,time);
-    JanL[6]=joi7L+janini6L;
+        q6L[time]=JoVel[15];
+        double *j6L=q6L;
+        double joi6L=Gamma_Int(j6L,time);
+        JanL[5]=joi6L+janini5L;
 
-    q8L[time]=JoVel[17];
-    double *j8L=q8L;
-    double joi8L=Gamma_Int(j8L,time);
-    JanL[7]=joi8L+janini7L;
+        q7L[time]=JoVel[16];
+        double *j7L=q7L;
+        double joi7L=Gamma_Int(j7L,time);
+        JanL[6]=joi7L+janini6L;
 
-    q9L[time]=JoVel[18];
-    double *j9L=q9L;
-    double joi9L=Gamma_Int(j9L,time);
-    JanL[8]=joi9L+janini8L;
+        q8L[time]=JoVel[17];
+        double *j8L=q8L;
+        double joi8L=Gamma_Int(j8L,time);
+        JanL[7]=joi8L+janini7L;
 
-    q10L[time]=JoVel[19];
-    double *j10L=q10L;
-    double joi10L=Gamma_Int(j10L,time);
-    JanL[9]=joi10L+janini9L;
+        q9L[time]=JoVel[18];
+        double *j9L=q9L;
+        double joi9L=Gamma_Int(j9L,time);
+        JanL[8]=joi9L+janini8L;
 
-    Jan[3]=-1.74;// -0.6981
-    Jan[4]=0.78;
-    Jan[5]=0;
-    Jan[6]=1.3;
-    Jan[7]=0;
-    Jan[8]=0;
-    Jan[9]=0;
-}   
+        q10L[time]=JoVel[19];
+        double *j10L=q10L;
+        double joi10L=Gamma_Int(j10L,time);
+        JanL[9]=joi10L+janini9L;
+
+        Jan[3]=-1.74;// -0.6981
+        Jan[4]=0.78;
+        Jan[5]=0;
+        Jan[6]=1.3;
+        Jan[7]=0;
+        Jan[8]=0;
+        Jan[9]=0;
+    }   
     // From Q >> X > Force > Torques >Q_dots >Q ....................
     //===================================================================
 }
@@ -2734,33 +2740,31 @@ void PMPThread::MessageDevDriverL(){
      
     commandL=0;
     
-            commandL[0]=ang4L;
-            commandL[1]=ang5L;
-            commandL[2]=ang6L;
-            commandL[3]=ang7L;
-            commandL[4]=ang8L;
-            commandL[5]=ang9L;
-            commandL[6]=ang10L;
-            commandL[7]=angCupL;
-            commandL[8]=angTL1;
-            commandL[9]=angTL2;
-            commandL[10]=angTL3;
-            commandL[11]=angIL1;
-            commandL[12]=angIL2;
-            commandL[13]=angML1;
-            commandL[14]=angML2;
-            commandL[15]=angRPL;
+    commandL[0]=ang4L;
+    commandL[1]=ang5L;
+    commandL[2]=ang6L;
+    commandL[3]=ang7L;
+    commandL[4]=ang8L;
+    commandL[5]=ang9L;
+    commandL[6]=ang10L;
+    commandL[7]=angCupL;
+    commandL[8]=angTL1;
+    commandL[9]=angTL2;
+    commandL[10]=angTL3;
+    commandL[11]=angIL1;
+    commandL[12]=angIL2;
+    commandL[13]=angML1;
+    commandL[14]=angML2;
+    commandL[15]=angRPL;
 
-            posL->positionMove(commandL.data());
+    posL->positionMove(commandL.data());
+    bool doneL=false;
 
-
-            bool doneL=false;
-
-            while(!doneL)
-            {
-                posL->checkMotionDone(&doneL);
-                Time::delay(0.1);
-            }
+    while(!doneL)
+    {
+        posL->checkMotionDone(&doneL);
+        Time::delay(0.1);
+    }
 
     robotDeviceL.close();
  };
@@ -2792,7 +2796,7 @@ void PMPThread::MessageDevDriverT()
     okT = robotDeviceT.view(posT);
     okT = okT && robotDeviceT.view(encsT);
 
- if (!okT) {
+    if (!okT) {
         printf("Problems acquiring Torso interfaces\n");
         //return 0;
     }
@@ -2801,7 +2805,7 @@ void PMPThread::MessageDevDriverT()
     posT->getAxes(&njT);
     //printf("Joints Torso %d \n", njT);
 
-   Vector encodersT;
+    Vector encodersT;
     Vector commandT;
     Vector tmpT;
     encodersT.resize(njT);
@@ -2814,7 +2818,7 @@ void PMPThread::MessageDevDriverT()
     posT->setRefAccelerations(tmpT.data()); 
 
 
-     for (i = 0; i < njT; i++) {
+    for (i = 0; i < njT; i++) {
         tmpT[i] = 30.0;
         posT->setRefSpeed(i, tmpT[i]);
     } 
@@ -3421,7 +3425,7 @@ void PMPThread::Kompliance(int TagK)	{
   
     if (TagK==2)  {
         // toy crane experimental set-up 
-        printf ("Adjusting Compliances 1 \n");
+        printf ("Adjusting Compliances 2 \n");
         KFORCE=0.009; //0.005
         ITERATION=1000;              
         RAMP_KONSTANT=0.0015;
@@ -3443,7 +3447,7 @@ void PMPThread::Kompliance(int TagK)	{
      
     if (TagK==3)  {
         t_dur=5; 
-        printf ("Adjusting Compliances 1 \n");
+        printf ("Adjusting Compliances 3 \n");
         KFORCE=0.01; //0.005
         ITERATION=1000;              
         RAMP_KONSTANT=0.005;
