@@ -28,22 +28,22 @@
 /****************************************************************************************************/
 
 inline void computeJac(double* a, double *u )	{
-	
-	double su[10],cu[10], cu2,cu5, su2,su5;
-	
-	for (int i = 0; i < 10; i++){
-		su[i]	=	sin(u[i]);
-		cu[i]	=	cos(u[i]);
-	}
-	su2	=	sin(u[2]+1.833);
-	cu2	=	cos(u[2]+1.833);
-	
-	
-	su5	=	sin(u[5]-1.833);
-	cu5	=	cos(u[5]-1.833);
-	
-	
-	a[0]
+    
+    double su[10],cu[10], cu2,cu5, su2,su5;
+    
+    for (int i = 0; i < 10; i++){
+        su[i]	=	sin(u[i]);
+        cu[i]	=	cos(u[i]);
+    }
+    su2	=	sin(u[2]+1.833);
+    cu2	=	cos(u[2]+1.833);
+    
+    
+    su5	=	sin(u[5]-1.833);
+    cu5	=	cos(u[5]-1.833);
+    
+    
+    a[0]
 =152.3*cu[4]*su[1]*cu[3]
 +16.01*cu[8]*su[7]*su[6]*cu[4]*su[1]*cu[3]
 -16.01*su[8]*su[6]*su5*cu[1]*cu2*cu[3]
@@ -121,9 +121,8 @@ inline void computeJac(double* a, double *u )	{
 +62.50*cu[9]*su[8]*cu[7]*cu5*cu[1]*cu2*cu[3]
 +62.50*cu[9]*cu[8]*su[6]*su5*cu[1]*cu2*cu[3]
 +62.50*cu[9]*cu[8]*cu[6]*cu[4]*cu[1]*cu2*su[3];
-printf("\n jac: %f \n",a[0]);
-	
-   	a[1]
+
+    a[1]
 =62.50*cu[9]*cu[8]*su[6]*cu5*su[4]*su[0]*cu[1]*cu[3]
 -62.50*cu[9]*cu[8]*su[6]*cu5*cu[4]*su[0]*su[1]*su2
 -62.50*cu[9]*cu[8]*su[6]*cu5*cu[4]*cu[0]*cu2
@@ -250,9 +249,9 @@ printf("\n jac: %f \n",a[0]);
 +16.01*cu[8]*su[7]*su[6]*cu[4]*su[0]*cu[1]*cu[3]
 -16.01*su[8]*cu[6]*cu[4]*su[0]*cu[1]*cu[3]
 +23.36*cu[0]*su2;
-printf("jac: %f \n",a[1]);
-   	
-   	a[2]
+
+    
+    a[2]
 =152.3*su[4]*su[0]*cu2
 -107.7*cu[0]*su[1]*su2
 -15.01*su[6]*cu[4]*cu[0]*cu[1]*cu[3]
@@ -379,28 +378,28 @@ printf("jac: %f \n",a[1]);
 -15.01*cu[6]*su5*cu[3]*su[0]*su2
 -15.01*cu[6]*su5*cu[0]*cu[1]*su[3]
 +152.3*cu[4]*su[3]*cu[0]*su[1]*cu2;
-printf("jac: %f \n",a[2]);
-   	
+
+
 }
 
 
 
 inline void computeJacL(double* aL, double* uL ) {
 
-	double suL[10],cuL[10], cuL2,cuL5, suL2,suL5;
-	
-	for (int i = 0; i < 10; i++){
-		suL[i]	=	sin(uL[i]);
-		cuL[i]	=	cos(uL[i]);
-	}
-	suL2	=	sin(uL[2]-1.833);
-	cuL2	=	cos(uL[2]-1.833);
-	
-	
-	suL5	=	sin(uL[5]+1.309);
-	cuL5	=	cos(uL[5]+1.309);
+    double suL[10],cuL[10], cuL2,cuL5, suL2,suL5;
+    
+    for (int i = 0; i < 10; i++){
+        suL[i]	=	sin(uL[i]);
+        cuL[i]	=	cos(uL[i]);
+    }
+    suL2	=	sin(uL[2]-1.833);
+    cuL2	=	cos(uL[2]-1.833);
+    
+    
+    suL5	=	sin(uL[5]+1.309);
+    cuL5	=	cos(uL[5]+1.309);
 
-	aL[0]
+    aL[0]
 =152.3*cuL[4]*suL[1]*cuL[3]
 -62.50*suL[9]*suL[7]*suL5*suL[4]*suL[1]*cuL[3]
 -62.50*suL[9]*suL[7]*suL5*cuL[1]*suL2*cuL[4]
@@ -480,7 +479,7 @@ inline void computeJacL(double* aL, double* uL ) {
 +62.50*cuL[9]*suL[8]*suL[7]*cuL[6]*cuL5*suL[4]*suL[1]*cuL[3];
 
 
-   	aL[1]
+    aL[1]
 =62.50*cuL[9]*suL[8]*cuL[7]*suL5*suL[4]*suL[0]*cuL[1]*cuL[3]
 -62.50*cuL[9]*suL[8]*cuL[7]*suL5*cuL[4]*suL[0]*suL[1]*suL2
 -62.50*cuL[9]*suL[8]*cuL[7]*suL5*cuL[4]*cuL[0]*cuL2
@@ -607,9 +606,9 @@ inline void computeJacL(double* aL, double* uL ) {
 -15.01*cuL[6]*cuL5*cuL[4]*cuL[0]*cuL2
 -62.50*suL[9]*cuL[7]*suL[6]*cuL[4]*suL[3]*cuL[0]*suL2
 +62.50*suL[9]*cuL[7]*suL[6]*suL[4]*suL[0]*suL[1]*suL2;
-   	
-   	
-   	aL[2]=
+    
+    
+    aL[2]=
 -15.01*suL[6]*cuL[4]*cuL[0]*cuL[1]*cuL[3]
 +32.001*cuL[0]
 -16.01*cuL[8]*suL[7]*suL[6]*cuL[4]*suL[3]*cuL[0]*suL[1]*cuL2
@@ -736,27 +735,27 @@ inline void computeJacL(double* aL, double* uL ) {
 -62.50*suL[9]*cuL[7]*cuL[6]*suL5*cuL[3]*suL[0]*suL2
 -62.50*cuL[9]*suL[8]*suL[7]*cuL[6]*cuL5*suL[4]*cuL[0]*cuL[1]*cuL[3]
 +62.50*cuL[9]*suL[8]*suL[7]*cuL[6]*cuL5*cuL[4]*cuL[0]*suL[1]*suL2;
-   	
+    
 }
 
 
 
 inline void computeJacLRH(double* aLRH, double* uLRH )	{
 
-	double suLRH[10],cuLRH[10], cuLRH2,cuLRH5, suLRH2,suLRH5;
-	
-	for (int i = 0; i < 10; i++){
-		suLRH[i]	=	sin(uLRH[i]);
-		cuLRH[i]	=	cos(uLRH[i]);
-	}
-	suLRH2	=	sin(uLRH[2]-1.833);
-	cuLRH2	=	cos(uLRH[2]-1.833);
-	
-	
-	suLRH5	=	sin(uLRH[5]+1.309);
-	cuLRH5	=	cos(uLRH[5]+1.309);
+    double suLRH[10],cuLRH[10], cuLRH2,cuLRH5, suLRH2,suLRH5;
+    
+    for (int i = 0; i < 10; i++){
+        suLRH[i]	=	sin(uLRH[i]);
+        cuLRH[i]	=	cos(uLRH[i]);
+    }
+    suLRH2	=	sin(uLRH[2]-1.833);
+    cuLRH2	=	cos(uLRH[2]-1.833);
+    
+    
+    suLRH5	=	sin(uLRH[5]+1.309);
+    cuLRH5	=	cos(uLRH[5]+1.309);
 
-	aLRH[0]
+    aLRH[0]
 =152.3*cuLRH[4]*suLRH[1]*cuLRH[3]
 -62.50*suLRH[9]*suLRH[7]*suLRH5*suLRH[4]*suLRH[1]*cuLRH[3]
 -62.50*suLRH[9]*suLRH[7]*suLRH5*cuLRH[1]*suLRH2*cuLRH[4]
@@ -834,9 +833,9 @@ inline void computeJacLRH(double* aLRH, double* uLRH )	{
 +16.01*cuLRH[8]*suLRH[7]*suLRH[6]*cuLRH[4]*suLRH[1]*cuLRH[3]
 -16.01*suLRH[8]*cuLRH[6]*cuLRH[4]*suLRH[1]*cuLRH[3]
 +62.50*cuLRH[9]*suLRH[8]*suLRH[7]*cuLRH[6]*cuLRH5*suLRH[4]*suLRH[1]*cuLRH[3];
-   	
-   	
-   	aLRH[1]
+    
+    
+    aLRH[1]
 =62.50*cuLRH[9]*suLRH[8]*cuLRH[7]*suLRH5*suLRH[4]*suLRH[0]*cuLRH[1]*cuLRH[3]
 -62.50*cuLRH[9]*suLRH[8]*cuLRH[7]*suLRH5*cuLRH[4]*suLRH[0]*suLRH[1]*suLRH2
 -62.50*cuLRH[9]*suLRH[8]*cuLRH[7]*suLRH5*cuLRH[4]*cuLRH[0]*cuLRH2
@@ -965,7 +964,7 @@ inline void computeJacLRH(double* aLRH, double* uLRH )	{
 +62.50*suLRH[9]*cuLRH[7]*suLRH[6]*suLRH[4]*suLRH[0]*suLRH[1]*suLRH2;
    
    
-   	aLRH[2]=
+    aLRH[2]=
 -15.01*suLRH[6]*cuLRH[4]*cuLRH[0]*cuLRH[1]*cuLRH[3]
 +32.001*cuLRH[0]
 -16.01*cuLRH[8]*suLRH[7]*suLRH[6]*cuLRH[4]*suLRH[3]*cuLRH[0]*suLRH[1]*cuLRH2
@@ -1109,17 +1108,17 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
     
     
     double sJ[10],cJ[10], cJ2,cJ5, sJ2,sJ5;
-	
-	for (int i = 0; i < 10; i++){
-		sJ[i]	=	sin(Jan[i]);
-		cJ[i]	=	cos(Jan[i]);
-	}
-	sJ2	=	sin(Jan[2]+1.833);
-	cJ2	=	cos(Jan[2]+1.833);
-	
-	
-	sJ5	=	sin(Jan[5]-1.833);
-	cJ5	=	cos(Jan[5]-1.833);
+    
+    for (int i = 0; i < 10; i++){
+        sJ[i]	=	sin(Jan[i]);
+        cJ[i]	=	cos(Jan[i]);
+    }
+    sJ2	=	sin(Jan[2]+1.833);
+    cJ2	=	cos(Jan[2]+1.833);
+    
+    
+    sJ5	=	sin(Jan[5]-1.833);
+    cJ5	=	cos(Jan[5]-1.833);
         
     Jacob[0]= 0 ;
     
@@ -1201,7 +1200,7 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
 +16.01*sJ[8]*cJ[6]*cJ[4]*sJ[1]*cJ2*sJ[3]
 -62.50*cJ[9]*cJ[8]*sJ[6]*sJ5*sJ[1]*cJ2*cJ[3]
 +137.3*cJ[6]*cJ[4]*cJ[1]*cJ[3];
-    printf("jacobian: %f \n",Jacob[1]);
+    
     
     Jacob[2]= 
 -16.01*cJ[8]*sJ[7]*cJ[6]*cJ5*cJ[1]*cJ2*cJ[4]
@@ -1252,7 +1251,6 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
 -137.3*sJ[6]*cJ5*sJ[4]*cJ[1]*sJ2*sJ[3]
 -152.3*cJ[1]*cJ2*sJ[4]
 -23.36*cJ[1]*sJ2;
-    printf("jacobian: %f \n",Jacob[2]);
 
     Jacob[3]
 =62.50*sJ[9]*cJ[7]*cJ[6]*cJ5*sJ[4]*sJ[1]*sJ[3]
@@ -1311,7 +1309,7 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
 +62.50*cJ[9]*cJ[8]*cJ[6]*cJ[4]*cJ[1]*cJ2*cJ[3]
 -62.50*cJ[9]*sJ[8]*cJ[7]*cJ5*sJ[1]*cJ[3]
 -16.01*cJ[8]*sJ[7]*cJ[6]*cJ5*sJ[4]*cJ[1]*cJ2*cJ[3];
-    printf("jacobian: %f \n",Jacob[3]);
+
 
     Jacob[4]=
 -152.3*sJ[4]*sJ[1]*cJ[3]
@@ -3331,17 +3329,17 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
  //=======================================================================================
        
     double sJL[10],cJL[10], cJL2,cJL5, sJL2,sJL5;
-	
-	for (int i = 0; i < 10; i++){
-		sJL[i]	=	sin(JanL[i]);
-		cJL[i]	=	cos(JanL[i]);
-	}
-	sJL2	=	sin(JanL[2]-1.833);
-	cJL2	=	cos(JanL[2]-1.833);
-	
-	
-	sJL5	=	sin(JanL[5]+1.309);
-	cJL5	=	cos(JanL[5]+1.309);
+    
+    for (int i = 0; i < 10; i++){
+        sJL[i]	=	sin(JanL[i]);
+        cJL[i]	=	cos(JanL[i]);
+    }
+    sJL2	=	sin(JanL[2]-1.833);
+    cJL2	=	cos(JanL[2]-1.833);
+    
+    
+    sJL5	=	sin(JanL[5]+1.309);
+    cJL5	=	cos(JanL[5]+1.309);
        
        
     JacobL[0]=0;
