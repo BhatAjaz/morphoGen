@@ -26,8 +26,12 @@
 /*
 /*
 /****************************************************************************************************/
-
-inline void computeJac(double* a, double *u )	{
+/**
+*  compute the forward kinematic 
+ * @param u joint angles
+ * @param a estimated 3d location
+*/
+inline void computeKinm(double* a, double *u )	{
     
     double su[10],cu[10], cu2,cu5, su2,su5;
     
@@ -42,7 +46,7 @@ inline void computeJac(double* a, double *u )	{
     su5	=	sin(u[5]-1.833);
     cu5	=	cos(u[5]-1.833);
     
-    
+
     a[0]
 =152.3*cu[4]*su[1]*cu[3]
 +16.01*cu[8]*su[7]*su[6]*cu[4]*su[1]*cu[3]
@@ -384,7 +388,7 @@ inline void computeJac(double* a, double *u )	{
 
 
 
-inline void computeJacL(double* aL, double* uL ) {
+inline void computeKinmL(double* aL, double* uL ) {
 
     double suL[10],cuL[10], cuL2,cuL5, suL2,suL5;
     
@@ -740,7 +744,7 @@ inline void computeJacL(double* aL, double* uL ) {
 
 
 
-inline void computeJacLRH(double* aLRH, double* uLRH )	{
+inline void computeKinmLRH(double* aLRH, double* uLRH )	{
 
     double suLRH[10],cuLRH[10], cuLRH2,cuLRH5, suLRH2,suLRH5;
     
@@ -5503,8 +5507,6 @@ inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* 
 +62.50*cJL[9]*cJL[8]*cJL[7]*sJL5*cJL[4]*cJL[0]*sJL[1]*sJL2
 -62.50*cJL[9]*cJL[8]*cJL[7]*sJL5*sJL[4]*sJL[3]*cJL[0]*sJL[1]*cJL2
 +16.01*sJL[8]*sJL[7]*cJL[6]*sJL5*cJL[3]*cJL[0]*sJL[1]*cJL2;
-
-
 
         JacobL[29]
 =62.50*sJL[9]*sJL[8]*sJL[7]*sJL[6]*cJL[4]*cJL[0]*cJL[1]*cJL[3]
