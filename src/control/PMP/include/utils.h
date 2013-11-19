@@ -43,8 +43,6 @@ inline void computeJac(double* a, double *u )	{
 	cu5	=	cos(u[5]-1.833);
 	
 	
-
-
 	a[0]
 =152.3*cu[4]*su[1]*cu[3]
 +16.01*cu[8]*su[7]*su[6]*cu[4]*su[1]*cu[3]
@@ -123,6 +121,7 @@ inline void computeJac(double* a, double *u )	{
 +62.50*cu[9]*su[8]*cu[7]*cu5*cu[1]*cu2*cu[3]
 +62.50*cu[9]*cu[8]*su[6]*su5*cu[1]*cu2*cu[3]
 +62.50*cu[9]*cu[8]*cu[6]*cu[4]*cu[1]*cu2*su[3];
+printf("\n jac: %f \n",a[0]);
 	
    	a[1]
 =62.50*cu[9]*cu[8]*su[6]*cu5*su[4]*su[0]*cu[1]*cu[3]
@@ -251,7 +250,7 @@ inline void computeJac(double* a, double *u )	{
 +16.01*cu[8]*su[7]*su[6]*cu[4]*su[0]*cu[1]*cu[3]
 -16.01*su[8]*cu[6]*cu[4]*su[0]*cu[1]*cu[3]
 +23.36*cu[0]*su2;
-   	
+printf("jac: %f \n",a[1]);
    	
    	a[2]
 =152.3*su[4]*su[0]*cu2
@@ -380,7 +379,7 @@ inline void computeJac(double* a, double *u )	{
 -15.01*cu[6]*su5*cu[3]*su[0]*su2
 -15.01*cu[6]*su5*cu[0]*cu[1]*su[3]
 +152.3*cu[4]*su[3]*cu[0]*su[1]*cu2;
-   	
+printf("jac: %f \n",a[2]);
    	
 }
 
