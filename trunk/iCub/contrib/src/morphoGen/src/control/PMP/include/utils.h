@@ -1097,14 +1097,6 @@ inline void computeJacLRH(double* aLRH, double* uLRH )	{
 }
 
 
-
-
-
-
-
-
-
-
 inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* JanL )	{
 
     
