@@ -1102,7 +1102,7 @@ inline void computeKinmLRH(double* aLRH, double* uLRH )	{
 /**
 * function that returns jacobians from jointangles
 */
-inline void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* JanL )	{
+void computeJacobian(double* Jacob, double* JacobL, double* Jan, double* JanL )	{
 
     
 //=======================================================================================
