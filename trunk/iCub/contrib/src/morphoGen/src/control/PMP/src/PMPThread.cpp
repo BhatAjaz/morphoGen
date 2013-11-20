@@ -51,7 +51,7 @@ using namespace std;
 #define rad2degree          180/3.14159
 
 
-//#define NEURALNETWORK   0
+
 
 #define CMD_RIGHT_ARM	VOCAB4('r','a','r','m')
 #define CMD_LEFT_ARM	VOCAB4('l','a','r','m')
@@ -154,10 +154,7 @@ bool PMPThread::threadInit() {
         // stotes jacobians
         jacFile = fopen ("jacobian.txt" , "w");
     }  
-#ifdef NEURALNETWORK
-    printf("Loading Neural Network \n");
-    loadNeuralNetwork();
-#endif     
+
     //initialization of the state of PMP (default state)
     GoalCodePMP  = 19; // 19 init, 1 discrete, 21 continuous
     BodyChain    = 0; // 0 right, 1 left, 
@@ -604,41 +601,8 @@ double* PMPThread::forward_Kinematics(double *u , int l)	{
     double a[3];
     double T_Len=0; double T_Ori=0;
 
-
-#ifdef NEURALNETWORK
-    //double *p;
-    //double h1[48],h2[55],a[3];
-    for(int v=0;v<hiddenL1;v++) {
-        double sum = 0;
-        for(int i=0;i<inputL;i++) {
-            sum = sum + w1[v][i]*u[i];   
-        }
-        h1[v] = sum + b1[v];
-        h1[v] = tanh(h1[v]);
-    }
-
-    for(int v=0;v<hiddenL2;v++) {
-        double sum = 0;
-        for(int i=0;i<hiddenL1;i++) {
-            sum = sum + w2[v][i]*h1[i];   
-        }
-        h2[v] = sum + b2[v];
-        h2[v] = tanh(h2[v]);
-    }
-
-    for(int v=0;v<outputL;v++) {
-        double sum = 0;
-        for(int i=0;i<hiddenL2;i++) {
-            sum = sum + w3[v][i]*h2[i];   
-        }
-        a[v] = sum + b3[v];
-        //a[v] = tanh(a[v]);
-    }
-
-#else	
     computeKinm(a,u);
-    
-#endif
+
     
     p=a;
     return p;
@@ -768,113 +732,7 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 
 
 
-#ifdef NEURALNETWORK
-//==========================ANN implementation =====//
-    
-    double h[48][1],z[48][1],p[55][1],hinter[48][1],p1[55][1],pinter[55][1],Jack[3][10],JacT[10][3];
-//==================== Loading Weights, Biases for the ANN ====================
 
-    for(u=0;u<hiddenL1;u++) {
-        double sum=0;
-        for(i=0;i<inputL;i++){
-            sum=sum+(w1[u][i]*Jan[i]);
-        }
-        h[u][0]=sum+b1[u]; // Inner variable of Layer 1
-        z[u][0]=tanh(h[u][0]);// output of layer 1
-        hinter[u][0]=1-(pow(z[u][0],2));    //(1-tanh(h(b,1))^2)
-    }
-//================W1/B1work over here, u have 'h' and 'z'===================
-
-    for(u=0;u<hiddenL2;u++) {
-        double sum2=0;
-        for(i=0;i<hiddenL1;i++) {
-            
-            sum2=sum2+w2[u][i]*z[i][0];
-        }
-        p[u][0]=sum2+b2[u]; // here u get p int variable of layer 2 ////////
-        p1[u][0]=tanh(p[u][0]);// output of layer 1
-        pinter[u][0]=1-(pow(p1[u][0],2));
-        
-    }
-
-    //int l=hiddenL2,j=hiddenL1,k,n,a,b;
-
-    for(int k=0;k<outputL;k++) {
-        for(int n=0;n<inputL;n++) {
-            double inter1=0;
-            for(int a=0;a<hiddenL2;a++) {
-                for(int b=0;b<hiddenL1;b++) {
-                    inter1=inter1 +((w3[k][a]*pinter[a][0])*((w2[a][b]*hinter[b][0])*w1[b][n]));
-                }
-            }
-            Jack[k][n]=inter1;
-            //fprintf(writeJ,"\n \t  %f",Jack[k][n]);
-        }	
-    }	
-
-    //=======================================================================================
-    meanJan[0] =  0.0000; 
-    meanJan[1] =  0.0000;
-    meanJan[2] =  0.0000;
-    meanJan[3] = -0.7854;
-    meanJan[4] =  0.0000;
-    meanJan[5] =  0.7098;
-    meanJan[6] =  0.9730;
-    meanJan[7] =  1.2000;
-    meanJan[8] =  0.0000;
-    meanJan[9] =  0.0000;
-
-
-    Joint_Field[0]=(meanJan[0]-Jan[0]) * J0H; // Multiply by Joint compliance 
-    Joint_Field[1]=(meanJan[1]-Jan[1]) * J1H; //0.000041; //0.52 / Modified in June at Crete
-    Joint_Field[2]=(meanJan[2]-Jan[2]) * J2H;     //1.8
-    Joint_Field[3]=(meanJan[3]-Jan[3]) * J3H;   //4.5 //0.95
-    Joint_Field[4]=(meanJan[4]-Jan[4]) * J4H; //J3H 
-    Joint_Field[5]=(meanJan[5]-Jan[5]) * J5H;  //5; // Multiply by Joint compliance      
-    Joint_Field[6]=(meanJan[6]-Jan[6]) * J6H;  //0.041; //0.52 / Modified in June at Crete  
-    Joint_Field[7]=(meanJan[7]-Jan[7]) * J7H;    //75;  //1.8 
-    Joint_Field[8]=(meanJan[8]-Jan[8]) * J8H;     //4.5 //0.95
-    Joint_Field[9]=(meanJan[9]-Jan[9]) * J9H;
-
-/* 
-    Joint_Field[0]=(0-Jan[0])*J0H; // Multiply by Joint compliance 
-    Joint_Field[1]=(0-Jan[1])*J1H;//0.000041; //0.52 / Modified in June at Crete
-    Joint_Field[2]=(0.0-Jan[2])*J2H;  //1.8
-    Joint_Field[3]=(-0.7854-Jan[3])*J3H;  //4.5 //0.95
-    Joint_Field[4]=(0-Jan[4])*J4H;//J3H 
-    Joint_Field[5]=(0.7098-Jan[5])*J5H; //5; // Multiply by Joint compliance 
-    Joint_Field[6]=(0.9730-Jan[6])*J6H;//0.041; //0.52 / Modified in June at Crete
-    Joint_Field[7]=(1.2-Jan[7])*J7H;//75;  //1.8
-    Joint_Field[8]=(0-Jan[8])*J8H;  //4.5 //0.95
-    Joint_Field[9]=(0-Jan[9])*J9H;
-*/
-//=======================================================================================
-    for(int a=0;a<inputL;a++) {
-        double jvelo=0;
-        for(int n=0;n<outputL;n++) {
-            JacT[a][n]=Jack[n][a];
-            jvelo=jvelo+(JacT[a][n]*ff[n]);
-        }
-        Jvel[a]=0.002*(jvelo+Joint_Field[a]);
-   //cout << Jvel[a]<< endl;
-    } 
-
-
-    Jvel[10]=0;
-    Jvel[11]=0;
-    Jvel[12]=0;
-    Jvel[13]=0;
-    Jvel[14]=0;
-    Jvel[15]=0;
-    Jvel[16]=0;
-    Jvel[17]=0;
-    Jvel[18]=0;
-    Jvel[19]=0;
-
-
-
-
-#else
 
 
     computeJacobian(Jacob,JacobL,Jan,JanL);
@@ -997,7 +855,6 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     Jvel[1]=KOMP_WAISZT*(Jvel[1]+ Jvel[11]);
     Jvel[2]=KOMP_WAISZT2*(Jvel[2]+ Jvel[12]);
 
-#endif
 
 
 //##############################################################################################
