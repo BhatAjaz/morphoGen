@@ -132,7 +132,9 @@ private:
     double target[3],targetL[3];
     double X_pos[3],ffield[3],JoVel[20],X_posL[3],ffieldL[3];
     double *ptr;
-    double KFORCE,ITERATION,RAMP_KONSTANT,t_dur,KOMP_JANG,KOMP_WAISZT,KOMP_WAISZT2,J0H,J1H,J2H,J5H,J6H,J7H,J8H,J9H,J3H,J4H;
+    double KFORCE,ITERATION,RAMP_KONSTANT,t_dur;
+    double KOMP_JANG,KOMP_WAISZT,KOMP_WAISZT2;
+    double J0H,J1H,J2H,J5H,J6H,J7H,J8H,J9H,J3H,J4H;
     float s[5000];
     //		int ParamStiff;
     double x_fin1,y_fin1,z_fin1,x_fin2,y_fin2,z_fin2,x_fin1L,y_fin1L,z_fin1L,x_fin2L,y_fin2L,z_fin2L;

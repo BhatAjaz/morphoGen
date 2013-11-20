@@ -637,7 +637,7 @@ double* PMPThread::forward_Kinematics(double *u , int l)	{
 
 #else	
     computeKinm(a,u);
-    //printf("values from jangle and targets %f %f %f %f %f  %f\n",a[0],a[1],a[2],u[0],u[1],u[2]);
+    
 #endif
     
     p=a;
@@ -747,7 +747,9 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 
     int i,u;
     double pi=3.14;
-    double ff[3],ffLFK[3],Jacob[30],JacobL[30],Joint_Field[10],Joint_FieldL[10];
+    double ff[3],ffLFK[3];
+    double Jacob[30],JacobL[30];
+    double Joint_Field[10],Joint_FieldL[10];
     
 
     for(i=0;i<3;i++) {
@@ -756,7 +758,6 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     ff[0]=ff[0]*1;
     ff[1]=ff[1]*1;
     ff[2]=ff[2]*1;
-   // cout<< ff[0] <<  ff[1] <<  ff[2] << endl;
 
     for(i=0;i<3;i++){
         ffLFK[i]=*(forceL+i);
@@ -780,7 +781,7 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
         }
         h[u][0]=sum+b1[u]; // Inner variable of Layer 1
         z[u][0]=tanh(h[u][0]);// output of layer 1
-    hinter[u][0]=1-(pow(z[u][0],2));    //(1-tanh(h(b,1))^2)
+        hinter[u][0]=1-(pow(z[u][0],2));    //(1-tanh(h(b,1))^2)
     }
 //================W1/B1work over here, u have 'h' and 'z'===================
 
@@ -874,16 +875,11 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 
 
 #else
+
+
     computeJacobian(Jacob,JacobL,Jan,JanL);
 
-    //printf("\n Jacobian after computeJacobian \n");
-    //for(int i = 0; i < 30 ; i++) {
-    //    fprintf(jacFile,"%f ", Jacob[i]);
-    //    printf("%f ", Jacob[i]);
-    //}
-    //printf("\n");
-    //fprintf(jacFile,"\n\n\n");
-    
+
 //=======================================================================================
    
 
@@ -975,7 +971,8 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     Jvel[0]= 1*((ff[0]*Jacob[0])+(ff[1]*Jacob[10])+(ff[2]*Jacob[20])+Joint_Field[0]);
     Jvel[1]= 0*((ff[0]*Jacob[1])+(ff[1]*Jacob[11])+(ff[2]*Jacob[21])+Joint_Field[1]);
     Jvel[2]= 1*((ff[0]*Jacob[2])+(ff[1]*Jacob[12])+(ff[2]*Jacob[22])+Joint_Field[2]);
-    Jvel[3]= 1*KOMP_JANG*((ff[0]*Jacob[3])+(ff[1]*Jacob[13])+(ff[2]*Jacob[23])+Joint_Field[3]);
+    Jvel[3]= 0.3;
+    //Jvel[3]= 1*KOMP_JANG*((ff[0]*Jacob[3])+(ff[1]*Jacob[13])+(ff[2]*Jacob[23])+Joint_Field[3]);
     Jvel[4]= 1*KOMP_JANG*((ff[0]*Jacob[4])+(ff[1]*Jacob[14])+(ff[2]*Jacob[24])+Joint_Field[4]);
     Jvel[5]= 1*KOMP_JANG*((ff[0]*Jacob[5])+(ff[1]*Jacob[15])+(ff[2]*Jacob[25])+Joint_Field[5]);
     Jvel[6]= 1*KOMP_JANG*((ff[0]*Jacob[6])+(ff[1]*Jacob[16])+(ff[2]*Jacob[26])+Joint_Field[6]);
@@ -999,7 +996,8 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     Jvel[0]=KOMP_WAISZT*(Jvel[0]+ Jvel[10]);
     Jvel[1]=KOMP_WAISZT*(Jvel[1]+ Jvel[11]);
     Jvel[2]=KOMP_WAISZT2*(Jvel[2]+ Jvel[12]);
-#endif   
+
+#endif
 
 
 //##############################################################################################
@@ -1537,15 +1535,15 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         printf("\n \n %f, \t  %f, \t %f ",x_finL,y_finL,z_finL);
         printf("\n");
     
-        janini0=Jan[0]; printf(">%f \n", Jan[0]);
-        janini2=Jan[2]; printf(">%f \n", Jan[2]);
+        janini0=Jan[0];
+        janini2=Jan[2];
         janini3=Jan[3];//-0.9425
-        janini4=Jan[4]; printf(">%f \n", Jan[4]);
-        janini5=Jan[5]; printf(">%f \n", Jan[5]);
-        janini6=Jan[6]; printf(">%f \n", Jan[6]);
-        janini7=Jan[7]; printf(">%f \n", Jan[7]);
-        janini8=Jan[8]; printf(">%f \n", Jan[8]);
-        janini9=Jan[9]; printf(">%f \n", Jan[9]);
+        janini4=Jan[4];
+        janini5=Jan[5];
+        janini6=Jan[6];
+        janini7=Jan[7];
+        janini8=Jan[8];
+        janini9=Jan[9];
 
         janini3L=JanL[3];//-0.9425
         janini4L=JanL[4];
@@ -2373,10 +2371,6 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
     int len=1,i;
     double *topmp, *topmpL;
 
-    for(i=0;i<8;i++)
-        {
-        printf("Jan%d >> %f \n",i, Jan[i]);
-        }
 //===============================================================
     if((HAct==0)||(HAct==2))
     {
@@ -2386,7 +2380,8 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
         {
         X_pos[i]=*(nFK+i);
         }
-
+        int value;
+        //cin>>value;
         if((HAct==0))
         {
         X_posL[0]=x_iniL;
@@ -2453,12 +2448,14 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
     //                  PASSIVE MOTION PARADIGM
 //===================================================================
     double *Q_Dot=PMP(topmp,topmpL);  //Force to Torque to Q_dot 2>>>>>3
+
 //===================================================================
 //===================================================================
     //MODIFY ????????
+    
     for(i=0;i<20;i++){
-        JoVel[i]=Jvel[i]*Gam;
-        //cout<<JoVel[i]<<endl;
+        JoVel[i]=Q_Dot[i]*Gam;
+        //JoVel[i]=Jvel[i]*Gam;
     }
     //===================================================================
     // Q1-Q3 :W , JAN 0 - JAN 2 : W = JANL 0 - JANL 2;   JAN 3-JAN 9 RIGHT ARM; JANL 13-JANL19 LEFT ARM
@@ -2484,7 +2481,6 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
 
     // Right or Both
     if((HAct==0)||(HAct==2)){
-
         q4[time]=JoVel[3];
         double *j4=q4;
         double joi4=Gamma_Int(j4,time);
@@ -2612,7 +2608,6 @@ void PMPThread::MessageDevDriverR(){
      
     int nj=0;
     pos->getAxes(&nj);
-    //printf("Joints %d \n", nj);
 
     Vector encoders;
     Vector command;
@@ -3404,10 +3399,10 @@ void PMPThread::Kompliance(int TagK)	{
         ITERATION=1000;              
         RAMP_KONSTANT=0.005;
         t_dur=5;
-        //KOMP_JANG=0.0009;
-        //KOMP_WAISZT=0.0001;
-        //KOMP_WAISZT3=0.00002
-        //KOMP_WAISZT2=0.0009;
+        KOMP_JANG=0.0009;
+        KOMP_WAISZT=0.0001;
+        //KOMP_WAISZT3=0.00002;
+        KOMP_WAISZT2=0.0009;
         J0H=800;//200; //400 //800
         J1H=0.52;
         J2H=400; //1 //400;
