@@ -1,9 +1,9 @@
 // -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
 
 /* 
- * Copyright (C) 2009 RobotCub Consortium, European Commission FP6 Project IST-004370
- * Authors: Rea Francesco
- * email:   francesco.rea@iit.it
+ * Copyright (C) Robotics Brain & Cognitive Sciences Department, IIT
+ * Authors: Rea Francesco, Ajaz Ahmad Bhat 
+ * email:   francesco.rea@iit.it, ajaz.bhat@iit.it
  * website: www.robotcub.org 
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU General Public License, version 2 or any
@@ -18,7 +18,7 @@
  * Public License for more details
  */
 
-#include "selAttentionInterface.h"
+#include "assemblyVisualization.h"
 
 #include <yarp/os/Property.h> 
 #include <yarp/os/Network.h> 
@@ -65,7 +65,13 @@ int _frameN;            //Frame Number
 bool _savingSet;        //Save Set of Images mode
 // 
 //yarp::os::BufferedPort<yarp::os::Bottle> *_pOutPort=0; //Output Point Port
-Port* _pOutPort=0;
+Port* _pOutPort         = 0;
+Port* _iitPort          = 0;
+Port* _kclPort          = 0;
+Port* _forthPort        = 0;
+Port* _nocaPort         = 0;
+Port* _profactorPort    = 0;
+Port* _cvutPort         = 0;
 yarp::os::Bottle _outBottle;//Output Bottle Container
 pgmOptions _options; //option set by the config file
 
@@ -141,19 +147,136 @@ static void callback( GtkWidget *widget,gpointer   data ){
 //-------------------------------------------------
 // Call Backs
 //-------------------------------------------------
+
 static void cb_digits_scale( GtkAdjustment *adj ) {
    
     if (_pOutPort!=NULL) {
-        Bottle in;
-        yarp::os::Bottle bot; //= _pOutPort->prepare();
-        bot.clear();
-        bot.addVocab(COMMAND_VOCAB_SET);
-        bot.addVocab(COMMAND_VOCAB_K1);
-        bot.addDouble((double) adj->value);
-        //_pOutPort->Content() = _outBottle;
-        _pOutPort->write(bot,in);
+        if(_pOutPort.getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot; //= _pOutPort->prepare();
+            bot.clear();
+            bot.addVocab(COMMAND_VOCAB_TEST);
+            _pOutPort->write(bot,in);
+           
+        }
+        
     }
 }
+
+static void cb_digits_scale( GtkAdjustment *adj ) {
+   
+    if (_iitPort!=NULL) {
+        if(_iitPort.getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot; //= _pOutPort->prepare();
+            bot.clear();
+            bot.addVocab(COMMAND_VOCAB_TEST);
+            _iitPort->write(bot,in);
+           
+        }
+        
+    }
+}
+
+
+static void cb_digits_scale( GtkAdjustment *adj ) {
+   
+    if (_kclPort!=NULL) {
+        if(_kclPort.getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot; //= _pOutPort->prepare();
+            bot.clear();
+            bot.addVocab(COMMAND_VOCAB_TEST);
+            _kclPort->write(bot,in);
+           
+        }
+        
+    }
+}
+
+
+
+static void cb_digits_scale( GtkAdjustment *adj ) {
+   
+    if (_forthPort!=NULL) {
+        if(_forthPort.getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot; //= _pOutPort->prepare();
+            bot.clear();
+            bot.addVocab(COMMAND_VOCAB_TEST);
+            _forthPort->write(bot,in);
+           
+        }
+        
+    }
+}
+
+
+
+static void cb_digits_scale( GtkAdjustment *adj ) {
+   
+    if (_nocaPort!=NULL) {
+        if(_nocaPort.getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot; //= _pOutPort->prepare();
+            bot.clear();
+            bot.addVocab(COMMAND_VOCAB_TEST);
+            _nocaPort->write(bot,in);
+           
+        }
+        
+    }
+}
+
+
+
+static void cb_digits_scale( GtkAdjustment *adj ) {
+   
+    if (_profactorPort!=NULL) {
+        if(_profactorPort.getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot; //= _pOutPort->prepare();
+            bot.clear();
+            bot.addVocab(COMMAND_VOCAB_TEST);
+            _profactorPort->write(bot,in);
+           
+        }
+        
+    }
+}
+
+
+
+static void cb_digits_scale( GtkAdjustment *adj ) {
+   
+    if (_cvutPort!=NULL) {
+        if(_cvutPort.getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot; //= _pOutPort->prepare();
+            bot.clear();
+            bot.addVocab(COMMAND_VOCAB_TEST);
+            _cvuttPort->write(bot,in);
+           
+        }
+        
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static void cb_digits_scale2( GtkAdjustment *adj ) {
    
@@ -260,7 +383,7 @@ gint timeout_update_CB(gpointer data) {
     //portFpsData.reset();
     gchar *msg;
     //gdk_threads_enter();
-    msg=g_strdup_printf("selectiveAttentionInterface");
+    msg=g_strdup_printf("assemblyVisualization");
     updateStatusbar(fpsStatusBar, msg);
     g_free(msg);
     //displayFpsData.getStats(av, min, max);
@@ -731,7 +854,7 @@ GtkWidget* createMainWindow(void) {
     
     //gtk_init (&argc, &argv);
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (window), "selectiveAttentionInterface");
+    gtk_window_set_title (GTK_WINDOW (window), "assemblyVisualization");
     gtk_window_set_default_size(GTK_WINDOW (window), 205, 300); 
     gtk_window_set_resizable (GTK_WINDOW (window), TRUE);
     g_signal_connect (G_OBJECT (window), "destroy",
@@ -1065,7 +1188,7 @@ void configure(yarp::os::ResourceFinder rf){
     /* Process all parameters from both command-line and .ini file */
     /* get the module name which will form the stem of all module port names */
     _options.portName      = rf.check("name", 
-                           Value("/selectiveAttentionInterface"), 
+                           Value("/assemblyVisualization"), 
                            "module name (string)").asString();
     _options.posX      = rf.check("x", 
                            Value(100), 
@@ -1088,6 +1211,9 @@ void setOptionsToDefault() {
 }
 
 bool openPorts() {
+
+
+
     //_pOutPort = new yarp::os::BufferedPort<yarp::os::Bottle>;
     _pOutPort=new Port;
     _options.portName+="/command:o";
@@ -1099,10 +1225,93 @@ bool openPorts() {
             g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
             return false;
     }
+
+
+
+    _iitPort=new Port;
+    _options.portName+="reasoning/command:o";
+    bool ok = _iitPort->open(_options.portName.c_str());
+    if (ok) {
+        g_print("Port registration succeed!\n");
+    }
+    else {
+            g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
+            return false;
+    }
+
+
+    _kclPort=new Port;
+    _options.portName+="grasping/command:o";
+    bool ok = _kclPort->open(_options.portName.c_str());
+    if (ok) {
+        g_print("Port registration succeed!\n");
+    }
+    else {
+            g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
+            return false;
+    }
+
+
+
+    _forthPort=new Port;
+    _options.portName+="localization/command:o";
+    bool ok = _forthPort->open(_options.portName.c_str());
+    if (ok) {
+        g_print("Port registration succeed!\n");
+    }
+    else {
+            g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
+            return false;
+    }
+
+
+
+    _nocaPort=new Port;
+    _options.portName+="support/command:o";
+    bool ok = _nocaPort->open(_options.portName.c_str());
+    if (ok) {
+        g_print("Port registration succeed!\n");
+    }
+    else {
+            g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
+            return false;
+    }
+
+
+    
+    _profactorPort=new Port;
+    _options.portName+="industrial/command:o";
+    bool ok = _profactorPort->open(_options.portName.c_str());
+    if (ok) {
+        g_print("Port registration succeed!\n");
+    }
+    else {
+            g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
+            return false;
+    }
+
+
+    _cvutPort=new Port;
+    _options.portName+="identification/command:o";
+    bool ok = _cvutPort->open(_options.portName.c_str());
+    if (ok) {
+        g_print("Port registration succeed!\n");
+    }
+    else {
+            g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
+            return false;
+    }
+
+
+
+
+
     return true;
 }
 
 void closePorts() {
+
+
     _pOutPort->close();
     bool ok = true;
     if  (ok)
@@ -1111,6 +1320,72 @@ void closePorts() {
         printf("ERROR: Port unregistration failed.\n");
     delete _pOutPort;
     _pOutPort = NULL;
+
+
+
+    _iitPort->close();
+    bool ok = true;
+    if  (ok)
+        printf("Port unregistration succeed!\n");
+    else 
+        printf("ERROR: Port unregistration failed.\n");
+    delete _iitPort;
+    _iitPort = NULL;
+
+
+    _kclPort->close();
+    bool ok = true;
+    if  (ok)
+        printf("Port unregistration succeed!\n");
+    else 
+        printf("ERROR: Port unregistration failed.\n");
+    delete _kclPort;
+    _kclPort = NULL;
+
+
+    _forthPort->close();
+    bool ok = true;
+    if  (ok)
+        printf("Port unregistration succeed!\n");
+    else 
+        printf("ERROR: Port unregistration failed.\n");
+    delete _forthPort;
+    _forthPort = NULL;
+
+
+    _nocaPort->close();
+    bool ok = true;
+    if  (ok)
+        printf("Port unregistration succeed!\n");
+    else 
+        printf("ERROR: Port unregistration failed.\n");
+    delete _nocaPort;
+    _nocaPort = NULL;
+
+
+    _profactorPort->close();
+    bool ok = true;
+    if  (ok)
+        printf("Port unregistration succeed!\n");
+    else 
+        printf("ERROR: Port unregistration failed.\n");
+    delete _profactorPort;
+    _profactorPort = NULL;
+
+
+
+    _cvutPort->close();
+    bool ok = true;
+    if  (ok)
+        printf("Port unregistration succeed!\n");
+    else 
+        printf("ERROR: Port unregistration failed.\n");
+    delete _cvutPort;
+    _cvutPort = NULL;
+
+
+
+
 
 }
 
