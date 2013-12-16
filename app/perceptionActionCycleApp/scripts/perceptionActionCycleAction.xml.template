@@ -16,7 +16,18 @@
   <tag>vergence</tag>
   <node>icub-b16</node>
 </module>
-
+<module>
+	<name>attentionPrioritiser</name>
+    <parameters>--name /attPrioritiser/icub </parameters>
+    <tag>prioritiser</tag>
+    <node>/icub-b14</node>
+</module>    
+<module>
+	<name>gazeArbiter</name>
+    <parameters>--name /gazeArbiter/icub --visualFeedback</parameters>
+    <tag>gArbiter</tag>
+    <node>/icub-b14</node>
+</module>
 
 
 <connection>
@@ -28,7 +39,36 @@
   <from>/rightTransform/image:o</from>
   <to>/vergence/right:i</to>
   <protocol>udp</protocol>
+</connection>
+<connection>
+	<from>/icub/camcalib/left/out</from>
+	<to>/attPrioritiser/icub/periodicTracker/img:i</to>
+	<protocol>tcp</protocol>
+</connection>
+<connection>
+	<from>/icub/camcalib/left/out</from>
+	<to>/attPrioritiser/icub/matchTracker/img:i</to>
+	<protocol>tcp</protocol>
+</connection>
+<connection>
+	<from>/icub/camcalib/left/out</from>
+	<to>/gazeArbiter/icub/periodicTracker/img:i</to>
+	<protocol>tcp</protocol>
+</connection>
+<connection>
+	<from>/icub/camcalib/left/out</from>
+	<to>/gazeArbiter/icub/matchTracker/img:i</to>
+	<protocol>tcp</protocol>
 </connection> 
-
+<connection>
+    <from>/attPrioritiser/icub/cmd:o</from>
+	<to>/gazeArbiter/icub/cmd:i</to>
+	<protocol>tcp</protocol>
+</connection> 
+<connection>
+	<from>/gazeArbiter/icub/status:o</from>
+	<to>/attPrioritiser/icub/cmd:i</to>
+	<protocol>tcp</protocol>
+</connection> 
 
 </application>

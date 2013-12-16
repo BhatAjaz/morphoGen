@@ -9,18 +9,18 @@
 
 </dependencies>
 
-
+<!--
 <module>
   <name>yarpview</name>
   <parameters>--name /partialCueView0 --x 000 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>partialCueView0</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /partialCueView1 --x 170 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>partialCueView1</tag>
 </module>
 
@@ -28,38 +28,38 @@
   <name>yarpview</name>
   <parameters>--name /partialCueView2 --x 340 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>partialCueView2</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /partialCueView3 --x 510 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>partialCueView3</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /partialCueView4 --x 680 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>partialCueView4</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
-
+-->
 
 
 
 <module>
   <name>yarpview</name>
   <parameters>--name /rememberedView0 --x 000 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>rememberedView0</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /rememberedView1 --x 170 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>rememberedView1</tag>
 </module>
 
@@ -67,38 +67,38 @@
   <name>yarpview</name>
   <parameters>--name /rememberedView2 --x 340 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>rememberedView2</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /rememberedView3 --x 510 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>rememberedView3</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /rememberedView4 --x 680 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>rememberedView4</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 
 
 
-
+<!--
 <module>
   <name>yarpview</name>
   <parameters>--name /hubView0 --x 000 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>hubView0</tag>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /hubView1 --x 170 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>hubView1</tag>
 </module>
 
@@ -106,35 +106,35 @@
   <name>yarpview</name>
   <parameters>--name /hubView2 --x 340 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>hubView2</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /hubView3 --x 510 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>hubView3</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 <module>
   <name>yarpview</name>
   <parameters>--name /hubView4 --x 680 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
   <tag>hubView4</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
-
+-->
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /hubTopView    --x 000 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
-  <tag>hubTopView</tag>
+  <parameters>--name /hubObjectView    --x 000 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>node1</node>
+  <tag>hubObjectView</tag>
 </module>
 <module>
   <name>yarpview</name>
-  <parameters>--name /hubBottomView --x 170 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
-  <tag>hubBottomView</tag>
+  <parameters>--name /hubBodyView --x 170 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>node1</node>
+  <tag>hubBodyView</tag>
 </module>
 
 
@@ -143,15 +143,50 @@
 <module>
   <name>yarpview</name>
   <parameters>--name /plan1View     --x 340 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>plan1View</tag>
 </module>
 <module>
   <name>yarpview</name>
   <parameters>--name /plan2View     --x 510 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub14</node>
+  <node>node1</node>
   <tag>plan2View</tag>
 </module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /weightView     --x 10 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>node1</node>
+  <tag>weightView</tag>
+</module>
+
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerObjectView     --x 200 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>node1</node>
+  <tag>observerObjectView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerBodyView     --x 400 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>node1</node>
+  <tag>observerBodyView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerActionView     --x 600 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>node1</node>
+  <tag>observerActionView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerColorWordShapeView     --x 780 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>node1</node>
+  <tag>observerColorWordShapeView</tag>
+</module>
+
+
 
 
 
@@ -159,19 +194,19 @@
   <name>DarwinObserver</name>
   <parameters>--name /DarwinObserver </parameters>
   <tag>DarwinObserver</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 <module>
   <name>EpisodicMem</name>
   <parameters>--name /EpisodicMem </parameters>
   <tag>EpisodicMem</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 <module>
   <name>emPlotter</name>
   <parameters>--name /emPlotter </parameters>
   <tag>emPlotter</tag>
-  <node>icub14</node>
+  <node>node1</node>
 </module>
 
 
@@ -197,6 +232,26 @@
 <connection>
   <from>/MyRemembered:o</from>
   <to>/emPlotter/rememberedX:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/bodyPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/objectPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/actionPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/cwsPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
   <protocol>udp</protocol>
 </connection>
 
@@ -287,12 +342,12 @@
 </connection>
 <connection>
   <from>/emPlotter/hubTop/img:o</from>
-  <to>/hubTopView</to>
+  <to>/hubObjectView</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
   <from>/emPlotter/hubBottom/img:o</from>
-  <to>/hubBottomView</to>
+  <to>/hubBodyView</to>
   <protocol>udp</protocol>
 </connection>
 
@@ -304,11 +359,41 @@
   <to>/plan1View</to>
   <protocol>udp</protocol>
 </connection>
+
 <connection>
   <from>/emPlotter/plan2/img:o</from>
   <to>/plan2View</to>
   <protocol>udp</protocol>
 </connection>
+
+<connection>
+  <from>/emPlotter/weight/img:o</from>
+  <to>/weightView</to>
+  <protocol>udp</protocol>
+</connection>
  
+<connection>
+  <from>/emPlotter/observerObject/img:o</from>
+  <to>/observerObjectView</to>
+  <protocol>udp</protocol>
+</connection>
+
+<connection>
+  <from>/emPlotter/observerBody/img:o</from>
+  <to>/observerBodyView</to>
+  <protocol>udp</protocol>
+</connection>
+
+<connection>
+  <from>/emPlotter/observerAction/img:o</from>
+  <to>/observerActionView</to>
+  <protocol>udp</protocol>
+</connection>
+
+<connection>
+  <from>/emPlotter/observerColorWordShape/img:o</from>
+  <to>/observerColorWordShapeView</to>
+  <protocol>udp</protocol>
+</connection>
 
 </application>
