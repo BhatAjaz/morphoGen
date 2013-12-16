@@ -45,11 +45,12 @@ private:
     
     
     //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > inputCallbackPort;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputPort[2];     // output port to plot event
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > outputPort[2], weightPort;     // output port to plot event
   
-    yarp::os::Bottle  *planA1, *planB1;
-    yarp::os::Semaphore *mutexA1, *mutexB1;
-    double plan[20][50];            // matrix to represent the hub or plan
+    yarp::os::Bottle  *planA1, *planB1,*weightBottle;
+    yarp::os::Semaphore *mutexA1, *mutexB1, *weightMutex;
+    double plan[20][50]; // matrix to represent the hub or plan
+	int weight[1000][1000];            //weight  matrix to represent the hub or plan
 
     bool idle;                      // flag that indicates whether the thread is active
 
@@ -106,23 +107,37 @@ public:
     /* 
     * function that receives the input bottles and assigns them to the corresponding thread
     */
-    void setSharingBottle(yarp::os::Bottle *c, yarp::os::Bottle *d);
+    void setSharingBottle(yarp::os::Bottle *c, yarp::os::Bottle *d, yarp::os::Bottle *e);
     
     
     /*
     * function that sets the semaphores to the corresponding thread
     */
-    void setSemaphore(yarp::os::Semaphore *a, yarp::os::Semaphore *b);
+    void setSemaphore(yarp::os::Semaphore *a, yarp::os::Semaphore *b, yarp::os::Semaphore *c);
 
     /*
     * function that updates when every new cue comes in
     */
     void updatePlan(yarp::os::Bottle *queueBottle);
     
+
+	/*
+    * function that updates when every new weight matrixcomes in
+    */
+    void updateWeight(yarp::os::Bottle *queueBottle);
+    
+
     /*
     * function that plots the contents of the cue
     */
     void planPlotting(int i);
+
+
+
+	 /*
+    * function that plots the contents of the weights
+    */
+    void weightPlotting();
 };
 
 #endif  //_PLAN_THREAD_H_

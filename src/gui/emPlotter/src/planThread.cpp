@@ -51,6 +51,10 @@ bool planThread::threadInit() {
     for (int i = 0; i < 20; i++)
         for (int j = 0; j < 50; j++)
             plan[i][j]=0.0;
+
+	for (int i = 0; i < 1000; i++)
+        for (int j = 0; j < 1000; j++)
+            weight[i][j]=0.0;
             
     if (!outputPort[0].open(getName("/plan1/img:o").c_str())) {
         cout << ": unable to open port to send unmasked events "  << endl;
@@ -62,6 +66,10 @@ bool planThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }    
  
+	if (!weightPort.open(getName("/weight/img:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }  
 
     return true;
     
@@ -84,17 +92,19 @@ void planThread::setInputPortName(string InpPort) {
     
 }
 
-void planThread::setSharingBottle(Bottle *a, Bottle *b) {
+void planThread::setSharingBottle(Bottle *a, Bottle *b,Bottle *c) {
 
     planA1       = a;
     planB1       = b;
+	weightBottle = c;
 }
 
 
-void planThread::setSemaphore(Semaphore *a, Semaphore *b) {
+void planThread::setSemaphore(Semaphore *a, Semaphore *b, Semaphore *c) {
 
     mutexA1      =   a;
     mutexB1      =   b; 
+	weightMutex	 =	 c;
 }
 
 void planThread::updatePlan(Bottle* hubBottle) {
@@ -119,6 +129,32 @@ void planThread::updatePlan(Bottle* hubBottle) {
      }
         
 }
+
+
+void planThread::updateWeight(Bottle* weightBottle) {
+
+     printf("%s \n", weightBottle->toString().c_str());
+    
+    
+     for (int i = 0; i < 1000; i++) {
+        for (int j = 0; j < 1000; j++) {
+            int index = i * 1000 + j;
+            int x  = weightBottle->get(index).asInt();
+            //if(x == 1 || x == 0) {
+                weight[i][j] = x;
+           // }
+           // else {
+             //   printf("bad input bottle\n");
+               // return;
+                //}
+              //printf("%f is the value of plan \n",*plan[i][j]);
+        }
+     
+     }
+        
+}
+
+
 
 void planThread::planPlotting(int i) {
 
@@ -159,6 +195,65 @@ void planThread::planPlotting(int i) {
  
 }
 
+
+
+
+
+
+void planThread::weightPlotting() {
+
+    if (weightPort.getOutputCount()) {
+        yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = weightPort.prepare();
+        
+        // processing of the outputImage
+        int height = 1000;
+        int width  = 1000;
+        //int scale  = 10;
+            
+        outputImage.resize(width, height);
+        int padding = outputImage.getPadding();
+
+        unsigned char* oproc = outputImage.getRawImage();
+        unsigned char* temp = oproc;
+    
+        for (int r = 0; r < 1000; r++) {
+            for (int c = 0; c < 1000; c++) {
+               
+                    *oproc++ = weight[c][r] * 255;
+
+				//if(r%2 == 0 || c%2 == 0)
+				//{
+				//	 *oproc++ = 255;
+				//}
+
+				//else
+				//{
+				//	 *oproc++ = 0;
+				//}
+
+               }
+			oproc+=padding;
+            }
+                
+        weightPort.write();  
+    } 
+ 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void planThread::run() {    
        
  /*       if (!idle) {
@@ -190,7 +285,22 @@ void planThread::run() {
                 printf("Error\n");
             }
             mutexB1->post();
-            this->planPlotting(1);      
+            this->planPlotting(1); 
+//////////////////////////////////////////////////////////////////////
+
+			weightMutex->wait();          
+            if(weightBottle->size() > 0){
+                printf("received not null function as plan \n");  
+                this->updateWeight(weightBottle);
+            }
+            weightBottle->clear();
+            if(weightBottle->size() != 0){
+                printf("Error\n");
+            }
+            weightMutex->post();
+            this->weightPlotting();   
+
+
 }
 
 void planThread::threadRelease() {
