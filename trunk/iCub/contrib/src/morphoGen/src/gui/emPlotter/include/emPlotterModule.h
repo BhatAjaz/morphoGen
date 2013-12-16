@@ -151,7 +151,7 @@
 #include <rememberedxThread.h>
 #include <hubThread.h>
 #include <planThread.h>
-
+#include <hubTypeThread.h>
 class emPlotterModule:public yarp::os::RFModule {
     
     std::string moduleName;                 // name of the module
@@ -169,7 +169,7 @@ class emPlotterModule:public yarp::os::RFModule {
     partialThread*      pt[5];              // pointer to a new thread that generates gui of incoming bottles-- from partial cues
     hubThread*          hThread;            // pointer to a new thread that generates gui of incoming bottles-- from hubThread
     planThread*         pThread;            // pointer to a new thread that generates gui of incoming bottles-- from planThread
-        
+    hubTypeThread*         htThread;    
 public:
     /**
     *  configure all the emPlotter parameters and return true if successful

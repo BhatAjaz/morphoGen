@@ -69,6 +69,11 @@ bool emPlotterRatethread::threadInit() {
         cout << ": unable to open port to receive plan bottles "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
+
+	if (!inputPorthubType.open(getName("/observerHub:i").c_str())) {
+        cout << ": unable to open port to receive plan bottles "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
     
     //printf("ports opened\n");
     
@@ -106,31 +111,40 @@ void emPlotterRatethread::setInputPortName(string InpPort) {
         
 }
 
-void emPlotterRatethread::setSharingBottle(Bottle *partialBot[], Bottle *remBot[], Bottle *hubBot[], Bottle* top, Bottle *bottom, Bottle *a, Bottle *b) {
+void emPlotterRatethread::setSharingBottle(Bottle *partialBot[], Bottle *remBot[], Bottle *hubBot[], Bottle* object, Bottle *body, Bottle *a, Bottle *b,Bottle *w, Bottle* x, Bottle *y, Bottle *z, Bottle *cws ) {
 
     for (int i = 0; i < 5; i++) {
         pbot[i] = partialBot[i];
         rbot[i] = remBot[i];
         hbot[i] = hubBot[i];
     }
-    hubTop          =   top;
-    hubBottomAll    =   bottom;
+    hubObject          =   object;
+    hubBody    =   body;
     planA           =   a;
     planB           =   b;
+	weight			=	w;
+	hubObjectObs       =   x;
+    hubBodyObs			=   y;
+	hubActionObs		=   z;
+	hubCWS               = cws;
 }
 
-void emPlotterRatethread::setSemaphore(Semaphore *pmu[], Semaphore *rmu[], Semaphore *hmu[], Semaphore *c, Semaphore *d, Semaphore *a, Semaphore *b) {
+void emPlotterRatethread::setSemaphore(Semaphore *pmu[], Semaphore *rmu[], Semaphore *hmu[], Semaphore *c, Semaphore *d, Semaphore *a, Semaphore *b, Semaphore *w, Semaphore *e, Semaphore *f, Semaphore *g, Semaphore *h) {
     
     for (int i = 0; i < 5; i++) {
         pmutex[i] = pmu[i];
         rmutex[i] = rmu[i];
         hmutex[i] = hmu[i];
     }
-    mutexTop        =   c;
-    mutexBottomAll  =   d;
+    mutexObject        =   c;
+    mutexBody  =   d;
     mutexA          =   a;
     mutexB          =   b;     
-        
+    weightMutex		=	w;
+	mutexObjectObs     =   e;
+    mutexBodyObs  =   f;
+	mutexActionObs  =   g;
+	mutexCWS  =   h;
 }
 
 void emPlotterRatethread::run() {    
@@ -139,7 +153,8 @@ void emPlotterRatethread::run() {
     remIncoming     = inputPortrem.read(false);
     hubIncoming     = inputPorthub.read(false);
     planIncoming    = inputPortplan.read(false);
-    
+    hubTypeIncoming     = inputPorthubType.read(false);
+
     if (cueIncoming!=NULL){
         printf(" bottle %s \n",cueIncoming->toString().c_str()); 
         string name;
@@ -260,7 +275,15 @@ void emPlotterRatethread::run() {
                 *planB = *planIncoming->get(1).asList();
                 mutexB->post();
             }                   
-        }                
+        } 
+
+		else if(!strcmp(name.c_str(), "weight")) {
+            if (planIncoming->size() > 0){
+                weightMutex->wait();
+                *weight = *planIncoming->get(1).asList();
+                weightMutex->post();
+            }                   
+        }
                
         else 
             printf("Please provide a  plan with a name like   \"planA\"   \"planB\" \n");
@@ -316,29 +339,76 @@ void emPlotterRatethread::run() {
             }                    
         }
         
-        else if(!strcmp(name.c_str(), "hubTop")) {
+       /* else if(!strcmp(name.c_str(), "hubTop")) {
             if (hubIncoming->size() > 0){
                 mutexTop->wait();
                 *hubTop = *hubIncoming->get(1).asList();
                 mutexTop->post();
             }                    
-        }
+        }*/
                 
-        else if(!strcmp(name.c_str(), "hubBottomAll")) {
-            printf("correctly detected the cue1 \n");    
+        else if(!strcmp(name.c_str(), "hubObject")) {
+            printf("correctly detected the object hub from memory \n");    
             if (hubIncoming->size() > 0){
-                mutexBottomAll->wait();
-                *hubBottomAll = *hubIncoming->get(1).asList();
-                printf("hubBottomAll %08x got secondary list %s \n",hubBottomAll, hubBottomAll->toString().c_str());
-                mutexBottomAll->post();
+                mutexObject->wait();
+                *hubObject = *hubIncoming->get(1).asList();
+                printf("hubObject %08x got secondary list %s \n",hubObject, hubObject->toString().c_str());
+                mutexObject->post();
             }                    
         }
-                
+		else if(!strcmp(name.c_str(), "hubBody")) {
+            printf("correctly detected the body hub from memory \n");    
+            if (hubIncoming->size() > 0){
+                mutexBody->wait();
+                *hubBody = *hubIncoming->get(1).asList();
+                printf("hubBody %08x got secondary list %s \n",hubBody, hubBody->toString().c_str());
+                mutexBody->post();
+            }                    
+        }          
                                
         else 
             printf("Please provide a hub with a name like \"hub0\"  \"hub1\"  \"hub2\"  \"hub3\"  \"hub4\"  \"hubTop\" \"hubBottom\" \n");
     }
         
+	if (hubTypeIncoming!=NULL){
+        printf(" bottle %s \n",hubTypeIncoming->toString().c_str()); 
+        string name;
+        name = hubTypeIncoming->get(0).asString();
+                   
+       if(!strcmp(name.c_str(), "object")) {
+            if (hubTypeIncoming->size() > 0){
+                mutexObjectObs->wait();
+                *hubObjectObs = *hubTypeIncoming->get(1).asList();
+                mutexObjectObs->post();
+            }                    
+        }
+                
+        else if(!strcmp(name.c_str(), "body")) {
+            if (hubTypeIncoming->size() > 0){
+                mutexBodyObs->wait();
+                *hubBodyObs = *hubTypeIncoming->get(1).asList();
+                mutexBodyObs->post();
+            }                   
+        }
+		else if(!strcmp(name.c_str(), "action")) {
+            if (hubTypeIncoming->size() > 0){
+                mutexActionObs->wait();
+                *hubActionObs = *hubTypeIncoming->get(1).asList();
+                mutexActionObs->post();
+            }                   
+        }
+
+		else if(!strcmp(name.c_str(), "CWS")) {
+            if (hubTypeIncoming->size() > 0){
+                mutexCWS->wait();
+                *hubCWS = *hubTypeIncoming->get(1).asList();
+                mutexCWS->post();
+            }                   
+        }
+
+		 else 
+            printf("Please provide a Observer hub with a name like \"object\"  \"body\" \"action\"  \"CWS\"  \n");
+    }
                         
         //printf("Finishing the rate thread run \n");          
 }
@@ -354,7 +424,8 @@ void emPlotterRatethread::threadRelease() {
     inputPorthub.close();
     inputPortplan.interrupt();
     inputPortplan.close();
-    
+    inputPorthubType.interrupt();
+    inputPorthubType.close();
 }
 
 

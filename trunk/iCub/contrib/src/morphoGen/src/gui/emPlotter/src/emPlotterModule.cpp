@@ -86,8 +86,8 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
         configFile.clear();
     }
 
-    Bottle*     partialBottle[5], *remBottle[5], *hubTop,*hubBottomAll, *hubBottom[5], *planA, *planB;
-    Semaphore*  pmutex[5], *rmutex[5], *mutexTop, *mutexBottomAll, *mutexBottom[5], *mutexA, *mutexB;
+    Bottle*     partialBottle[5], *remBottle[5], *hubObject,*hubBody, *hubBottom[5], *planA, *planB,*weight,*hubBodyObs,*hubObjectObs,*hubActionObs,*hubCWS;
+    Semaphore*  pmutex[5], *rmutex[5], *mutexObject, *mutexBody, *mutexBottom[5], *mutexA, *mutexB, *weightMutex,*mutexObjectObs,*mutexBodyObs, *mutexActionObs, *mutexCWS;
     
     for (int i = 0; i < 5; i++) {
         partialBottle[i]    = new Bottle();
@@ -98,16 +98,28 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
         mutexBottom[i]      = new Semaphore();
     }
     
-    hubTop          = new Bottle();
-    hubBottomAll    = new Bottle();
+    hubObject          = new Bottle();
+    hubBody		    = new Bottle();
     planA           = new Bottle();
     planB           = new Bottle();
-    mutexTop        = new Semaphore();
-    mutexBottomAll  = new Semaphore();
+    hubObjectObs          = new Bottle();
+    hubBodyObs		    = new Bottle();
+	hubActionObs		    = new Bottle();
+	hubCWS					= new Bottle();
+    weight			= new Bottle();
+
+	
+	mutexObject        = new Semaphore();
+    mutexBody	  = new Semaphore();
     mutexA          = new Semaphore();
     mutexB          = new Semaphore();
-       
- 
+	mutexObjectObs        = new Semaphore();
+    mutexBodyObs	  = new Semaphore();
+	 mutexActionObs	  = new Semaphore();
+	 mutexCWS		=	 new Semaphore();
+	weightMutex     = new Semaphore();
+
+
 
     /* create the thread and pass pointers to the module parameters */
     rThread = new emPlotterRatethread(robotName, configFile);
@@ -124,24 +136,31 @@ bool emPlotterModule::configure(yarp::os::ResourceFinder &rf) {
     pThread   = new planThread();
     pThread->setName(getName().c_str());
     
+	htThread   = new hubTypeThread();
+    htThread->setName(getName().c_str());
+    
+	
     /* share the resources and semaphores between the threads*/ 
-    rThread->setSharingBottle(partialBottle, remBottle, hubBottom, hubTop, hubBottomAll, planA, planB);
-    rThread->setSemaphore(pmutex, rmutex, mutexBottom, mutexTop, mutexBottomAll, mutexA, mutexB);
+    rThread->setSharingBottle(partialBottle, remBottle, hubBottom, hubObject, hubBody, planA, planB,weight,hubObjectObs, hubBodyObs,hubActionObs,hubCWS);
+    rThread->setSemaphore(pmutex, rmutex, mutexBottom, mutexObject, mutexBody, mutexA, mutexB,weightMutex, mutexObjectObs, mutexBodyObs, mutexActionObs,mutexCWS);
     
     remThread->setSharingBottle(remBottle);
     remThread->setSemaphore(rmutex);
     
-    hThread->setSharingBottle(hubTop, hubBottomAll, hubBottom);
-    hThread->setSemaphore(mutexTop, mutexBottomAll, mutexBottom);
+    hThread->setSharingBottle(hubObject, hubBody, hubBottom);
+    hThread->setSemaphore(mutexObject, mutexBody, mutexBottom);
     
-    pThread->setSharingBottle(planA, planB);
-    pThread->setSemaphore(mutexA, mutexB);
+    pThread->setSharingBottle(planA, planB,weight);
+    pThread->setSemaphore(mutexA, mutexB,weightMutex);
     
+	htThread->setSharingBottle(hubObjectObs, hubBodyObs,hubActionObs,hubCWS);
+    htThread->setSemaphore(mutexObjectObs, mutexBodyObs, mutexActionObs,mutexCWS);
+
     rThread->start(); // this calls threadInit() and it if returns true, it then calls run()
     remThread->start(); 
     hThread->start();
     pThread->start();
-    
+    htThread->start();
     for (int i = 0; i < 5; i++){
         
         pt[i] = new partialThread();
@@ -181,6 +200,7 @@ bool emPlotterModule::close() {
     rThread->stop();
     hThread->stop();
     pThread->stop();
+	htThread->stop();
     return true;
 }
 

@@ -159,7 +159,7 @@ void hubThread::hubPlotting(int i) {
         // processing of the outputImage
         int height = 6;
         int width  = 7;
-        int scale  = 10;
+        int scale  = 20;
             
         outputImage.resize(width*scale, height*scale);
         int padding = outputImage.getPadding();
