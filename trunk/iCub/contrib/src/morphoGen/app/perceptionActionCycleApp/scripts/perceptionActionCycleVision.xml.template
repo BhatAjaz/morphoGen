@@ -45,7 +45,7 @@
 </module>
 <module>
   <name>shapeSelector</name>
-  <parameters>--name /shapeSelector --width 320 --height 240</parameters>
+  <parameters>--name /shapeSelector --width 320 --height 240 --dimX 640 --dimY 480</parameters>
   <tag>shapeSelector</tag>
   <node>icub-b15</node>
 </module>
