@@ -18,7 +18,7 @@
  * Public License for more details
  */
 
-#include "assemblyVisualization.h"
+#include "visualizationGui.h"
 
 #include <yarp/os/Property.h> 
 #include <yarp/os/Network.h> 
@@ -478,7 +478,7 @@ gint timeout_update_CB(gpointer data) {
     //portFpsData.reset();
     gchar *msg;
     //gdk_threads_enter();
-    msg=g_strdup_printf("assemblyVisualization");
+    msg=g_strdup_printf("visualizationGui");
     updateStatusbar(fpsStatusBar, msg);
     g_free(msg);
     //displayFpsData.getStats(av, min, max);
@@ -765,7 +765,7 @@ gint menuHelpAbout_CB(GtkWidget *widget, gpointer data) {
         "ONNECTION WITH THE SOFTWARE.\n";
 
     gtk_show_about_dialog(GTK_WINDOW(mainWindow),
-                          "name", "assemblyVisualization",
+                          "name", "visualizationGui",
                           "version", "1.0",
                           "license", license,
                           "website", "http://sourceforge.net/projects/yarp0",
@@ -952,7 +952,7 @@ GtkWidget* createMainWindow(void) {
     
     //gtk_init (&argc, &argv);
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (window), "assemblyVisualization");
+    gtk_window_set_title (GTK_WINDOW (window), "visualizationGui");
     gtk_window_set_default_size(GTK_WINDOW (window), 205, 300); 
     gtk_window_set_resizable (GTK_WINDOW (window), TRUE);
     g_signal_connect (G_OBJECT (window), "destroy",
@@ -1435,7 +1435,7 @@ void configure(yarp::os::ResourceFinder rf){
     /* Process all parameters from both command-line and .ini file */
     /* get the module name which will form the stem of all module port names */
     _options.portName      = rf.check("name", 
-                           Value("/assemblyVisualization"), 
+                           Value("/visualizationGui"), 
                            "module name (string)").asString();
     _options.posX      = rf.check("x", 
                            Value(200), 
@@ -1723,8 +1723,8 @@ int myMain(int argc, char* argv[]) {
     yarp::os::ResourceFinder* rf;
     rf=new ResourceFinder();
     rf->setVerbose(true);
-    rf->setDefaultConfigFile("assemblyVisualization.ini"); //overridden by --from parameter
-    rf->setDefaultContext("assemblyVisualization/conf");   //overridden by --context parameter
+    rf->setDefaultConfigFile("visualizationGui.ini"); //overridden by --from parameter
+    rf->setDefaultContext("visualizationGui/conf");   //overridden by --context parameter
     rf->configure("ICUB_ROOT", argc, argv);
     configure(*rf);
     
@@ -1799,7 +1799,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 void printHelp() {
-    g_print("assemblyVisualization usage:\n");
-    g_print("--name: input port name (default: /assemblyVisualization)\n");
+    g_print("visualizationGui usage:\n");
+    g_print("--name: input port name (default: /visualizationGui)\n");
 }
 

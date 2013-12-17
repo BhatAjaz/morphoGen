@@ -21,7 +21,7 @@
 /**
 *
 * @ingroup icub_morphoGen
-*\defgroup icub_assemblyVisualization assemblyVisualization
+*\defgroup icub_visualizationGui visualizationGui
 */
 
 /**
