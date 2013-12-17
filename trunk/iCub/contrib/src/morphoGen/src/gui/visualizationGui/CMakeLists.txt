@@ -2,7 +2,7 @@
 # Authors: Giorgio Metta, Francesco Rea
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-SET(KEYWORD "assemblyVisualization")
+SET(KEYWORD "visualizationGui")
 PROJECT(${KEYWORD})
 
 # set up to use GTK+
@@ -21,8 +21,8 @@ INCLUDE_DIRECTORIES(
 )
 
 # Search for source code.
-FILE(GLOB folder_source *.cpp *.cc .c)
-FILE(GLOB folder_header *.h)
+FILE(GLOB folder_source src/*.cpp *.cc .c)
+FILE(GLOB folder_header include/*.h)
 SOURCE_GROUP("Source Files" FILES ${folder_source})
 SOURCE_GROUP("Header Files" FILES ${folder_header})
 
