@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.6)
 #add here the name of the directory you want to build
 #add_subdirectory( assemblyVisualization )
 add_subdirectory( emPlotter )
-#add_subdirectory( neuralVisualization )
+add_subdirectory( neuronsVisualization )
 add_subdirectory( visualizationGui )
 
 # single modules that are going to be sorted into subsection
