@@ -51,7 +51,8 @@ using namespace std;
 #define rad2degree          180/3.14159
 
 
-#define NEURALNETWORK
+#define NEURALNETWORK   //By default PMP uses Neural network solution to PMP
+                        //Please comment out this line if you want to run the analytical version of PMP
 
 #define CMD_RIGHT_ARM	VOCAB4('r','a','r','m')
 #define CMD_LEFT_ARM	VOCAB4('l','a','r','m')
@@ -116,6 +117,11 @@ bool PMPThread::threadInit() {
         cout << ": unable to open port to send unmasked events "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
+
+    if (!activationsPort.open(getName("/activations:o").c_str())) {
+        cout << ": unable to open port to send activations "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
     
     //depreciated hardcoded connections
     
@@ -152,9 +158,9 @@ bool PMPThread::threadInit() {
         posiL.open("positionL.txt");
         wr_Gam.open("result.txt");
         jacFile = fopen ("jacobian.txt" , "w");
+        wr_Test.open("resultTest.txt");///testing the result..temporary
     }  
 #ifdef NEURALNETWORK
-    printf("Loading Neural Network \n");
     loadNeuralNetwork();
 #endif     
     //initialization of the state of PMP (default state)
@@ -163,9 +169,9 @@ bool PMPThread::threadInit() {
     MSimExec     = 1;
     TrajType     = 1;
     WristO       =  0;
-    MiniGoal[0]  =  -250;  // target right arm x
+    MiniGoal[0]  =  -300;  // target right arm x
     MiniGoal[1]  =  100;   // target right arm y
-    MiniGoal[2]  =  80;
+    MiniGoal[2]  =  50;
     MiniGoal[3]  =  0.0;   //obstacle x
     MiniGoal[4]  =  0.0;
     MiniGoal[5]  =  0.0;
@@ -317,6 +323,37 @@ void PMPThread::setRobotName(string robName) {
 
 void PMPThread::run() {    
 
+//testing the  yxz data accuracy ..lines for generating data
+/*    InitializeJan();  
+    for (int x = -200; x > -400 ; x-=30)
+        for (int y = 0; y < 200 ; y+=30)//{
+               //int z = 100;
+            for (int z = 0; z < 200 ; z+=30){
+                MiniGoal[0]=x;
+                MiniGoal[1]=y;
+                MiniGoal[2]=z;
+                ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType);
+                
+            } 
+
+*/
+/*
+//////////////////////////////////////////////
+///testing neural activatons
+    InitializeJan();  
+
+               x = -303;
+               z = 23; 
+            for (int y = 0; y < 200 ; y+=){
+                MiniGoal[0]=x;
+                MiniGoal[1]=y;
+                MiniGoal[2]=z;
+                ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType);          
+            } 
+
+
+*/
+//////////////////original code////////////////////////////////
     while (isStopping() != true) {
       
 
@@ -534,7 +571,7 @@ void PMPThread::run() {
 
                 PMPResponse.reply(ObsResp);
                 Time::delay(3);
-                */
+                /*/
                 
             }
             else {
@@ -544,7 +581,7 @@ void PMPThread::run() {
 
             PMPResponse.reply(ObsResp);
 
-//========================================================================================  
+        //========================================================================================  
         }
     }               
 
@@ -573,6 +610,7 @@ void PMPThread::threadRelease() {
     wr1L.close();
     wr_GamL.close();
     fclose(jacFile);
+    wr_Test.close();
   }
   printf("PMPThread::threadRelease:end \n"); 
 }
@@ -584,11 +622,13 @@ void PMPThread::onStop() {
   cmdTorsoPort.interrupt();
   cmdInterfacePort.interrupt();
   PMPResponse.interrupt();
+  activationsPort.interrupt();
   cmdLeft_armPort.close();
   cmdRight_armPort.close();
   cmdTorsoPort.close();
   cmdInterfacePort.close();
   PMPResponse.close();
+  activationsPort.close();
   printf("PMPThread::onStop:end \n");
 }
 
@@ -698,55 +738,7 @@ double* PMPThread::forcefieldL(double *wL, double*vL)	{
 
 
 void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
-    
-	int i,u;
-	double h[hiddenL1],z[hiddenL1],p[hiddenL2],hinter[hiddenL1],p1[hiddenL2],pinter[hiddenL2],Jack[outputL][inputL];
-    double *Jacob = JacobIn;
-    double *Jan = JanIn;
-//==================== Loading Weights, Biases for the ANN ====================
-
-	for(u=0;u<hiddenL1;u++) {
-		double sum=0;
-		for(i=0;i<inputL;i++){
-       		sum=sum+(w1[u][i]*Jan[i]);
-	   	}
-		h[u]=sum+b1[u]; // Inner variable of Layer 1
-		z[u]=tanh(h[u]);// output of layer 1
-	    hinter[u]=1-(pow(z[u],2));    //(1-tanh(h(b,1))^2)
-	}
-
-//================W1/B1work over here, u have 'h' and 'z'===================
-
-	for(u=0;u<hiddenL2;u++) {
-		double sum2=0;
-		for(i=0;i<hiddenL1;i++) {
-      		
-       		sum2=sum2+w2[u][i]*z[i];
-		}
-		p[u]=sum2+b2[u]; // here u get p int variable of layer 2 ////////
-		p1[u]=tanh(p[u]);// output of layer 2
-		pinter[u]=1-(pow(p1[u],2));
-		
-	}
-
-	for(int k=0;k<outputL;k++) {
-		for(int n=0;n<inputL;n++) {
-			double inter1=0;
-			for(int a=0;a<hiddenL2;a++) {
-				for(int b=0;b<hiddenL1;b++) {
-    				inter1=inter1 +((w3[k][a]*pinter[a])*((w2[a][b]*hinter[b])*w1[b][n]));
-				}
-			}
-			Jack[k][n]=inter1;
-			//fprintf(writeJ,"\n \t  %f",Jack[k][n]);
-		}	
-	}
-
-    for (int a=0; a<inputL; a++) {
-        for (int n=0; n<outputL; n++)
-            Jacob[a*outputL + n] = Jack[n][a];    
-    
-    }	
+	
 }
 
  double* PMPThread::PMP(double *force,double *forceL)	{
@@ -807,6 +799,22 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 		pinter[u][0]=1-(pow(p1[u][0],2));
 		
 	}
+
+/////////////////////////////////////////////////////////Added SEND ACTIVATIONS To PORT FOR DISPLAY
+    if (activationsPort.getOutputCount()) {
+        Bottle& actv =activationsPort.prepare();
+    	actv.clear();
+		for(int i=0; i<hiddenL1; i++) 
+            actv.addDouble(hinter[i][0]);
+		for(int i=0; i<hiddenL2; i++) 
+            actv.addDouble(pinter[i][0]);          
+	    //cout<<"Sending Activations for Display"<<endl;
+       	activationsPort.write();
+        Time::delay(0.03);
+    }
+////////////////////////////////////////////////////////////////////////////////////
+
+
 
 	//int l=hiddenL2,j=hiddenL1,k,n,a,b;
 
@@ -1326,6 +1334,7 @@ void PMPThread::InitializeJanObst() {	// this is the default init for a trajecto
 
 void PMPThread::InitializeJan()	 {	// init for normal reaching
          
+/* 
     Jan[0]=0;
     Jan[1]=0;
     Jan[2]=0;
@@ -1367,19 +1376,76 @@ void PMPThread::InitializeJan()	 {	// init for normal reaching
     janini8L=0;
     janini9L=0;
     
-    x_iniIC  =-48;
-	y_iniIC  = 227;
-	z_iniIC  = 411;
+    x_iniIC  =-215;
+	y_iniIC  = 245;
+	z_iniIC  = 402;
 	x_iniICL =-160;
 	y_iniICL =-256;
 	z_iniICL = 380;
 
-	x_ini  =-48;
-	y_ini  = 227;
-	z_ini  = 411;
+	x_ini  =-215;
+	y_ini  = 245;
+	z_ini  = 402;
 	x_iniL =-160;
 	y_iniL =-256;
 	z_iniL = 380;
+*/
+    Jan[0]=0;
+    Jan[1]=-0.09;
+    Jan[2]=0.01;
+    Jan[3]=-0.73;// -0.6981
+    Jan[4]=0.27;
+    Jan[5]=0.37;
+    Jan[6]=1.03;
+    Jan[7]=0;
+    Jan[8]=0.37;
+    Jan[9]=0.52;
+    
+    janini0=0;
+    // janini1 missing because we dont use one of the dof of the torso
+    janini2=-0.01;
+    janini3=-0.73;// -0.6981
+    janini4=0.27;
+    janini5=0.37;
+    janini6=1.03;
+    janini7=0;
+    janini8=0.37;
+    janini9=0.52;
+    
+    JanL[0]=0;
+    JanL[1]=-0.09;
+    JanL[2]=0.01;
+    JanL[3]=-0.73;// -0.6981
+    JanL[4]=0.27;
+    JanL[5]=0.37;
+    JanL[6]=1.03;
+    JanL[7]=0;
+    JanL[8]=0.37;
+    JanL[9]=0.52;
+    
+    janini3L=-0.73;// -0.6981
+    janini4L=0.27;
+    janini5L=0.37;
+    janini6L=1.03;
+    janini7L=0;
+    janini8L=0.37;
+    janini9L=0.52;
+    
+    x_iniIC  =-303;
+	y_iniIC  = 9;
+	z_iniIC  = 23;
+	x_iniICL =-303;
+	y_iniICL = -9;
+	z_iniICL = 23;
+
+	x_ini  =-303;
+	y_ini  = 9;
+	z_ini  = 23;
+	x_iniL =-303;
+	y_iniL =-9;
+	z_iniL = 23;
+
+    
 };
 
 
@@ -1620,6 +1686,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     		MotCon(x_ini,y_ini,z_ini, x_iniL,y_iniL,z_iniL,time,Gam,HandAct);
  //**********************************************************************************************    		
     		if (verboseTerm) {
+
     			posiL << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] << "    "  << X_posL[0] << "    " << X_posL[1] << "    " << X_posL[2] <<endl;
     			wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
     		}
@@ -1650,6 +1717,8 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	printf("\n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang1,ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
     	printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],X_posL[1],X_posL[2]);
     	//Sleep(5000);
+//temorary line
+        wr_Test << MiniGoal[0] << "    " << MiniGoal[1] << "    " << MiniGoal[2] << "    " << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] <<endl;
     	
     	if(MSim==MSim_SIMULATION)	{
         	//  InitializeJan();

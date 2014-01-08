@@ -38,7 +38,7 @@
 #include <math.h>
 #include <vector>
 
-
+#define COMMAND_VOCAB_INIT   VOCAB4('I','N','I','T')
 #define COMMAND_VOCAB_CACT   VOCAB4('C','A','C','T')
 #define COMMAND_VOCAB_BCHA   VOCAB4('B','C','H','A')
 #define COMMAND_VOCAB_MSIM   VOCAB4('M','S','I','M')
@@ -69,13 +69,13 @@ private:
 	
 	// output ports to command the robot parts
 	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort;  
-	   
+	yarp::os::BufferedPort<yarp::os::Bottle > activationsPort;   
 	//PMPServer to Observer
 	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result and motor commands
    	double *foof;
 	std::string name;           // rootname of all the ports opened by this thread
     bool verboseFile, verboseTerm;
-    std::ofstream wr,wr1,posi,wrL,wr_GamL,wr1L,posiL,wr_Gam; //output file pointers
+    std::ofstream wr,wr1,posi,wrL,wr_GamL,wr1L,posiL,wr_Gam,wr_Test; //output file pointers
     FILE  *jacFile;
     /*	
         double Jan[6];
