@@ -54,7 +54,7 @@ private:
    
     std::string name;
     int inputHeight, inputWidth,outputHeight, outputWidth, inputPadding, outputPadding;
-    double activations[12][10];
+    double activations[12][12];
     //IplImage inputIplImage, outputIplImage;
     //cv::Mat thumbnail,temp;
 public:
