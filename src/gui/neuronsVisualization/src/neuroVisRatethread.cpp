@@ -59,7 +59,7 @@ bool neuroVisRatethread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }
     for (int i =0;i<12;i++)
-        for(int j=0;j<10;j++)
+        for(int j=0;j<12;j++)
             activations[i][j] = 0;
 
     return true;
@@ -92,7 +92,7 @@ void neuroVisRatethread::run() {
         if (inputData!=NULL)   {
 
             for (int i =0;i<12;i++)
-                for(int j=0;j<10;j++)
+                for(int j=0;j<12;j++)
                     activations[i][j] = 0;
 
         
