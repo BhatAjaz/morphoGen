@@ -37,9 +37,9 @@ int main(int argc, char * argv[])
 
     ResourceFinder rf;
     rf.setVerbose(true);
-   // rf.setDefaultConfigFile("cameraTest.ini");    //overridden by --from parameter
-   // rf.setDefaultContext("morphoGenApp/conf");    //overridden by --context parameter
-   // rf.configure("ICUB_ROOT", argc, argv);  
+    rf.setDefaultConfigFile("epimConfig.ini");    //overridden by --from parameter
+    rf.setDefaultContext("perceptionActionCycleApp");    //overridden by --context parameter
+    rf.configure("ICUB_ROOT", argc, argv);  
 	printf("running the module \n");
     EpisodicM.runModule(rf);
 	printf("module closed with success \n");

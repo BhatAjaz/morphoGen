@@ -99,9 +99,16 @@ modelFile=rf.findFile(rf.find("model").asString().c_str());
 //    rThread->setColorPath(colormapFile);
 //    rThread->setModelPath(modelFile);
 
-
+      
 	//=======================================================================
-//    rThread->setName(getName().c_str());
+    rThread->setName(getName().c_str());
+
+    const string pt = rf.findPath("epimConfig.ini");
+    unsigned pos = pt.find("epimConfig.ini");
+    pathPrefix = pt.substr(0,pos);
+    
+    printf("\n Episodic memory configuraion file in %s \n", pathPrefix.c_str());
+    rThread->setPath(pathPrefix);
     //rThread->setInputPortName(inputPortName.c_str());
     
     /* now start the thread to do the work */
