@@ -59,7 +59,7 @@ private:
 	yarp::os::BufferedPort<yarp::os::Bottle >  HumTopDownCompete;
 	
 	std::string name;           // rootname of all the ports opened by this thread
-
+    std::string pathPrefix,fileName; // the path for input output files
 		int Episodes[25][1000];
 		int NumEpi;
 		int **data; 
@@ -148,8 +148,10 @@ public:
     void setInputPortName(std::string inpPrtName);
 
     /*
-    * function that sets the inputPort name
+    
+    * function that sets the path 
     */
+     void setPath(std::string inP);
 //    void setColorPath(std::string inp) { colorMapPath = inp; };
 
        /*

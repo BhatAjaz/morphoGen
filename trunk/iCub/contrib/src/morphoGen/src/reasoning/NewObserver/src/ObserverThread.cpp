@@ -269,7 +269,10 @@ void ObserverThread::run()
 					cout<<responsecode<<endl;
 
 					if(responsecode == 123 /*COMMAND_VOCAB_ACK*/) {
-						ofstream PXper("PXper.txt");
+						fileName = pathPrefix;
+						fileName.append("PXper.txt");
+						ofstream PXper(fileName.c_str());
+
 						 cout << "Receiving Plan from server" << endl;
 						 Report <<"Receiving Plan from server" << endl;
 						 for(int i=0;i<1000;i++)
@@ -1788,7 +1791,10 @@ void ObserverThread::InitializeWorkingMemory(int GoalPointer)
 void ObserverThread:: GetLocalAct(int numW)
 {
  int iCo, jCo, m, clocal=0; 
-  ofstream MapAini("MapI.txt"); 
+  fileName = pathPrefix;
+  fileName.append("MapI.txt");
+  ofstream MapAini(fileName.c_str()); 
+
   MaxiAct=0.0001;
   MaxiActS=0.0001; 
   MaxiActW=0.0001;
@@ -2195,7 +2201,10 @@ int ObserverThread::UserInterface(int GoalLearn)
 				   cout << "Input number goal arguement words " << endl;
 				   cin >> sizz;
                    NumWords=sizz;
-				   ofstream WorBin("WorBin.txt");
+				   fileName = pathPrefix;
+				   fileName.append("WorBin.txt");
+				   ofstream WorBin(fileName.c_str());
+				   
   					for (n=0; n<sizz; n++)
 						{
 						  WordEncode(n,2);
