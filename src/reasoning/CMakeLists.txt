@@ -9,6 +9,8 @@ add_subdirectory( AssocMem             )
 add_subdirectory( DarwinObserver       )
 add_subdirectory( EpisodicMem          )
 add_subdirectory( EventDrivenReasoning )
+add_subdirectory( NewEpim			   )
+add_subdirectory( NewObserver		   )
 add_subdirectory( SmallWorldOPC        )
 add_subdirectory( SmallWorlds          )
 
