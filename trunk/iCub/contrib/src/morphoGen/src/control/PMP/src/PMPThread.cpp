@@ -138,7 +138,7 @@ bool PMPThread::threadInit() {
 	//initial Joint angles
 	memset(Jan ,0,10*sizeof(double));
 	memset(JanL,0,10*sizeof(double));
-     
+    //InitializeJan(); 
     // handling verbose option
     if (verboseTerm) {      
         // Stores Output Gamma Function
@@ -165,7 +165,7 @@ bool PMPThread::threadInit() {
 #endif     
     //initialization of the state of PMP (default state)
     GoalCodePMP  = 1;
-    BodyChain    = 0;
+    BodyChain    = 2;
     MSimExec     = 1;
     TrajType     = 1;
     WristO       =  0;
@@ -176,7 +176,7 @@ bool PMPThread::threadInit() {
     MiniGoal[4]  =  0.0;
     MiniGoal[5]  =  0.0;
     MiniGoal[6]  = -300;   //target left arm x
-    MiniGoal[7]  =  -100;
+    MiniGoal[7]  =  -150;
     MiniGoal[8]  =  50;
     MiniGoal[9]  =  0.0;
     MiniGoal[10] =  0.0;
@@ -393,14 +393,14 @@ void PMPThread::run() {
                   ok = true;
                 }break;
 
-                case COMMAND_VOCAB_BCHA:{
+/*                case COMMAND_VOCAB_BCHA:{
                   rec = true;
                   printf("Body Chain \n");
                   //Body Chain: 0,1,2 
                   BodyChain=ObsReq.get(1).asInt();
                   ok = true;
                 }break;
-
+*/
                 case COMMAND_VOCAB_MSIM:{
                   rec = true;
                   printf("Mental Simulation\n");
@@ -425,17 +425,30 @@ void PMPThread::run() {
                   ok = true;
                 }break;
 
-                case COMMAND_VOCAB_GRIG:{
+                case COMMAND_VOCAB_MICG:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
+                  double c1[3];
                   for(int i = 0; i < 3; i++)	{
-					MiniGoal[i] = Coord->get(i).asDouble(); 
-					cout << "GRIG : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+					c1[i] = Coord->get(i).asDouble(); 
+					cout << "MICG : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
+                  }
+                  if (c1[1] < 0) {
+                    for(int i = 0; i < 3; i++)	{
+					    MiniGoal[6 + i] = c1[i];  
+                     }
+                    BodyChain = 1;
+                  }
+                  else {
+                    for(int i = 0; i < 3; i++)	{
+					    MiniGoal[i] = c1[i];  
+                    }
+                    BodyChain = 0;  
                   }
                   ok = true;
                 }break;
 
-                case COMMAND_VOCAB_GLEF:{
+/*                case COMMAND_VOCAB_GLEF:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
                   for(int i = 0; i < 3; i++)	{
@@ -444,7 +457,7 @@ void PMPThread::run() {
                   }
                   ok = true;
                 }break;
-
+*/
                 case COMMAND_VOCAB_ORIG:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
@@ -467,6 +480,7 @@ void PMPThread::run() {
 
                 case COMMAND_VOCAB_REA :{
                   rec = true;
+                  XmitGreen=0;
                   //placing the arm close to the destination...
                   if((GoalCodePMP == GoalCodePMP_DISC)||(GoalCodePMP == GoalCodePMP_CONT))	{
 					cout << "Goal REA Target recd from Client" << endl;
@@ -504,6 +518,41 @@ void PMPThread::run() {
                         MessagePassL();
                       }
                     }
+                  }
+                  cout << "Sending out Result of requested Primitive behaviour to Client Observer" << endl;
+               
+                  ObsResp.addDouble(221);
+                  ObsResp.addDouble(XmitGreen);
+                  for(int i=0;i<3;i++)	{
+                    if (BodyChain == 0) 
+                        ObsResp.addDouble(X_pos[i]);
+                    if (BodyChain == 1) 
+                        ObsResp.addDouble(X_posL[i]);
+                  }
+                  if (BodyChain == 0) { 
+                    ObsResp.addDouble(ang1);
+                    ObsResp.addDouble(ang2);
+                    ObsResp.addDouble(ang3); //torso
+                    ObsResp.addDouble(ang4);
+                    ObsResp.addDouble(ang5);
+                    ObsResp.addDouble(ang6);
+                    ObsResp.addDouble(ang7);
+                    ObsResp.addDouble(ang8);
+                    ObsResp.addDouble(ang9);
+                    ObsResp.addDouble(ang10);// right arm
+                  }
+                  if (BodyChain == 1) {                     
+                    ObsResp.addDouble(ang1);
+                    ObsResp.addDouble(ang2);
+                    ObsResp.addDouble(ang3); //torso
+                    ObsResp.addDouble(ang4L);
+                    ObsResp.addDouble(ang5L);
+                    ObsResp.addDouble(ang6L);
+                    ObsResp.addDouble(ang7L);
+                    ObsResp.addDouble(ang8L);
+                    ObsResp.addDouble(ang9L);
+                    ObsResp.addDouble(ang10L);
+                    //ObsResp.addDouble(angCupL);//left arm
                   }
                   ok = true;
                 }break;
@@ -868,28 +917,147 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 	Joint_Field[9]=(0-Jan[9])*J9H;
 */
 //=======================================================================================
-	for(int a=0;a<inputL;a++) {
+    for(int a=0;a<inputL;a++) {
 		double jvelo=0;
     	for(int n=0;n<outputL;n++) {
 	   		JacT[a][n]=Jack[n][a];
        		jvelo=jvelo+(JacT[a][n]*ff[n]);
 		}
-    	Jvel[a]=0.002*(jvelo+Joint_Field[a]);
+//    	Jvel[a]=0.002*(jvelo+Joint_Field[a]);
+        if((a==0)||(a==1)){
+           Jvel[a]=KOMP_WAISZT*(jvelo+Joint_Field[a]);
+        }
+    	if(a==2){
+           Jvel[a]=KOMP_WAISZT2*(jvelo+Joint_Field[a]);
+        }
+	    if(a>2){
+           Jvel[a]=KOMP_JANG*(jvelo+Joint_Field[a]);
+        }
+
    //cout << Jvel[a]<< endl;
-	} 
+    }
 
 
-    Jvel[10]=0;
-	Jvel[11]=0;
-	Jvel[12]=0;
-	Jvel[13]=0;
-	Jvel[14]=0;
-	Jvel[15]=0;
-	Jvel[16]=0;
-	Jvel[17]=0;
-	Jvel[18]=0;
-	Jvel[19]=0;
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////
+//Coding for left arm in symmetry  
+
+//==================== Loading Weights, Biases for the ANN ====================
+
+	for(u=0;u<hiddenL1;u++) {
+		double sum=0;
+		for(i=0;i<inputL;i++){
+       		sum=sum+(w1[u][i]*JanL[i]);
+	   	}
+		h[u][0]=sum+b1[u]; // Inner variable of Layer 1
+		z[u][0]=tanh(h[u][0]);// output of layer 1
+	hinter[u][0]=1-(pow(z[u][0],2));    //(1-tanh(h(b,1))^2)
+	}
+//================W1/B1work over here, u have 'h' and 'z'===================
+
+	for(u=0;u<hiddenL2;u++) {
+		double sum2=0;
+		for(i=0;i<hiddenL1;i++) {
+      		
+       		sum2=sum2+w2[u][i]*z[i][0];
+		}
+		p[u][0]=sum2+b2[u]; // here u get p int variable of layer 2 ////////
+		p1[u][0]=tanh(p[u][0]);// output of layer 1
+		pinter[u][0]=1-(pow(p1[u][0],2));
+		
+	}
+
+/////////////////////////////////////////////////////////Added SEND ACTIVATIONS To PORT FOR DISPLAY
+    if (activationsPort.getOutputCount()) {
+        Bottle& actv =activationsPort.prepare();
+    	actv.clear();
+		for(int i=0; i<hiddenL1; i++) 
+            actv.addDouble(hinter[i][0]);
+		for(int i=0; i<hiddenL2; i++) 
+            actv.addDouble(pinter[i][0]);          
+	    //cout<<"Sending Activations for Display"<<endl;
+       	activationsPort.write();
+        Time::delay(0.03);
+    }
+////////////////////////////////////////////////////////////////////////////////////
+
+
+
+	//int l=hiddenL2,j=hiddenL1,k,n,a,b;
+
+	for(int k=0;k<outputL;k++) {
+		for(int n=0;n<inputL;n++) {
+			double inter1=0;
+			for(int a=0;a<hiddenL2;a++) {
+				for(int b=0;b<hiddenL1;b++) {
+    				inter1=inter1 +((w3[k][a]*pinter[a][0])*((w2[a][b]*hinter[b][0])*w1[b][n]));
+				}
+			}
+			Jack[k][n]=inter1;
+			//fprintf(writeJ,"\n \t  %f",Jack[k][n]);
+		}	
+	}	
+
+    //=======================================================================================
+    meanJan[0] =  0.0000; 
+    meanJan[1] =  0.0000;
+    meanJan[2] =  0.0000;
+    meanJan[3] = -0.7854;
+    meanJan[4] =  0.0000;
+    meanJan[5] =  0.7098;
+    meanJan[6] =  0.9730;
+    meanJan[7] =  1.2000;
+    meanJan[8] =  0.0000;
+    meanJan[9] =  0.0000;
+
+
+    Joint_Field[0]=(meanJan[0]-JanL[0]) * J0H; // Multiply by Joint compliance 
+    Joint_Field[1]=(meanJan[1]-JanL[1]) * J1H; //0.000041; //0.52 / Modified in June at Crete
+    Joint_Field[2]=(meanJan[2]-JanL[2]) * J2H;     //1.8
+    Joint_Field[3]=(meanJan[3]-JanL[3]) * J3H;   //4.5 //0.95
+    Joint_Field[4]=(meanJan[4]-JanL[4]) * J4H; //J3H 
+    Joint_Field[5]=(meanJan[5]-JanL[5]) * J5H;  //5; // Multiply by Joint compliance      
+    Joint_Field[6]=(meanJan[6]-JanL[6]) * J6H;  //0.041; //0.52 / Modified in June at Crete  
+    Joint_Field[7]=(meanJan[7]-JanL[7]) * J7H;    //75;  //1.8 
+    Joint_Field[8]=(meanJan[8]-JanL[8]) * J8H;     //4.5 //0.95
+    Joint_Field[9]=(meanJan[9]-JanL[9]) * J9H;
+
+/* 
+    Joint_Field[0]=(0-Jan[0])*J0H; // Multiply by Joint compliance 
+
+    Joint_Field[1]=(0-Jan[1])*J1H;//0.000041; //0.52 / Modified in June at Crete
+	Joint_Field[2]=(0.0-Jan[2])*J2H;  //1.8
+	Joint_Field[3]=(-0.7854-Jan[3])*J3H;  //4.5 //0.95
+	Joint_Field[4]=(0-Jan[4])*J4H;//J3H 
+	Joint_Field[5]=(0.7098-Jan[5])*J5H; //5; // Multiply by Joint compliance 
+    Joint_Field[6]=(0.9730-Jan[6])*J6H;//0.041; //0.52 / Modified in June at Crete
+
+	Joint_Field[7]=(1.2-Jan[7])*J7H;//75;  //1.8
+	Joint_Field[8]=(0-Jan[8])*J8H;  //4.5 //0.95
+	Joint_Field[9]=(0-Jan[9])*J9H;
+*/
+//=======================================================================================
+	for(int a=0;a<inputL;a++) {
+		double jvelo=0;
+    	for(int n=0;n<outputL;n++) {
+	   		JacT[a][n]=Jack[n][a];
+       		jvelo=jvelo+(JacT[a][n]*ffLFK[n]);
+		}
+//    	Jvel[a+10]=0.002*(jvelo+Joint_Field[a]);
+
+        if((a==0)||(a==1)){
+           Jvel[a+10]=KOMP_WAISZT*(jvelo+Joint_Field[a]);
+        }
+    	if(a==2){
+           Jvel[a+10]=KOMP_WAISZT2*(jvelo+Joint_Field[a]);
+        }
+	    if(a>2){
+           Jvel[a+10]=KOMP_JANG*(jvelo+Joint_Field[a]);
+        }
+   //cout << Jvel[a]<< endl;
+	}
 
 
 
@@ -1591,7 +1759,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         fin[2]=MiniGoal[2];
 
         finL[0]=MiniGoal[6]; //Final Position X
-        finL[1]=MiniGoal[7];
+        finL[1]=-MiniGoal[7];/////////////////////reflected along y axis for symmetry exploitation
         finL[2]=MiniGoal[8];// TO TAKE INTO ACCOUNT SHIFT IN ORIGIN OF THE Z AXIS
    
       
@@ -1610,7 +1778,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
         printf("\n Targets");
         printf("\n \n %f, \t  %f, \t %f ",x_fin,y_fin,z_fin);
-        printf("\n \n %f, \t  %f, \t %f ",x_finL,y_finL,z_finL);
+        printf("\n \n %f, \t  %f, \t %f ",x_finL,-(y_finL),z_finL);
     
         janini0=Jan[0];
         janini2=Jan[2];
@@ -1701,7 +1869,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	ang7=rad2degree*Jan[6];
     	ang8=Wrist;
     	ang9=rad2degree*Jan[8];
-    	ang10=30;//rad2degree*Jan[9]
+    	ang10=rad2degree*Jan[9];
     	angCup=51;
     	ang4L=rad2degree*JanL[3];
     	ang5L=rad2degree*JanL[4];
@@ -1709,13 +1877,13 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	ang7L=rad2degree*JanL[6];
     	ang8L=Wrist;
     	ang9L=rad2degree*JanL[8];
-    	ang10L=28;//
+    	ang10L=rad2degree*JanL[9];//
     	angCupL=48;
 
         printf("\n JOINT ANGLE: RIGHT and LEFT \n");
     	printf("\n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
     	printf("\n  %f, \t  %f, \t %f ,\t %f ,\t %f ,\t %f, \t  %f, \t %f ,\t %f ,\t %f",ang1,ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
-    	printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],X_posL[1],X_posL[2]);
+    	printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],-(X_posL[1]),X_posL[2]);
     	//Sleep(5000);
 //temorary line
         wr_Test << MiniGoal[0] << "    " << MiniGoal[1] << "    " << MiniGoal[2] << "    " << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] <<endl;
@@ -2444,7 +2612,8 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
     double *ang = Jan;
 	double *angL = JanL;
 	int len=1,i;
-	double *topmp, *topmpL;
+	double *topmp =0;
+    double *topmpL =0;
 //===============================================================
    if((HAct==0)||(HAct==2))
    {
@@ -2458,7 +2627,7 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
 		if((HAct==0))
 		{
 		X_posL[0]=x_iniL;
-		X_posL[1]=y_iniL;
+		X_posL[1]=-y_iniL;
 		X_posL[2]=z_iniL;
 		}
 		double *po=X_pos;
@@ -2476,7 +2645,7 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
 		 for(i=0;i<3;i++)
 		{
 		ffield[i]=*(force+i);
-		ffieldL[i]=0;
+		//ffieldL[i]=0;
 		}
 		topmp= ffield;
 		topmpL= ffieldL;
@@ -2488,7 +2657,7 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
     
    if((HAct==1)||(HAct==2))
    {
-		double *nLeft = forward_KinematicsL(angL,len); // Joint Angles to Positions 3>>>>>2
+		double *nLeft = forward_Kinematics(angL,len); // Joint Angles to Positions 3>>>>>2
 		
 		for(i=0;i<3;i++)
 		{
@@ -2511,10 +2680,10 @@ void PMPThread::MotCon(double T1, double T2, double T3,double TL1, double TL2, d
 		{
 		taL=poL;
 		}
-		double *forceL=forcefieldL(poL,taL); // Position to Force 3>>>>>3
+		double *forceL=forcefield(poL,taL); // Position to Force 3>>>>>3
 		 for(i=0;i<3;i++)
 		{
-        ffield[i]=0;
+        //ffield[i]=0;
         ffieldL[i]=*(forceL+i);
 		}
 		topmp= ffield;
@@ -2593,13 +2762,14 @@ if((HAct==0)||(HAct==2))
 	double joi10=Gamma_Int(j10,time);
 	Jan[9]=joi10+janini9;
 
-	        JanL[3]=-1.74;// -0.6981
+/*	        JanL[3]=-1.74;// -0.6981
 	        JanL[4]=0.78;
 			JanL[5]=0;
 			JanL[6]=1.3;
 			JanL[7]=0;
 			JanL[8]=0;
 			JanL[9]=0;
+*/
 }
 
 	// for LEFT HAND OR BOTH
@@ -2640,13 +2810,14 @@ if((HAct==1)||(HAct==2))
 	double joi10L=Gamma_Int(j10L,time);
 	JanL[9]=joi10L+janini9L;
 
-	        Jan[3]=-1.74;// -0.6981
+/*	        Jan[3]=-1.74;// -0.6981
 	        Jan[4]=0.78;
 			Jan[5]=0;
 			Jan[6]=1.3;
 			Jan[7]=0;
 			Jan[8]=0;
 			Jan[9]=0;
+*/
 }   
 	// From Q >> X > Force > Torques >Q_dots >Q ....................
 //===================================================================
@@ -3497,8 +3668,8 @@ void PMPThread::Kompliance(int TagK)	{
         J5H=1;//200; //1
         J6H=0.41;//200; //0.041;
 		J7H=1;//400; //1
-		J8H=0.041; //1
-		J9H=0.041; //1
+		J8H=500; //1
+		J9H=500; //1
         // Far Space ***************************** 
 		printf ("\n Initiating System Dynamics \n");
 	 } 
