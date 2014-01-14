@@ -128,8 +128,8 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
             s1.append(sLayerN);
             
             printf("string: %s \n",s1.c_str());
-            if (rf.check(s1)) {
-                weightsPath = rf.findFile(rf.find(s1).asString().c_str());
+            if (rf.check(s1.c_str())) {
+                weightsPath = rf.findFile(rf.find(s1.c_str()).asString().c_str());
                 if (weightsPath=="") {
                     return false;
                 }
@@ -145,8 +145,8 @@ bool PMPModule::configure(yarp::os::ResourceFinder &rf) {
 
             s2.append(sLayerN);    
 
-            if (rf.check(s2)) {
-                biasesPath = rf.findFile(rf.find(s2).asString().c_str());
+            if (rf.check(s2.c_str())) {
+                biasesPath = rf.findFile(rf.find(s2.c_str()).asString().c_str());
                 if (biasesPath=="") {
                     return false;
                 }

@@ -43,8 +43,8 @@
 #define COMMAND_VOCAB_BCHA   VOCAB4('B','C','H','A')
 #define COMMAND_VOCAB_MSIM   VOCAB4('M','S','I','M')
 #define COMMAND_VOCAB_TRAT   VOCAB4('T','R','A','T')
-#define COMMAND_VOCAB_GRIG   VOCAB4('G','R','I','G')
-#define COMMAND_VOCAB_GLEF   VOCAB4('G','L','E','F')
+#define COMMAND_VOCAB_MICG   VOCAB4('M','I','C','G')
+//#define COMMAND_VOCAB_GLEF   VOCAB4('G','L','E','F')
 #define COMMAND_VOCAB_OLEF   VOCAB4('O','L','E','F')
 #define COMMAND_VOCAB_ORIG   VOCAB4('O','R','I','G')
 #define COMMAND_VOCAB_WRIO   VOCAB4('W','R','I','O')
@@ -148,6 +148,7 @@ private:
     double MiniGoal[12], PlaceMap[10][10],BodyTrack[2][15],GoalSpace[10][23],WristOrR,WristOrL;
     double PickX,PickY,PickZ,PlacX,PlacY,PlacZ, WristO;
     double Proprioceptive[2];
+	int XmitGreen;
     double meanJan[10],JHd[10], meanJanL[10],JHdL[10];
 
 public:
