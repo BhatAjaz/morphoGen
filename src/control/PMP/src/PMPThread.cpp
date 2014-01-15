@@ -502,7 +502,7 @@ void PMPThread::run() {
                    	if (MSimExec == 1) { 
                       if (cmdInterfacePort.getOutputCount()) {
 
-                        Bottle& outBot = cmdInterfacePort.prepare();
+                        //Bottle& outBot = cmdInterfacePort.prepare();
                         //cmdInterfacePort.setStrict();
                         //Send output commands in a bottle to motor interface  		
                         cmdInterfacePassT();       // torso
@@ -2299,14 +2299,14 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	if (cmdInterfacePort.getOutputCount()) {
     		// Send output commands in a bottle to another module through interface
     		if (rightMove){
-              Bottle& outBot = cmdInterfacePort.prepare();
+              //Bottle& outBot = cmdInterfacePort.prepare();
               cmdInterfacePassT();
               cmdInterfacePassR();
               cmdInterfacePassRhand();
               rightMove = false;
     		}
     		if (leftMove) {
-              Bottle& outBot = cmdInterfacePort.prepare();
+              //Bottle& outBot = cmdInterfacePort.prepare();
               cmdInterfacePassT();
               cmdInterfacePassL();
               cmdInterfacePassLhand();
