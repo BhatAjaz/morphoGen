@@ -123,6 +123,11 @@ bool PMPThread::threadInit() {
         return false;  // unable to open; let RFModule know so that it won't run
     }
     
+    if (!cmdEndEffectorPort.open(getName("/cmd/endEffector:o").c_str())) {
+        cout << ": unable to open port to send unmasked events "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    
     //depreciated hardcoded connections
     
     //Network::connect("/cmd/right_arm:o","/icubSim/right_arm/rpc:i");
@@ -1858,6 +1863,18 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     			posiL << X_pos[0] << "    " << X_pos[1] << "    " << X_pos[2] << "    "  << X_posL[0] << "    " << X_posL[1] << "    " << X_posL[2] <<endl;
     			wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
     		}
+
+            if (cmdEndEffectorPort.getOutputCount() > 0) {
+                Bottle & PlotPoints =cmdEndEffectorPort.prepare();
+                PlotPoints.clear();
+                PlotPoints.addDouble(Gam);
+                PlotPoints.addDouble(x_ini);
+                PlotPoints.addDouble(y_ini);
+                PlotPoints.addDouble(z_ini);
+                PlotPoints.addDouble(sqrt(pow(X_pos[0]-x_ini,2)+ pow(X_pos[1]-y_ini,2)+ pow(X_pos[2]-z_ini,2)));
+                cmdEndEffectorPort.write(true);
+                Time::delay(0.02);
+            }
     	}
     	
     	ang1=rad2degree*Jan[0];
@@ -3324,6 +3341,8 @@ void PMPThread::CubGrazp3(){
     angT2=0;
     angT3=0;
     angI1=47;
+
+
     angI2=0;
     angM1=50;
     angM2=0;
