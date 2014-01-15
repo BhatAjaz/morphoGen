@@ -1,186 +1,398 @@
 <application>
-<name>Cognitive GUI</name>
+<name>cognitiveGui</name>
 <dependencies>
-  <port>/icub/cam/left</port>
-  <port>/icub/cam/right</port>	
+
+  <port>/PlanXplore:o</port>
+  <port>/Hub:o</port>
+  <port>/Useful/PastXperiences:o</port>
+  <port>/MyRemembered:o</port>
+
 </dependencies>
 
+<!--
 <module>
   <name>yarpview</name>
-  <parameters>--name /leftLogPolarImage --x 000 --y 0 --RefreshTime 33</parameters>
+  <parameters>--name /partialCueView0 --x 000 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
   <node>icub14</node>
-  <tag>leftLogPolarImage</tag>
+  <tag>partialCueView0</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /rightLogPolarImage --x 340 --y 0 --RefreshTime 33</parameters>
+  <parameters>--name /partialCueView1 --x 170 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
   <node>icub14</node>
-  <tag>rightLogpolarImage</tag>
-</module>
-
-<module>
-  <name>selAttentionInterface</name>
-  <parameters>--name /selectiveAttentionInterface/icub/left_cam --x 1480 --y 0</parameters>
-  <tag>selectiveAttInterfaceLeft</tag>
-  <node>icub14</node>
+  <tag>partialCueView1</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /icub/left_cam/attentionCartesian --x 000 --y 340 --RefreshTime 33</parameters>
-  <tag>attCartLeft</tag>
+  <parameters>--name /partialCueView2 --x 340 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>partialCueView2</tag>
   <node>icub14</node>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /icub/left_cam/combinationView --x 340 --y 340 --RefreshTime 33</parameters>
-  <tag>combViewLeft</tag>
+  <parameters>--name /partialCueView3 --x 510 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>partialCueView3</tag>
   <node>icub14</node>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /icub/left_cam/corrView --x 680 --y 340 --RefreshTime 33</parameters>
-  <tag>corrViewLeft</tag>
+  <parameters>--name /partialCueView4 --x 680 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>partialCueView4</tag>
   <node>icub14</node>
 </module>
 
+-->
+
+
+
 <module>
-      <name>yarpview</name>
-      <parameters>--name /matchViewer --out /matchViewer/out --x 000 --y 660 --RefreshTime 33</parameters>
-      <node>icub14</node>
-      <tag>matchTrackerView</tag>
-</module>
-<module>
-      <name>yarpview</name>
-      <parameters>--name /matchEpisodic --x 340 --y 660 --RefreshTime 33</parameters>
-      <node>icub14</node>
-      <tag>matchEpisodicView</tag>
-</module>
-<module>
-      <name>yarpview</name>
-      <parameters>--name /matchPredictor --x 680 --y 660 --RefreshTime 33</parameters>
-      <node>icub14</node>
-      <tag>matchTrackerPredictor</tag>
-</module>
-<module>
-      <name>yarpview</name>
-      <parameters>--name /episodicPredictor --x 1020 --y 660 --RefreshTime 33</parameters>
-      <node>icub14</node>
-      <tag>matchEpisodicPredictor</tag>
+  <name>yarpview</name>
+  <parameters>--name /rememberedView0 --x 000 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>rememberedView0</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /histoViewer --x 1020 --y 0 --RefreshTime 33</parameters>
+  <parameters>--name /rememberedView1 --x 170 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
   <node>icub14</node>
-  <tag>histogramView</tag>
+  <tag>rememberedView1</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /foveaViewer --x 680 --y 0 --RefreshTime 33</parameters>
+  <parameters>--name /rememberedView2 --x 340 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>rememberedView2</tag>
   <node>icub14</node>
-  <tag>foveaView</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /view/Seg --x 1360 --y 660 --RefreshTime 33</parameters>
+  <parameters>--name /rememberedView3 --x 510 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>rememberedView3</tag>
   <node>icub14</node>
-  <tag>view Seg</tag>
 </module>
 
 <module>
   <name>yarpview</name>
-  <parameters>--name /mosaicView --x 1320 --y 0 --RefreshTime 33</parameters>
+  <parameters>--name /rememberedView4 --x 680 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>rememberedView4</tag>
   <node>icub14</node>
-  <tag>mosaicViewer</tag>
+</module>
+
+
+
+
+<!--
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView0 --x 000 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>hubView0</tag>
 </module>
 
 <module>
-  <name>zdfControl</name>
-  <parameters>--x 1780 --y 660</parameters>
-  <tag>zdf control</tag>
+  <name>yarpview</name>
+  <parameters>--name /hubView1 --x 170 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>hubView1</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView2 --x 340 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>hubView2</tag>
   <node>icub14</node>
 </module>
 
-<!---------------- connections --------------->
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView3 --x 510 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>hubView3</tag>
+  <node>icub14</node>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView4 --x 680 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>hubView4</tag>
+  <node>icub14</node>
+</module>
+-->
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubObjectView    --x 000 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>hubObjectView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubBodyView --x 170 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>hubBodyView</tag>
+</module>
+
+
+
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /plan1View     --x 340 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>plan1View</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /plan2View     --x 510 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>plan2View</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /weightView     --x 10 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>weightView</tag>
+</module>
+
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerObjectView     --x 200 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>observerObjectView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerBodyView     --x 400 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>observerBodyView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerActionView     --x 600 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>observerActionView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerColorWordShapeView     --x 780 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub14</node>
+  <tag>observerColorWordShapeView</tag>
+</module>
+
+
+
+
+
+<module>
+  <name>DarwinObserver</name>
+  <parameters>--name /DarwinObserver </parameters>
+  <tag>DarwinObserver</tag>
+  <node>icub14</node>
+</module>
+<module>
+  <name>EpisodicMem</name>
+  <parameters>--name /EpisodicMem </parameters>
+  <tag>EpisodicMem</tag>
+  <node>icub14</node>
+</module>
+<module>
+  <name>emPlotter</name>
+  <parameters>--name /emPlotter </parameters>
+  <tag>emPlotter</tag>
+  <node>icub14</node>
+</module>
+
+
+
+
+
+
 <connection>
-  <from>/logPolarTransform/icub/left_cam/image:o</from>
-  <to>/leftLogPolarImage</to>
+  <from>/PlanXplore:o</from>
+  <to>/emPlotter/plan:i</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/logPolarTransform/icub/right_cam/image:o</from>
-  <to>/rightLogPolarImage</to>
+  <from>/Hub:o</from>
+  <to>/emPlotter/hub:i</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/selectiveAttentionInterface/icub/left_cam/command:o</from>
-  <to>/selectiveAttentionEngine/icub/left_cam</to>
+  <from>/Useful/PastXperiences:o</from>
+  <to>/emPlotter/cue:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/MyRemembered:o</from>
+  <to>/emPlotter/rememberedX:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/bodyPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/objectPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/actionPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/cwsPlot:o</from>
+  <to>/emPlotter/observerHub:i</to>
+  <protocol>udp</protocol>
+</connection>
+
+
+
+<connection>
+  <from>/emPlotter/partialQ0/img:o</from>
+  <to>/partialCueView0</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/emPlotter/partialQ1/img:o</from>
+  <to>/partialCueView1</to>
+  <protocol>udp</protocol>
+</connection>
+<connection>
+  <from>/emPlotter/partialQ2/img:o</from>
+  <to>/partialCueView2</to>
   <protocol>tcp</protocol>
 </connection>
 <connection>
-  <from>/zdfControl/command:o</from>
-  <to>/zdfMod</to>
+  <from>/emPlotter/partialQ3/img:o</from>
+  <to>/partialCueView3</to>
   <protocol>tcp</protocol>
 </connection>
 <connection>
-  <from>/selectiveAttentionEngine/icub/left_cam/cartesian:o</from>
-  <to>/icub/left_cam/attentionCartesian</to>
+  <from>/emPlotter/partialQ4/img:o</from>
+  <to>/partialCueView4</to>
+  <protocol>udp</protocol>
+</connection>
+
+
+
+
+<connection>
+  <from>/emPlotter/rem0/img:o</from>
+  <to>/rememberedView0</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/emPlotter/rem1/img:o</from>
+  <to>/rememberedView1</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/emPlotter/rem2/img:o</from>
+  <to>/rememberedView2</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/emPlotter/rem3/img:o</from>
+  <to>/rememberedView3</to>
+  <protocol>udp</protocol>
+</connection> 
+<connection>
+  <from>/emPlotter/rem4/img:o</from>
+  <to>/rememberedView4</to>
+  <protocol>udp</protocol>
+</connection> 
+
+
+
+
+<connection>
+  <from>/emPlotter/hub0/img:o</from>
+  <to>/hubView0</to>
+  <protocol>udp</protocol>
+</connection> 
+ <connection>
+  <from>/emPlotter/hub1/img:o</from>
+  <to>/hubView1</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/selectiveAttentionEngine/icub/left_cam/combination:o</from>
-  <to>/icub/left_cam/combinationView</to>
+  <from>/emPlotter/hub2/img:o</from>
+  <to>/hubView2</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/gazeArbiter/icub/matchTracker/img:o</from>
-  <to>/matchViewer</to>
+  <from>/emPlotter/hub3/img:o</from>
+  <to>/hubView3</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/gazeArbiter/icub/periodicTracker/img:o</from>
-  <to>/matchEpisodic</to>
+  <from>/emPlotter/hub4/img:o</from>
+  <to>/hubView4</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/attPrioritiser/icub/matchTracker/img:o</from>
-  <to>/matchPredictor</to>
+  <from>/emPlotter/hubTop/img:o</from>
+  <to>/hubObjectView</to>
   <protocol>udp</protocol>
 </connection>
 <connection>
-  <from>/attPrioritiser/icub/periodicTracker/img:o</from>
-  <to>/episodicPredictor</to>
+  <from>/emPlotter/hubBottom/img:o</from>
+  <to>/hubBodyView</to>
   <protocol>udp</protocol>
 </connection>
+
+
+
+
 <connection>
-  <from>/attPrioritiser/icub/sacPlanner/corr:o</from>
-  <to>/icub/left_cam/corrView</to>
+  <from>/emPlotter/plan1/img:o</from>
+  <to>/plan1View</to>
   <protocol>udp</protocol>
 </connection>
+
 <connection>
-  <from>/vergence/histo:o</from>
-  <to>/histoViewer</to>
+  <from>/emPlotter/plan2/img:o</from>
+  <to>/plan2View</to>
   <protocol>udp</protocol>
 </connection>
+
 <connection>
-  <from>/blobFinder/icub/left_cam/foveaRgbBlob:o</from>
-  <to>/foveaViewer</to>
+  <from>/emPlotter/weight/img:o</from>
+  <to>/weightView</to>
   <protocol>udp</protocol>
 </connection>
+ 
 <connection>
-  <from>/zdfMod/imageSeg:o</from>
-  <to>/view/Seg</to>
+  <from>/emPlotter/observerObject/img:o</from>
+  <to>/observerObjectView</to>
   <protocol>udp</protocol>
 </connection>
+
 <connection>
-  <from>/mosaic/icub/image:o</from>
-  <to>/mosaicView</to>
+  <from>/emPlotter/observerBody/img:o</from>
+  <to>/observerBodyView</to>
+  <protocol>udp</protocol>
+</connection>
+
+<connection>
+  <from>/emPlotter/observerAction/img:o</from>
+  <to>/observerActionView</to>
+  <protocol>udp</protocol>
+</connection>
+
+<connection>
+  <from>/emPlotter/observerColorWordShape/img:o</from>
+  <to>/observerColorWordShapeView</to>
   <protocol>udp</protocol>
 </connection>
 
