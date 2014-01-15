@@ -61,7 +61,7 @@ using namespace std;
 #define CMD_TORSO 		VOCAB4('t','o','r','s')
 
 PMPThread::PMPThread() {
-    robot = "icubSim";        
+    robot = "icubMICG (";        
 }
 
 PMPThread::PMPThread(string _robot, string _configFile){
@@ -805,18 +805,18 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 	{
 	ff[i]=*(force+i);
    	}
-    ff[0]=ff[0]*1;
-	ff[1]=ff[1]*1;
-	ff[2]=ff[2]*1;
+    ff[0]=ff[0]*10;
+	ff[1]=ff[1]*3;
+	ff[2]=ff[2]*4;
    // cout<< ff[0] <<  ff[1] <<  ff[2] << endl;
 
 	for(i=0;i<3;i++)
 	{
 	ffLFK[i]=*(forceL+i);
    	}
-    ffLFK[0]=ffLFK[0]*1;
-	ffLFK[1]=ffLFK[1]*1;
-	ffLFK[2]=ffLFK[2]*1;
+    ffLFK[0]=ffLFK[0]*10;
+	ffLFK[1]=ffLFK[1]*3;
+	ffLFK[2]=ffLFK[2]*4;
 
 
 
