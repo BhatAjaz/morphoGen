@@ -72,7 +72,7 @@ bool EpisodicMemThread::threadInit() {
 	Network::connect("/what-to-do:o", "/world/analysis:i"); 
 	//Network::connect("/Strategy:o", "/strategy:i");  //check this
 	//Network::connect("/AckObserver:o","/EpimAck:i"); 
-    
+   
     return true;
 }
 
@@ -88,12 +88,12 @@ std::string EpisodicMemThread::getName(const char* p) {
     return str;
 }
 
-void EpisodicMemThread::setInputPortName(string InpPort) {
-    
-}
-
 void EpisodicMemThread::setPath(string inS) {
     pathPrefix	= inS.c_str();
+}
+
+void EpisodicMemThread::setInputPortName(string InpPort) {
+    
 }
 
 void EpisodicMemThread::run()
@@ -124,6 +124,8 @@ void EpisodicMemThread::run()
 				Largeness=request.get(5).asInt();
 
                 cout << Largeness << endl;
+				ReplanStatus=request.get(6).asInt();
+				cout<< "Replan Status:::::" << ReplanStatus <<endl;
 			   //=================================================================================
 
 				 for (int m =0; m<42; m++)
@@ -133,11 +135,12 @@ void EpisodicMemThread::run()
 						BHub[m]=0;
 					   }
 				SumVSSP=0;
+				iSPlan=0;
     			//initialization can from from bottom up perception
 				int xid=0;
 					for(int i=0;i<NoB;i++)
 						{
-						  xid = request.get(i+6).asInt();
+						  xid = request.get(i+7).asInt();
 						  if((xid != 50)&&(HubQuery==1))
 						  {
 							 OHub[xid]=1;
@@ -161,6 +164,11 @@ void EpisodicMemThread::run()
 						  {
 							 OHub[36]=1;  //size related neural activation
 						  }  
+					  if(ReplanStatus == 0)
+						  {
+							 PrevSentPlan=50;  //size related neural activation
+						  }  
+					
       				for (int m =0; m<42; m++)
 						{
 							VSSP[m]=OHub[m];
@@ -211,17 +219,25 @@ void EpisodicMemThread::run()
             //=================================================================================
 				//processing here
 				//processPlan();
-
-				response.addInt(123);
-                cout << "Sending out plan to Client" << endl;
-				for(int i=0;i<1000;i++)
-					{
-					  response.addInt(PlanPastExp[i]);
-					}
-				cout<<"Point of Chunk Termination is"<<ChunkTerminate<<endl;
-				response.addInt(ChunkTerminate);
-				ObserverResponse.reply(response);
-				fileName = pathPrefix;
+               if(iSPlan!=0)
+				 {
+					response.addInt(123);
+				 }
+			   if(iSPlan==0)
+				 {
+					response.addInt(41);
+					ChunkTerminate=iSPlan;
+				 }
+			   cout << "Sending out plan to Client" << endl;
+					for(int i=0;i<1000;i++)
+						{
+						  response.addInt(PlanPastExp[i]);
+						}
+					cout<<"Point of Chunk Termination is"<<ChunkTerminate<<endl;
+					response.addInt(ChunkTerminate);
+					ObserverResponse.reply(response);
+						
+                fileName = pathPrefix;
 				fileName.append("PXper.txt");
 				ofstream PXper(fileName.c_str());
 
@@ -261,6 +277,8 @@ void EpisodicMemThread::run()
 }
 
 void EpisodicMemThread::threadRelease() {
+ 	free(data);
+	delete data;
     // nothing
 	ObserverResponse.close();
 	PlanF.close();
@@ -276,11 +294,10 @@ void EpisodicMemThread::onStop() {
 
 void EpisodicMemThread:: MemControl(int HubQuery, int GoalContext)
 	{
-		int iCo;
-		fileName = pathPrefix;
-		fileName.append("PXper.txt");
-		ofstream PXper(fileName.c_str());
-		
+		 int iCo;
+		 fileName = pathPrefix;
+		 fileName.append("PXper.txt");
+		 ofstream PXper(fileName.c_str());
 		 InitializeAM();
 		 int Nrelevent=RememberPast(HubQuery,GoalContext);  //remember my past episodic experiences based on the present context/hubs active/user goal
 		 if((HubQuery==1)||(GoalContext==4)) //activations in object or action hubs relayed by Observer or User
@@ -292,9 +309,12 @@ void EpisodicMemThread:: MemControl(int HubQuery, int GoalContext)
 			 }
 		  if((HubQuery==2)||(GoalContext=14)) //activations in object or action hubs relayed by Observer or User
 			 {
-			 int MemEnergy=TDMemCompBodyHub(Nrelevent); // here u will get a remembered plan/combination of plans with minimal energy in the context of the goal
-			 // extracting relevant sequnce chunk...not all of the plan is needed, what you need is only the relavant memory chunk that connects with observer req
-
+             if(Nrelevent!=0)
+			 {
+				 int MemEnergy=TDMemCompBodyHub(Nrelevent); // here u will get a remembered plan/combination of plans with minimal energy in the context of the goal
+				 // extracting relevant sequnce chunk...not all of the plan is needed, what you need is only the relavant memory chunk that connects with observer req
+				 iSPlan=1;
+			 }
 			 	
     //Make bottle to command to GUI about plotting remembered experiences /VM
 				Bottle& Plan = PlanorXplore.prepare();
@@ -617,7 +637,6 @@ void EpisodicMemThread::MemComb(int NWiner)
 void EpisodicMemThread:: RipRealSequence(int nme)
 	{
 	 int iCo,jCo,jCoo,MCnt,UnfM[20][50], UseSeq[20][50];
-
 	 fileName = pathPrefix;
 	 fileName.append("UsefulAcSeqs.txt");
 	 ofstream UsePCue(fileName.c_str());
@@ -791,7 +810,6 @@ int EpisodicMemThread:: TDMemCompBodyHub(int Nrelevant) // this deals with top d
 		int SunHIB[6];
 		SumTopDownB=0;
 		ChunkTerminate=0;
-
 		fileName = pathPrefix;
 	 	fileName.append("MinEnergyPlan.txt");
 		ofstream HeeHuBod(fileName.c_str());
@@ -854,7 +872,7 @@ int EpisodicMemThread:: TDMemCompBodyHub(int Nrelevant) // this deals with top d
   ChunkTerminate=SunHIB[memindexy];
   int MaxPlan=0;
   int tempMaxPlan=0;
-   for(iCo=0; iCo<4; iCo++)
+   for(iCo=0; iCo<6; iCo++)
 	   {
 		  int ScorePlanMem=0;
 		  for(jCo=0; jCo<1000; jCo++)
@@ -1091,8 +1109,8 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 
 	fileName = pathPrefix;
 	fileName.append("HeEpMult.txt");
-	ofstream Hee(fileName.c_str());	 
-	for(icn=0; icn<6; icn++) //NumEpi
+	ofstream Hee(fileName.c_str());		 
+	for(icn=0; icn<6; icn++) //NumEpi //Made this change to test online learning
 			{
 				if(icn!=PrevSentPlan)
 				{
@@ -1342,8 +1360,8 @@ for (k=1; k<500; k++)
 	  }
                				
 //=====================================================================
-      int iCo; 
-	  	fileName = pathPrefix;
+     	int iCo; 
+      	fileName = pathPrefix;
   		fileName.append("Remembered.txt");
       	ofstream RecMem(fileName.c_str());
     			for (iCo=0; iCo<1000; iCo++)
@@ -1411,7 +1429,7 @@ void EpisodicMemThread::MemMaint()
 void EpisodicMemThread::InitializeAM()
  {
 	int m=0,n=0;
-	fileName = pathPrefix;
+    fileName = pathPrefix;
 	fileName.append("Numepi.txt");
 	//ifstream NEp(fileName.c_str()); //Commented it 07/12
    // NEp>> NumEpi;
@@ -1422,9 +1440,9 @@ void EpisodicMemThread::InitializeAM()
 		{
 		  NumEpi=3;
 		}*/  //This is related to stacking goal commented 07/12
-	fileName = pathPrefix;
+  	fileName = pathPrefix;
 	fileName.append("Episodes7.txt");
-	ifstream EpiW(fileName.c_str()); //loaded the weights for Reivesd Body Hub-Goal-Object Hub network , need to swich to the right neural net in the future based on Context
+	ifstream EpiW(fileName.c_str());//loaded the weights for Reivesd Body Hub-Goal-Object Hub network , need to swich to the right neural net in the future based on Context
     if(!EpiW)     
            { cout << "Error opening Network weight matrix" << endl; }
     else
@@ -1438,6 +1456,7 @@ void EpisodicMemThread::InitializeAM()
 					}
 				}
 //===================================================================================
+
 	fileName = pathPrefix;
 	fileName.append("WMems7.txt");
 	ifstream TCo(fileName.c_str());  //Episodic Patch new
@@ -1455,13 +1474,14 @@ for (int h = 0; h < 1000; h++)
 	 for (n =0; n<1000; n++)
 				{
 						 TCo >> data[m][n];
-					   //  cout << data[m][n]<< endl ;
+					     cout << data[m][n] ;
 					}
  }
 
-
+	//cout << "Loaded Neural connectivity" << endl;
 
  /////////////////////////////////////////////////////////////////////////////////////////////////Change to visualize weight matrix
+		
  Bottle& weight = PlanorXplore.prepare();
 				weight.clear();
 				weight.addString("weight");
@@ -1477,11 +1497,13 @@ for (int h = 0; h < 1000; h++)
 				}
 			    cout<<"Sending Weight Matrix to DARWIN GUI"<<endl;
              	PlanorXplore.write();
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 
 	//DumpAM();
     //===================================================================================
+
  	fileName = pathPrefix;
 	fileName.append("cue.txt");
  	ifstream Cu(fileName.c_str());
@@ -1521,9 +1543,9 @@ ifstream WhubTt(fileName.c_str());
 cout << "Loading Hub Epim NetT" <<WHub2EpimT[18][18] << endl ;
 
 //===================================================================================
-fileName = pathPrefix;
-fileName.append("WActToEpis.txt");
-   ifstream WAcE(fileName.c_str());
+   	fileName = pathPrefix;
+	fileName.append("WActToEpis.txt");
+   	ifstream WAcE(fileName.c_str());
     if(!WAcE)
            { cout << "Error opening Hub Epim Net" << endl; }
     else
@@ -1588,6 +1610,7 @@ for (n=0; n<1000; n++)
 	}
 
 //===================================================================================
+
 fileName = pathPrefix;
 fileName.append("GoalNact.txt");
 ifstream GActivateW(fileName.c_str()); //loaded the weights for Reivesd Body Hub-Goal-Object Hub network , need to swich to the right neural net in the future based on Context
@@ -1651,7 +1674,7 @@ void EpisodicMemThread::DumpAM()
 					EpiWO << "    " << endl;
 				}
 //======================== Updating number of episdoes of experiences in the memory at present =========
-	fileName = pathPrefix;
+    fileName = pathPrefix;
   	fileName.append("Numepi.txt");
     ofstream NEpo(fileName.c_str());
     NEpo<< NumEpi;

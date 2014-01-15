@@ -84,6 +84,7 @@ bool ObserverThread::threadInit() {
 
 	 //Network::connect("/hubPlot:o", "/emPlotter/observerHub:i");  
 	 
+
 	fileName = pathPrefix;
 	fileName.append("Report.txt");
 	Report.open(fileName.c_str());
@@ -122,7 +123,6 @@ void ObserverThread::setPath(string inS) {
     pathPrefix	= inS.c_str();
 }
 
-
 void ObserverThread::setInputPortName(string InpPort) {
     
 }
@@ -147,6 +147,7 @@ void ObserverThread::run()
 						iterMicroN=0;
 						TerminateFlag=50;
 						RootGoalFlag=14;
+						MergePlans=0;
 						InitializeSW();
 						int interfaceRes=UserInterface(14); 
 						if(interfaceRes==1)
@@ -162,6 +163,11 @@ void ObserverThread::run()
 								  //RetroactivateBodyHub(1);  //not needed here will become active based on failiures
                                   cout<<" Initializing DARWIN Working memory " <<endl;	
 								  InitializeWorkingMemory(GoalPointer);
+								  if(Goal_AcID==4)
+									  {
+								         cout<<"Enter the Object on which to Place " <<endl;	
+								         LoadGWSArgument(); 
+									  }
 								  GContext=14;
 								  Replan=0;
 								  pointIntersect=0; // this helps thread/plan binding in time
@@ -250,6 +256,7 @@ void ObserverThread::run()
 												
                         cmd.addDouble(NumberofObsE);
 						cmd.addInt(largeness);
+						cmd.addInt(Replan);
 						for(int i=0;i<NumberofObsE;i++)
 							{
 								if(Replan==0)
@@ -258,7 +265,7 @@ void ObserverThread::run()
 									}
 								if(Replan==1)
 									{
-										cmd.addDouble(BodyHub[i]); //this should be replaced with ObjIDEE[i] coming from OPC server
+										cmd.addDouble(BodyHub[i]); 
 									}
 							}
 	                    
@@ -272,7 +279,6 @@ void ObserverThread::run()
 						fileName = pathPrefix;
 						fileName.append("PXper.txt");
 						ofstream PXper(fileName.c_str());
-
 						 cout << "Receiving Plan from server" << endl;
 						 Report <<"Receiving Plan from server" << endl;
 						 for(int i=0;i<1000;i++)
@@ -286,6 +292,11 @@ void ObserverThread::run()
 						 Report << "Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event" << endl;
 
 						 state=6;
+					}
+						if(responsecode == 41 /*COMMAND_VOCAB_ACK*/) {
+						 cout << "No relevant past experience exists in the Neural Episodic memory: Triggering exploration" << endl;
+						 Report << "No relevant past experience exists in the Neural Episodic memory: Triggering exploration" << endl;
+						 state=10;
 					}
 			}
 			break;
@@ -560,14 +571,19 @@ void ObserverThread::run()
                             pointIntersect=PtOfReplann+1;
 							cout<<"Intersecting element is "<<pointIntersect << endl;
 					  	  }
-					 						 
+					 	 if(MergePlans==14)
+						  {
+                            pointIntersect=iterMicro-2; 
+							cout<<"Intersecting element is "<<pointIntersect << endl;
+					  	  }
+					 					
 					  cout<< "there are " << SeqAcInterp[0] << "Micro sequences leading to goal:" << Goal_AcID+1 << "Interpreting.." << endl;
 					     for(iCo=pointIntersect; iCo<SeqAcInterp[0]; iCo++)
 							{
 								if(Encapsulate[iCo+1]==0)
 								{
-								     CMicroSub=MicroMonitor(SeqAcInterp[iCo+1]);  //Am commenting Micromonitor to test encapsulation
-									 //CMicroSub=50;
+								      CMicroSub=MicroMonitor(SeqAcInterp[iCo+1]);  //Am commenting Micromonitor to test encapsulation
+									  CMicroSub=50; //Commented out to test online learning
 									  if(CMicroSub==1){
 										 cout<<"Top Down and Bottom up activations Do not resonate: retriggereing reasoning/Xploration"<<endl;
 										 PtOfReplann=SeqAcNum[iCo+1];
@@ -585,6 +601,7 @@ void ObserverThread::run()
 								if(Encapsulate[iCo+1]==1)
 									{
                                         cout<<"Encapsulated Micro Goal:::::"<< SeqAcInterp[iCo+1] << "in micro sequnce::"<<SeqAcNum[iCo+1] << endl;  
+										RootGoalFlag=14;
 										GoalStack[GoalPointer][0]=Goal_AcID;
 										GoalStack[GoalPointer][1]=NActs;
 										GoalStack[GoalPointer][2]=iCo+1; //point of encountering an encapsulated goal
@@ -603,7 +620,8 @@ void ObserverThread::run()
 										Replan=0;
 										pointIntersect=0; 
 										cout<<" Initializing DARWIN Working memory for new Subgoal " <<endl;	
-								        InitializeWorkingMemory(GoalPointer);
+								       // InitializeWorkingMemory(GoalPointer);
+										//THIS MAY NOT BE NEEDED AS WORKIGN MEMORY IS INITIALIZED THROUGH USER INTERFACE: Comment on 14th Jan
 										CMicroSub=14;
 										HubID_EPIM=50;
 										break;
@@ -668,11 +686,58 @@ void ObserverThread::run()
 			}
 			break;
 
+			 case 10 : {
+			  cout<<" Combining past experience with Explorative actions/User guidance" << endl;
+			  int iCo,jCo;
+			  MergePlans=0;
+			  NXploreAct=0;
+			//   PtOfReplann=SeqAcNum[iCo+1];
+			  // ActionPointer=SeqAcInterp[iCo+1];  //U already get action pointer becasue u go through Micromonitoring
+			   int ExplorePt=MaintainTrace(PtOfReplann);
+			   iterMicro=ExplorePt+1;
+			   cout<<" Retroactivating Bodh Hub-Action Hub" << endl;
+			   int ActPlay=RetroactivateBodyHub(0);
+			   int ActionPresent =0;
+			   while(NXploreAct !=0){
+			   if(ActPlay!=50)
+				 {
+					int PMicroSub=MicroMonitor(ActionHubXplore[ActionPresent]);  
+					if(PMicroSub==50){
+										 cout<<"Merging the explorative action with the Previous plan"<<endl; 
+										 NXploreAct=0;
+										 if(ActionHubXplore[ActionPresent]==6){
+										 state=0;
+										 }
+										 if(ActionHubXplore[ActionPresent]!=6){  //tThe robot did not choose to terminate the goal but tried soemthing else that succeded
+										     RootGoalFlag=23; 
+											 MergePlans=14;
+											 Replan=0;
+											 state=6;
+											 for(jCo=0; jCo<20; jCo++)
+													{
+													   SeqAcInterp[jCo]=SeqAcInterpR[jCo];
+													}
+										 }
+									  }
+
+									   if(PMicroSub==1){
+										  cout<<"This did nto work out: Exploring again"<<endl;
+										 // ActionHubXplore[ActPlay]=1;
+										  ActionPresent=ActionPresent+1;
+										  NXploreAct=NXploreAct-1;
+										 // ActPlay=RetroactivateBodyHub(0);
+										}
+			  }
+			 }
+			break;
+
 		}
 
 		//Time::delay(5);          	     
 	} 
 }
+}
+
 
 void ObserverThread::threadRelease() {
     // nothing
@@ -727,6 +792,18 @@ int ObserverThread::MicroMonitor(int stateMicormonitor)
 							{
 							   cout<<"Initialializing search primitive for Goal pointer::"<<  Goal_AcID << endl;
 							   ActionPlotter[2]=1;
+							   if((GoalStack[0][0]==0)||(GoalStack[0][0]==1)) //the roor goal issued by the user in reference to the global work space
+								   {
+							         GWSPtr=0;
+							   	   }
+							   if((GoalStack[0][0]==4)&&(GoalPointer==2)) //the roor goal issued by the user in reference to the global work space
+								   {
+							         GWSPtr=0;
+							   	   }
+							    if((GoalStack[0][0]==4)&&(GoalPointer==1)) //the roor goal issued by the user in reference to the global work space
+								   {
+							         GWSPtr=1;
+							   	   }
 							   double Fres=PrimSearch(0,0,95);    
 							   if(Fres<=0)
 								   {
@@ -753,6 +830,10 @@ int ObserverThread::MicroMonitor(int stateMicormonitor)
 							{
 							   cout<<"Initialializing Body Schema primitive for Goal pointer::"<<  Goal_AcID << endl;
 							    ActionPlotter[0]=1;
+								PlaceMap[0][0]=-300;
+								PlaceMap[0][1]=100;
+								PlaceMap[0][2]=50;
+								//PrimBodySchema(1,0,1,0,0,1);
 							   int rres=1;
 							   if(rres<=0) // This implies failiure to reach that will be addressed soon, then the if loop must be different
 								   {
@@ -793,6 +874,9 @@ int ObserverThread::MicroMonitor(int stateMicormonitor)
 									 BodyHub[6]=1;
 									 BodyHub[7]=1;
 									 BodyHub[11]=1;
+									 BodyHub[28]=1;
+									 BodyHub[29]=1;
+									 BodyHub[30]=1;
 									//Finger Occupied must also be represented in the future.
 									 ConsMicro=50;
 									}
@@ -839,13 +923,27 @@ int ObserverThread::MicroMonitor(int stateMicormonitor)
 								   {
 									   /*BodyHub[16]=1;
 									   BodyHub[17]=1;*/
-									  ConsMicro=50;
+									  ConsMicro=1;
 								   }
 																				 
 							}
 
-						break;  
+						break; 
+						case 11:
+							{
+							   cout<<"Initialializing Release primitive for Goal pointer::"<<  Goal_AcID << endl;
+							    ActionPlotter[11]=1;
+							    cout<<"Object released"<< endl;
+								 BodyHub[28]=0;
+								 BodyHub[29]=0;
+								 BodyHub[30]=0;
+								TerminateFlag=1;
+							    ConsMicro=50;
+							 }
+		                break;  
 		 			 }
+
+					 
 				 // It will be interesting to plot the comparison between the present behavior in comparison with the plan proposed by reasoning:?????
 				 //this has to take into account Encapsulation...to enable reconstruction..
 				    Behavior[iterMicroN][stateMicormonitor]=1;
@@ -914,6 +1012,15 @@ void ObserverThread::initBodyHub()
 	 }
 };
 
+void ObserverThread::LoadGWSArgument()
+	{
+		UserInterface(41); 
+		GetLocalAct(NumWords);
+		int PropWeightC=1; // this can come as a result of the elimination/growth rule
+		Retroactivate(PropWeightC);
+		cout<<" Initializing DARWIN Working memory " <<endl;	
+		InitializeWorkingMemory(1);
+	}
 
 void ObserverThread::Mergence(){
     int iCo, jCo, NoBReplan=0;
@@ -1115,7 +1222,7 @@ int ObserverThread::PickandPlace(int pick, int place, int seqNumber) {
 								StaticLoc[2]=95+90;
 							}
 
-						  PMPReplPlace=PrimBodySchema(21,GetObjIDs[0],1,GetObjIDs[0]);// contains arguements for reach object Place;	
+						  PMPReplPlace=PrimBodySchema(21,GetObjIDs[0],1,GetObjIDs[0],0,1);// contains arguements for reach object Place;	
 						//if this is sucessful, Release the object, init the arm, find if the object with ID pick is now there in the scene
 						//and approximately allined in the z-dimension with object place 
 						   
@@ -1199,75 +1306,214 @@ int ObserverThread::PickandPlace(int pick, int place, int seqNumber) {
 return Cumulate; // VM transformed the findsucess score into a cumualtive score that relates to all micro events
 }
 
-double ObserverThread::PrimBodySchema(int PMPGoalCode, int OIDinPM,int PIdentifier,int ObjectIDPMP){
+//This is for the industrial robot
+//double ObserverThread::PrimBodySchema(int PMPGoalCode, int OIDinPM,int PIdentifier,int ObjectIDPMP){
+//
+//        				
+//						cout << "Inside the PrimBodySchema : " << endl;
+//						Report << "Inside the PrimBodySchema : "  << endl;
+//                        int iCo=0, iCocord=-1,cannotfindXLoc=100;
+//						cannotfindX=0;
+//                        for(int i=2;i<18;i=i+3)
+//							{
+//							  if((PlaceMap[OIDinPM][i])>iCocord) //checks 2-5-8-11-14..
+//								  {
+//								     iCocord=PlaceMap[OIDinPM][i]; //z coordinate
+//                                     iCo=i;
+//								  }
+//							}  
+//
+//						Bottle BodySchema_cmd, BodySchema_response;
+//						BodySchema_cmd.addVocab(COMMAND_VOCAB_REACH);
+//						BodySchema_cmd.addInt(PMPGoalCode);
+//						//the rest of information will be replaced by correct numbers coming from Place Map (that is a event driven 
+//						//working memory keeping track of what thngs are there and where they are in the world)
+//						if(PMPGoalCode==1){
+//							BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo-2]); 
+//							cannotfindX=PlaceMap[OIDinPM][iCo-2]; 
+//							cannotfindXLoc=iCo-2;
+//							BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo-1]);
+//							if(PIdentifier==1)
+//							{
+//								BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]);
+//							}
+//							if(PIdentifier==3)
+//							{
+//								if(ObjectIDPMP == 2)
+//								{
+//									BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]+123);
+//								}
+//								else
+//								{
+//									BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]+93);
+//								}
+//							}
+//						}
+//						if(PMPGoalCode==19){
+//
+//						cout<<"Entered Goal of Initialization " <<endl;
+//						Report<<"Entered Goal of Initialization " <<endl;
+//						BodySchema_cmd.addDouble(XPosition[0]); 
+//						BodySchema_cmd.addDouble(XPosition[1]);
+//						BodySchema_cmd.addDouble(XPosition[2]);
+//						cout<<"Entered Goal of Initialization X1,X2,X3 : "<<XPosition[0]<<" , "<<XPosition[1]<<" , "<<XPosition[2] <<endl;
+//						Report<<"Entered Goal of Initialization X1,X2,X3 : "<<XPosition[0]<<" , "<<XPosition[1]<<" , "<<XPosition[2] <<endl;
+//						}
+//						if(PMPGoalCode==21){
+//						BodySchema_cmd.addDouble(StaticLoc[0]); 
+//						BodySchema_cmd.addDouble(StaticLoc[1]);
+//						BodySchema_cmd.addDouble(StaticLoc[2]);
+//						}
+//						BodySchema_cmd.addDouble(0);
+//						BodySchema_cmd.addDouble(0);
+//						BodySchema_cmd.addDouble(0);
+//						// for ComputeTheta
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][0]); 
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][1]); 
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][3]);
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][4]);
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][6]); 
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][7]); 
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][9]);
+//						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][10]);
+//						BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);
+//
+//						cout<<"Sent a request to PMP Server with PMPGoalCode : "<<PMPGoalCode<<endl;
+//						Report<<"Sent a request to PMP Server with PMPGoal Code : "<<PMPGoalCode<<endl;
+//						printf("%s \n",BodySchema_response.toString().c_str());
+//	
+//						double Bresponsecode = BodySchema_response.get(0).asDouble();
+//					    cout<<Bresponsecode<<endl;
+//
+//					if(Bresponsecode == 221 /*COMMAND_VOCAB_REACH*/) {
+//						 cout << "Receiving status from Body Schema PMP server" << endl;
+//						 Report << "Receiving status from Body Schema PMP server" << endl;
+//						 for(int i=0;i<10;i++)
+//							{
+//							 PMPresp[i]= BodySchema_response.get(i+1).asDouble();
+//							 cout << "Resp from PMP server" << PMPresp[i]<< endl;
+//							}
+//						 XPosition[0]=PMPresp[1];
+//						 XPosition[1]=PMPresp[2];
+//						 XPosition[2]=PMPresp[3];
+//						 cout<<" Forward model output of arm position"<< endl;
+//						 cout<< XPosition[0] << XPosition[1] << XPosition[2] << endl;
+//						 if(PMPresp[0]==1){
+//						 cout << "Reached goal object sucessfully: wait for next goal from client" << endl;
+//						 Report << "Reached goal object sucessfully: wait for next goal from client" << endl;
+//						 }
+//
+//						 if(PMPresp[0]==0){
+//							 cout << "Goal is not doable: need to form a updated plan with help of EPIM" << endl;
+//						 }
+//					}
+//return PMPresp[0];
+//}
 
-        				
-						 cout << "Inside the PrimBodySchema : " << endl;
-						 Report << "Inside the PrimBodySchema : "  << endl;
+double ObserverThread::PrimBodySchema(int PMPGoalCode, int OIDinPM,int PIdentifier,int MsimFlag, int WristOrient, int TrajType){
+
+        				Network::connect("/BodySchemaSim:io", "/PMP/PMPreply:io");  
+						cout << "Inside the PrimBodySchema : " << endl;
+						Report << "Inside the PrimBodySchema : "  << endl;
+
                         int iCo=0, iCocord=-1,cannotfindXLoc=100;
 						cannotfindX=0;
-                        for(int i=2;i<18;i=i+3)
+           /*             for(int i=2;i<18;i=i+3)
 							{
 							  if((PlaceMap[OIDinPM][i])>iCocord) //checks 2-5-8-11-14..
 								  {
 								     iCocord=PlaceMap[OIDinPM][i]; //z coordinate
                                      iCo=i;
 								  }
-							}  
+							}  */  //This is commented as I dont have 18 3D positions
 
 						Bottle BodySchema_cmd, BodySchema_response;
-						BodySchema_cmd.addVocab(COMMAND_VOCAB_REACH);
-						BodySchema_cmd.addInt(PMPGoalCode);
+						BodySchema_cmd.addVocab(COMMAND_VOCAB_CACT);
+						BodySchema_cmd.addInt(PMPGoalCode); // Reach 1 or Initialize 19 or 21 Conitnuous reaching
+						BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);
 						//the rest of information will be replaced by correct numbers coming from Place Map (that is a event driven 
 						//working memory keeping track of what thngs are there and where they are in the world)
+						BodySchema_cmd.clear();
+						BodySchema_response.clear();
 						if(PMPGoalCode==1){
-							BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo-2]); 
-							cannotfindX=PlaceMap[OIDinPM][iCo-2]; 
-							cannotfindXLoc=iCo-2;
-							BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo-1]);
-							if(PIdentifier==1)
-							{
-								BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]);
-							}
-							if(PIdentifier==3)
-							{
-								if(ObjectIDPMP == 2)
+							BodySchema_cmd.addVocab(COMMAND_VOCAB_GRIG);
+							Bottle& Coordinates = BodySchema_cmd.addList();
+							Coordinates.addDouble(PlaceMap[OIDinPM][0]); 
+							//cannotfindX=PlaceMap[OIDinPM][iCo-2];  This was earlier
+							//cannotfindXLoc=iCo-2;
+							Coordinates.addDouble(PlaceMap[OIDinPM][1]);
+							Coordinates.addDouble(PlaceMap[OIDinPM][2]);
+							BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);
+
+							BodySchema_cmd.clear();
+						    BodySchema_response.clear();
+							BodySchema_cmd.addVocab(COMMAND_VOCAB_MSIM);
+							BodySchema_cmd.addInt(MsimFlag);
+							BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);
+
+							BodySchema_cmd.clear();
+						    BodySchema_response.clear();
+							BodySchema_cmd.addVocab(COMMAND_VOCAB_WRIO);
+							BodySchema_cmd.addInt(WristOrient);
+							BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);
+
+							BodySchema_cmd.clear();
+						    BodySchema_response.clear();
+							BodySchema_cmd.addVocab(COMMAND_VOCAB_TRAT);
+							BodySchema_cmd.addInt(TrajType);
+							BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);
+							
+
+							BodySchema_cmd.clear();
+						    BodySchema_response.clear();
+							BodySchema_cmd.addVocab(COMMAND_VOCAB_REA);
+						    BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);							
+							/*	if(PIdentifier==3)
 								{
-									BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]+123);
-								}
-								else
-								{
-									BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]+93);
-								}
-							}
+									if(ObjectIDPMP == 2)
+									{
+										BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]+123);
+									}
+									else
+									{
+										BodySchema_cmd.addDouble(PlaceMap[OIDinPM][iCo]+93);
+									}
+								}*/ //This was for the mushroom Offset
+
 						}
+
 						if(PMPGoalCode==19){
 
 						cout<<"Entered Goal of Initialization " <<endl;
 						Report<<"Entered Goal of Initialization " <<endl;
-						BodySchema_cmd.addDouble(XPosition[0]); 
+						/*BodySchema_cmd.addDouble(XPosition[0]); 
 						BodySchema_cmd.addDouble(XPosition[1]);
 						BodySchema_cmd.addDouble(XPosition[2]);
 						cout<<"Entered Goal of Initialization X1,X2,X3 : "<<XPosition[0]<<" , "<<XPosition[1]<<" , "<<XPosition[2] <<endl;
-						Report<<"Entered Goal of Initialization X1,X2,X3 : "<<XPosition[0]<<" , "<<XPosition[1]<<" , "<<XPosition[2] <<endl;
+						Report<<"Entered Goal of Initialization X1,X2,X3 : "<<XPosition[0]<<" , "<<XPosition[1]<<" , "<<XPosition[2] <<endl;*/
 						}
+
+						//continuous reachign through a via point
 						if(PMPGoalCode==21){
 						BodySchema_cmd.addDouble(StaticLoc[0]); 
 						BodySchema_cmd.addDouble(StaticLoc[1]);
 						BodySchema_cmd.addDouble(StaticLoc[2]);
+						BodySchema_cmd.addDouble(StaticLoc[3]); 
+						BodySchema_cmd.addDouble(StaticLoc[4]);
+						BodySchema_cmd.addDouble(StaticLoc[5]);
 						}
-						BodySchema_cmd.addDouble(0);
-						BodySchema_cmd.addDouble(0);
-						BodySchema_cmd.addDouble(0);
-						// for ComputeTheta
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][0]); 
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][1]); 
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][3]);
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][4]);
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][6]); 
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][7]); 
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][9]);
-						BodySchema_cmd.addDouble(PlaceMap[OIDinPM][10]);
+						//BodySchema_cmd.addDouble(0);
+						//BodySchema_cmd.addDouble(0);
+						//BodySchema_cmd.addDouble(0);
+						//// for ComputeTheta
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][0]); 
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][1]); 
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][3]);
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][4]);
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][6]); 
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][7]); 
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][9]);
+						//BodySchema_cmd.addDouble(PlaceMap[OIDinPM][10]);
 						BodySchemaCtrlPort.write(BodySchema_cmd,BodySchema_response);
 
 						cout<<"Sent a request to PMP Server with PMPGoalCode : "<<PMPGoalCode<<endl;
@@ -1280,7 +1526,7 @@ double ObserverThread::PrimBodySchema(int PMPGoalCode, int OIDinPM,int PIdentifi
 					if(Bresponsecode == 221 /*COMMAND_VOCAB_REACH*/) {
 						 cout << "Receiving status from Body Schema PMP server" << endl;
 						 Report << "Receiving status from Body Schema PMP server" << endl;
-						 for(int i=0;i<10;i++)
+						 for(int i=0;i<14;i++)
 							{
 							 PMPresp[i]= BodySchema_response.get(i+1).asDouble();
 							 cout << "Resp from PMP server" << PMPresp[i]<< endl;
@@ -1350,14 +1596,25 @@ double ObserverThread::PrimSearch(int obj1, int obj2, int goalidentity){
 	if(goalidentity==95)
 			{
               // u now need to transform all object ID's into learnt object hub activations to bring compositionlity and flexibility
-              PlaceMapHub[0][0]=1; //this must come due to top down retroactivation from user goal given in proto language: now is blue driver
+            PlaceMapPos=10; 
+			PlaceMapHub[0][0]=1; //this must come due to top down retroactivation from user goal given in proto language: now is blue driver
 			  PlaceMapHub[0][6]=1;
 			  double sumPh=0; 
-				for(jCo=0; jCo<42; jCo++)
+			  for(iCo=0; iCo<NumObjectsinScene; iCo++)
 						 {
-						   sumPh=sumPh+((GlobalWorkSpace[0][jCo]-PlaceMapHub[0][jCo])*(GlobalWorkSpace[0][jCo]-PlaceMapHub[0][jCo]));
-						 }
+							for(jCo=0; jCo<42; jCo++)
+									 {
+									   sumPh=sumPh+((GlobalWorkSpace[GWSPtr][jCo]-PlaceMapHub[0][jCo])*(GlobalWorkSpace[GWSPtr][jCo]-PlaceMapHub[0][jCo]));
+									 }
+							if(sumPh==0)
+							{
+							  cout <<"object is there at PlaceMap Location" << iCo << endl;
+							  PlaceMapPos=iCo; 
+							  break;
+							}
+			  }
 		     FindResp=sumPh;
+
 			}
    return FindResp;
 }
@@ -1429,7 +1686,7 @@ double ObserverThread::RefreshPlacemap(){
        									for(int j=0;j<7;j++)
 											{
 												PlaceMap[i][j]=OPC_Response.get(ctrr).asDouble();
-                        Report << PlaceMap[i][j]<< endl;
+												Report << PlaceMap[i][j]<< endl;
 												ctrr=ctrr+1; 
 											}	
 								     }
@@ -1551,6 +1808,49 @@ void ObserverThread::Xlator(){
 								}
 						cout<<"Numcu"<< numcu << "NumCubID[0]" << NumCubID[0]<< endl;
 					   }
+
+					if ((ObjIDEE[i]==100))
+					   {
+					    PlaceMapHub[i][8]=1;
+						NumberofObsE=NumberofObsE+1;
+						cout<<"Fuse found"<<endl;
+					   }
+
+					if ((ObjIDEE[i]==101))
+					   {
+					    PlaceMapHub[i][9]=1;
+						NumberofObsE=NumberofObsE+1;
+						cout<<"Fuse box found"<<endl;
+					   }
+
+					if ((ObjIDEE[i]==102))
+					   {
+					    PlaceMapHub[i][32]=1;
+						NumberofObsE=NumberofObsE+1;
+						cout<<"Composite Object: FUSE BOX SET UP found"<<endl;
+					   }
+
+					if ((ObjIDEE[i]==120))
+					   {
+					    PlaceMapHub[i][14]=1;
+						NumberofObsE=NumberofObsE+1;
+						cout<<"MECCANO Block found"<<endl;
+					   }
+
+					if ((ObjIDEE[i]==121))
+					   {
+					    PlaceMapHub[i][6]=1;
+						NumberofObsE=NumberofObsE+1;
+						cout<<"MECCANO screwdriver found"<<endl;
+					   }
+
+					if ((ObjIDEE[i]==122))
+					   {
+					    PlaceMapHub[i][33]=1;
+						NumberofObsE=NumberofObsE+1;
+						cout<<"MECCANO Composite object found"<<endl;
+					   }
+
 			}
 			cout<<"No of objects in the abstract neural representation:" << NumberofObsE << endl;
 
@@ -1646,11 +1946,12 @@ void ObserverThread::InvXlator(int pi, int pl){
 
 }
 
-void ObserverThread::RetroactivateBodyHub(int PropWB)
+int ObserverThread::RetroactivateBodyHub(int PropWB)
 	{
 		//BodyHub[34]=1; //testing
 		//BodyHub[35]=1;
 		int iCo,jCo,pr_Bo;
+		ActionChoice=50;
 		for(iCo=0; iCo<12; iCo++)
 				{
 				     pr_Bo=0;
@@ -1659,8 +1960,24 @@ void ObserverThread::RetroactivateBodyHub(int PropWB)
 							pr_Bo = pr_Bo + BodyHub2Acn[jCo][iCo]*BodyHub[jCo];
 						}
 					 ActionHub[iCo]=pr_Bo/(pr_Bo+0.001);
-					 cout << ActionHub[iCo] << endl;
+					 if(ActionHub[iCo]>0.50){
+					 cout << "Xplorative Action:::::" << ActionHub[iCo] << "possible in relation to the present situation" <<endl;
+					 ActionHubXplore[NXploreAct]=iCo;
+					 NXploreAct=NXploreAct+1;
+					 }
 		}
+		
+		for(iCo=0; iCo<12; iCo++)
+				{
+					if(ActionHub[iCo]>0.5){
+						if(ActionHub[iCo]-ActionHubXplore[iCo]>0.5){
+
+							ActionChoice=iCo;
+							break;
+						}
+					}
+		}
+		return ActionChoice;
 	//	Sleep(15000);
 	};
 
@@ -1790,14 +2107,28 @@ void ObserverThread::InitializeWorkingMemory(int GoalPointer)
 
 void ObserverThread:: GetLocalAct(int numW)
 {
- int iCo, jCo, m, clocal=0; 
+ int iCo, jCo, m,n, clocal=0; 
   fileName = pathPrefix;
   fileName.append("MapI.txt");
   ofstream MapAini(fileName.c_str()); 
-
   MaxiAct=0.0001;
   MaxiActS=0.0001; 
   MaxiActW=0.0001;
+  /*for (n=0; n<30; n++)
+		{
+			 Col[n]=0;
+			 Word[n]=0;
+			 Shape[n]=0;
+		}*/
+	  	  for (n=0; n<90; n++)
+					{
+					 LocalMapAct[n]=0;
+					}
+		  for (n=0; n<42; n++)
+					{
+					 ProvHub[n]=0;
+					}
+		  
   for(iCo=0; iCo<30; iCo++)
 	 {
        Rdis=sqrt(pow(ColW[iCo][0]-ipCol[0],2)+pow(ColW[iCo][1]-ipCol[1],2)+pow(ColW[iCo][2]-ipCol[2],2));
@@ -1901,7 +2232,7 @@ void ObserverThread::InitializeSW()
  {
     int m=0,n=0;
 	//================== Initialize connectivity ==========================
-	fileName = pathPrefix;
+    fileName = pathPrefix;
 	fileName.append("WProvCSWRev.txt");
     ifstream WCSW(fileName.c_str());
 	printf("%s\n",fileName.c_str());
@@ -1990,16 +2321,7 @@ for (m =0; m<30; m++)
 					}
 				}
 
-	for (m =0; m<2; m++)
-				{
-					for (n=0; n<120; n++)
-					{
-						 WordIn[m][n]=0;
-					}
-				}
-
-
-	for (m =0; m<10; m++)
+		for (m =0; m<10; m++)
 				{
 					for (n=0; n<42; n++)
 					{
@@ -2051,13 +2373,16 @@ for (m =0; m<30; m++)
 						 }
 					}
 				}
-
+	 for (n=0; n<12; n++)
+		{  
+			ActionHubXplore[n]==0;
+	    }
 	  for (n=0; n<30; n++)
-					{
-						Col[n]=0;
-						Word[n]=0;
-						Shape[n]=0;
-					}
+		{
+			 Col[n]=0;
+			 Word[n]=0;
+			 Shape[n]=0;
+		}
 	      ipCol[0]=0;
 	      ipCol[1]=0;
 	      ipCol[2]=0;
@@ -2065,10 +2390,7 @@ for (m =0; m<30; m++)
 		  ipShap[1]=0;
 		  ipShap[2]=0;
 
-	  for (n=0; n<90; n++)
-					{
-					 LocalMapAct[n]=0;
-					}
+
 	  for (n=0; n<42; n++)
 					{
 						ProvHub[n]=0;
@@ -2083,8 +2405,12 @@ void ObserverThread::WordEncode(int numu, int hubenc)
 {
      
 	string mycol;
-    int sizz,n;
- 
+    int sizz,m,n;
+    	for (n=0; n<120; n++)
+					{
+						 WordIn[numu][n]=0;
+					}
+				
     cout << "Input word " << endl;
     cin >> mycol;
     sizz=mycol.size();
@@ -2129,72 +2455,76 @@ void ObserverThread::WordEncodeA(int numu, int hubenc)
 int ObserverThread::UserInterface(int GoalLearn) 
 {
 	  int m,n,userIntervention;
-	  if(GoalLearn==14)
+	  if((GoalLearn==14)||(GoalLearn==41))
 		  {
-			  cout << "Input Root Goal " << endl;  
-			//==============================================================
-			  cout << "Input word " << endl;
-			  string mycoll;
-			  int sizze;
-				cin >> mycoll;
-				sizze=mycoll.size();
-				cout << sizze << endl;
-				for (n=0; n<120; n++)
-				{
-				WordAIn[n]=0;
-				}
+			if(GoalLearn==14)
+			  {
+				  cout << "Input Root Goal " << endl;  
+				//==============================================================
+				  cout << "Input word " << endl;
+				  string mycoll;
+				  int sizze;
+					cin >> mycoll;
+					sizze=mycoll.size();
+					cout << sizze << endl;
+					for (n=0; n<120; n++)
+					{
+					WordAIn[n]=0;
+					}
 
-    for (n=0; n<sizze; n++)
-	     {
-	   	 cout << mycoll[n] << endl;
-		 if (mycoll[n] ==  'r') { WordAIn[(8+(n*20))]=1;} 
-		 if (mycoll[n] ==  'e') { WordAIn[(0+(n*20))]=1;} 
-		 if (mycoll[n] ==  'd') { WordAIn[(9+(n*20))]=1;} 
-		 if (mycoll[n] ==  't') { WordAIn[(1+(n*20))]=1;} 
-		 if (mycoll[n] ==  'a') { WordAIn[(2+(n*20))]=1;} 
-		 if (mycoll[n] ==  'o') { WordAIn[(3+(n*20))]=1;} 
-		 if (mycoll[n] ==  'i') { WordAIn[(4+(n*20))]=1;} 
-		 if (mycoll[n] ==  'n') { WordAIn[(5+(n*20))]=1;} 
-		 if (mycoll[n] ==  's') { WordAIn[(6+(n*20))]=1;} 
-		 if (mycoll[n] ==  'h') { WordAIn[(7+(n*20))]=1;} 
-		 if (mycoll[n] ==  'l') { WordAIn[(10+(n*20))]=1;} 
-		 if (mycoll[n] ==  'c') { WordAIn[(11+(n*20))]=1;} 
-		 if (mycoll[n] ==  'u') { WordAIn[(12+(n*20))]=1;} 
-		 if (mycoll[n] ==  'm') { WordAIn[(13+(n*20))]=1;} 
-		 if (mycoll[n] ==  'w') { WordAIn[(14+(n*20))]=1;} 
-		 if (mycoll[n] ==  'f') { WordAIn[(15+(n*20))]=1;} 
-		 if (mycoll[n] ==  'g') { WordAIn[(16+(n*20))]=1;} 
-		 if (mycoll[n] ==  'y') { WordAIn[(17+(n*20))]=1;} 
-		 if (mycoll[n] ==  'p') { WordAIn[(18+(n*20))]=1;} 
-		 if (mycoll[n] ==  'j') { WordAIn[(19+(n*20))]=1;} 
-		 }
+			for (n=0; n<sizze; n++)
+				 {
+	   			 cout << mycoll[n] << endl;
+				 if (mycoll[n] ==  'r') { WordAIn[(8+(n*20))]=1;} 
+				 if (mycoll[n] ==  'e') { WordAIn[(0+(n*20))]=1;} 
+				 if (mycoll[n] ==  'd') { WordAIn[(9+(n*20))]=1;} 
+				 if (mycoll[n] ==  't') { WordAIn[(1+(n*20))]=1;} 
+				 if (mycoll[n] ==  'a') { WordAIn[(2+(n*20))]=1;} 
+				 if (mycoll[n] ==  'o') { WordAIn[(3+(n*20))]=1;} 
+				 if (mycoll[n] ==  'i') { WordAIn[(4+(n*20))]=1;} 
+				 if (mycoll[n] ==  'n') { WordAIn[(5+(n*20))]=1;} 
+				 if (mycoll[n] ==  's') { WordAIn[(6+(n*20))]=1;} 
+				 if (mycoll[n] ==  'h') { WordAIn[(7+(n*20))]=1;} 
+				 if (mycoll[n] ==  'l') { WordAIn[(10+(n*20))]=1;} 
+				 if (mycoll[n] ==  'c') { WordAIn[(11+(n*20))]=1;} 
+				 if (mycoll[n] ==  'u') { WordAIn[(12+(n*20))]=1;} 
+				 if (mycoll[n] ==  'm') { WordAIn[(13+(n*20))]=1;} 
+				 if (mycoll[n] ==  'w') { WordAIn[(14+(n*20))]=1;} 
+				 if (mycoll[n] ==  'f') { WordAIn[(15+(n*20))]=1;} 
+				 if (mycoll[n] ==  'g') { WordAIn[(16+(n*20))]=1;} 
+				 if (mycoll[n] ==  'y') { WordAIn[(17+(n*20))]=1;} 
+				 if (mycoll[n] ==  'p') { WordAIn[(18+(n*20))]=1;} 
+				 if (mycoll[n] ==  'j') { WordAIn[(19+(n*20))]=1;} 
+				 }
 
-	int iCo,jCo,ahactiv=0;
-	int maxA=0.01;
-		for(iCo=0; iCo<12; iCo++)
-								{
-									int pr_Coo=0;
-									 for(jCo=0; jCo<120; jCo++)
+				int iCo,jCo,ahactiv=0;
+				int maxA=0.01;
+					for(iCo=0; iCo<12; iCo++)
 											{
-												pr_Coo = pr_Coo + WActionPrim[iCo][jCo]*WordAIn[jCo];
-											}
+												int pr_Coo=0;
+												 for(jCo=0; jCo<120; jCo++)
+														{
+															pr_Coo = pr_Coo + WActionPrim[iCo][jCo]*WordAIn[jCo];
+														}
 																	
-									ActH[iCo]=pr_Coo; 
-									if(ActH[iCo]>maxA)
-										{
-										   maxA=ActH[iCo];
-										   ahactiv=iCo;
-										}
-								}
-   for(iCo=0; iCo<12; iCo++)
-		   {
-             ActH[iCo]=ActH[iCo]/maxA;
-		     WorABin <<ActH[iCo] << endl;   
-			// cout<<ActH[iCo]<<endl;
-		   }
-    cout<<"ahaactive"<<ahactiv<<endl;
-	Goal_AcID=ahactiv;
-	GoalStack[GoalPointer][0]=Goal_AcID;
+												ActH[iCo]=pr_Coo; 
+												if(ActH[iCo]>maxA)
+													{
+													   maxA=ActH[iCo];
+													   ahactiv=iCo;
+													}
+											}
+			   for(iCo=0; iCo<12; iCo++)
+					   {
+						 ActH[iCo]=ActH[iCo]/maxA;
+						 WorABin <<ActH[iCo] << endl;   
+						// cout<<ActH[iCo]<<endl;
+					   }
+				cout<<"ahaactive"<<ahactiv<<endl;
+				Goal_AcID=ahactiv;
+				GoalStack[GoalPointer][0]=Goal_AcID;
+	  }
+
   //========================================================
   
 				   int sizz;
@@ -2204,7 +2534,6 @@ int ObserverThread::UserInterface(int GoalLearn)
 				   fileName = pathPrefix;
 				   fileName.append("WorBin.txt");
 				   ofstream WorBin(fileName.c_str());
-				   
   					for (n=0; n<sizz; n++)
 						{
 						  WordEncode(n,2);
