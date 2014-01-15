@@ -68,7 +68,7 @@ private:
 	//yarp::os::BufferedPort<yarp::os::Bottle > Inpjoints;
 	
 	// output ports to command the robot parts
-	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort;  
+	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort,cmdEndEffectorPort;  
 	yarp::os::BufferedPort<yarp::os::Bottle > activationsPort;   
 	//PMPServer to Observer
 	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result and motor commands
