@@ -35,13 +35,13 @@ bool EpisodicMemModule::configure(yarp::os::ResourceFinder &rf) {
 
     /* get the module name which will form the stem of all module port names */
     moduleName            = rf.check("name", 
-                           Value("/EpisodicMem"), 
+                           Value(""), 
                            "module name (string)").asString();
     /*
     * before continuing, set the module name before getting any other parameters, 
     * specifically the port names which are dependent on the module name
     */
-    setName(moduleName.c_str());
+    //setName(moduleName.c_str());
 
     /*
     * get the robot name which will form the stem of the robot ports names

@@ -91,6 +91,8 @@ private:
 		int MemIDBhub[6];
 		int ChunkTerminate;
 		int PrevSentPlan;
+		int ReplanStatus;
+		int iSPlan;
    
 public:
     /**
@@ -146,12 +148,15 @@ public:
     * function that sets the inputPort name
     */
     void setInputPortName(std::string inpPrtName);
-
+    
     /*
     
     * function that sets the path 
     */
      void setPath(std::string inP);
+    /*
+    * function that sets the inputPort name
+    */
 //    void setColorPath(std::string inp) { colorMapPath = inp; };
 
        /*

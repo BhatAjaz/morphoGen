@@ -32,7 +32,7 @@
 
 #define COMMAND_VOCAB_REQ          VOCAB3('R','E','Q') //with episodic mem module
 #define COMMAND_VOCAB_ACK          VOCAB3('A','C','K')
-#define COMMAND_VOCAB_REACH        VOCAB3('R','E','A') //with body schema module
+//#define COMMAND_VOCAB_REACH        VOCAB3('R','E','A') //with body schema module
 #define COMMAND_VOCAB_FIND         VOCAB4('F','I','N','D')  //with OPC module
 #define COMMAND_VOCAB_GRAZP        VOCAB5('G','R','A','Z') //with KCL grasper
 
@@ -45,6 +45,20 @@
 #define COMMAND_VOCAB_PICK           VOCAB4('P','I','C','K') 
 #define COMMAND_VOCAB_WHERE          VOCAB5('W','H','E','R','E')
 #define COMMAND_VOCAB_HELP           VOCAB4('H','E','L','P') 
+
+#define COMMAND_VOCAB_INIT   VOCAB4('I','N','I','T')
+#define COMMAND_VOCAB_CACT   VOCAB4('C','A','C','T')
+#define COMMAND_VOCAB_BCHA   VOCAB4('B','C','H','A')
+#define COMMAND_VOCAB_MSIM   VOCAB4('M','S','I','M')
+#define COMMAND_VOCAB_TRAT   VOCAB4('T','R','A','T')
+#define COMMAND_VOCAB_GRIG   VOCAB4('G','R','I','G')
+#define COMMAND_VOCAB_GLEF   VOCAB4('G','L','E','F')
+#define COMMAND_VOCAB_OLEF   VOCAB4('O','L','E','F')
+#define COMMAND_VOCAB_ORIG   VOCAB4('O','R','I','G')
+#define COMMAND_VOCAB_WRIO   VOCAB4('W','R','I','O')
+#define COMMAND_VOCAB_FAILED VOCAB4('F','A','I','L')
+#define COMMAND_VOCAB_REA    VOCAB3('R','E','A')
+#define COMMAND_VOCAB_OK     VOCAB2('O','K')
 
 
 class ObserverThread : public yarp::os::Thread {
@@ -68,7 +82,7 @@ private:
 
 	std::ofstream Report,HubA,MapA,WorABin,Present;
 	std::string name;           // rootname of all the ports opened by this thread
-    std::string pathPrefix,fileName;				;
+    std::string pathPrefix,fileName;
 	int KeySend;
 	int state;                  //state that represents the action to perform
 	int Strata[1000];
@@ -78,23 +92,26 @@ private:
 	int SeqAcXl[2];
 	int PickMicro, PlaceMicro, NPiCs,findsuccess,findsuccess2,PPiCo;
 	double PlaceMap[10][18]; //col-shap-x-y-z-constraint
-	double ObjIDEE[10], ObjIDEEEpim[10], XPosition[3];
+	double ObjIDEE[20], ObjIDEEEpim[20], XPosition[3];
 	double NumObjectsinScene;
 	int GetObjIDs[2], largeness,cannotfindXLoc,CannotFind,Cumulate;
 	double PMPresp[12],cannotfindX,NumCubID[3],NumCylID[2],NumMushID[2];
 	double XlatTrackP[10],XlatTrackPl[10],StaticLoc[3];
 	int PtOfReplan,PtOfReplann;
-	double Col[30],Word[30],Shape[30],ProvHub[42],OCHub[42],LocalMapAct[90],ipCol[3],ipShap[3],RdisActW[2][30],BodyHub[42],ActionHub[12];
-	int MapstoProvHub[36][90],ProvHubtoMaps[90][36],ColW[30][3], WorW[30][120],ShapW[30][3],BodyHub2Acn[42][12],ActH[12];
+	double Col[30],Word[30],Shape[30],ProvHub[42],OCHub[42],LocalMapAct[90],ipCol[3],ipShap[3],RdisActW[2][30],BodyHub[42],ActionHub[12],ActionHubXplore[12];
+	int MapstoProvHub[36][90],ProvHubtoMaps[90][36],ColW[30][3], WorW[30][120],ShapW[30][3],BodyHub2Acn[42][12],ActH[12],NXploreAct;
 	int WordIn[2][120],inhib[30][30],NumWords, WActPrim[12][120],WActionPrim[12][120];
 	int WordAIn[120],Goal_AcID,HubID_EPIM, GContext;
 	double Rdis,RdisAct[90],pr_Co,RdisS,RdisActS[90],pr_CoS;
     double WorActiv[2][30],pr_CoW,RdisW,RdistempW,MaxiAct,MaxiActW,MaxiActS;
-	int GlobalWorkSpace[10][50],PlaceMapHub[10][42], BottomUPTrace[20][50],	Behavior[20][50];
+	int GlobalWorkSpace[10][50],PlaceMapHub[10][42], BottomUPTrace[20][50],	Behavior[50][50];
 	int GoalPointer,pointRew,pointIntersect,ActionPointer,GoalStack[10][50],GoalStackPtr;
-	int BodyHubBU[42],BodyHubTD[42],iterMicro,iterMicroN, TerminateFlag,NActs,RootGoalFlag;
+	int BodyHubBU[42],BodyHubTD[42],iterMicro,iterMicroN, TerminateFlag,NActs,RootGoalFlag,ActionChoice;
 	int CMicroSub;
 	int stateMM;
+	int MergePlans;
+	int PlaceMapPos;
+	int GWSPtr;
 	
 public:
     /**
@@ -155,7 +172,7 @@ public:
 
 	double RefreshPlacemap(); // speak with vision
 
-	double PrimBodySchema(int PMPGoalCode,int OIDinPM,int PIdentifier, int ObjectIDPMP);
+	double PrimBodySchema(int PMPGoalCode,int OIDinPM,int PIdentifier, int MsimFlag, int WristOrient, int TrajType);
 
 	int PrimGrasp(int GraspReq,int RobID );
 
@@ -178,10 +195,12 @@ public:
 	void WordEncodeA(int numu, int hubenc);
 
 	void GetLocalAct(int numW);
+
+	void LoadGWSArgument();
 	
 	void Retroactivate(int PropWC);
 	
-	void RetroactivateBodyHub(int PropWB);
+	int RetroactivateBodyHub(int PropWB);
 	
 	int RetroactivateAcHub();
 
@@ -194,15 +213,8 @@ public:
 	int MaintainTrace(int PtRe);
 	//void HubRep();
 
-
-    // function that sets the inputPort name
+    // Function that sets path for files
     void setPath(std::string inP);
-
-
-
-
-
-
 
 
 	/*
