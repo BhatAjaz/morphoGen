@@ -2,14 +2,14 @@
 <name>yarpscopeGui</name>
 
 
-
+<!--
 <module>
   <name>yarpscope</name>
   <parameters>--name /finger --x 000--y 000 --w 280 --h 210 --RefreshTime 33 --xml fingersScope.xml  --context yarpScopeDarwin</parameters>
   <tag>finger</tag>
   <node>icub14</node>
 </module>
-
+-->
 
 <module>
   <name>yarpscope</name>
