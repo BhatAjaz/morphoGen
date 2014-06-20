@@ -8,5 +8,5 @@ add_subdirectory( Grasper         )
 add_subdirectory( postureControl  )
 add_subdirectory( PMP             )
 add_subdirectory( pmpAnalytic     )
-add_subdirectory( pmpIndustrial     )
+
 
