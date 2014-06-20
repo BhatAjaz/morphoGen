@@ -25,7 +25,7 @@ set(CMAKE_MODULE_PATH
 
 if (ICUBcontrib_FOUND)
   include(ICUBcontribHelpers)
-  set_contrib_default_prefix() #set CMAKE_INSTALL_PREFIX to the ICUBcontrib one; print warning if user modifies it
+  icubcontrib_set_default_prefix() #set CMAKE_INSTALL_PREFIX to the ICUBcontrib;20/06/14 changed into icubcontrib_set_default_prefix()
 else()
   set(ICUBCONTRIB_CONTEXTS_INSTALL_DIR share/morphoGen/contexts)
   set(ICUBCONTRIB_APPLICATIONS_TEMPLATES_INSTALL share/morphoGen/templates/applications)
