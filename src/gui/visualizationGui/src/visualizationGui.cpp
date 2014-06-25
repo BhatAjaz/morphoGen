@@ -153,7 +153,7 @@ static void callback( GtkWidget *widget,gpointer   data ){
 
 
 //iit call backs
-static int cb_iit_mod1( GtkWidget *widget, gpointer data ) {
+static void cb_iit_mod1( GtkWidget *widget, gpointer data ) {
     if (_iitPort1!=NULL) {
         if(_iitPort1->getOutputCount()){
             Bottle in;
