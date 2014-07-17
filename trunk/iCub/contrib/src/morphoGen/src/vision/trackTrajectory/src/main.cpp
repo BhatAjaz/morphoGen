@@ -49,22 +49,23 @@ int main(int argc, char * argv[])
     yarp::os::BufferedPort<yarp::os::Bottle> input;
 	yarp::os::Bottle *incomingBottle;
     input.open("/trackTrajectory/data:i");
-    Network::connect("colorVision/data:o","/trackTrajectory/data:i");
+    Network::connect("/colorVisionLeft/colordata:o","/trackTrajectory/data:i");
     int x1,y1,x2,y2,x,y,count,ID;
     // Bottle handling
 	FILE * trajFile;
-	trajFile = fopen ("trajectory.txt","w");
+	trajFile = fopen ("trajectory.txt","w+");
 	while (true){
         if( input.getInputCount()){
+			//fprintf (trajFile,"running the module%d %d %d",i,j);
             incomingBottle    =   input.read(false);
             if (incomingBottle  !=  NULL)   {           
                 count = incomingBottle->get(0).asInt();
                 if (incomingBottle->size() > 0) {                 
                         Bottle * tempBottle =   incomingBottle->get(1).asList();                     
                         if (tempBottle != NULL){
-                            x1  =   abs(tempBottle->get(0).asInt()); // Divison by scale signifies an external constraint
-                            y1  =   abs(tempBottle->get(1).asInt()); // as in our case we have images and dimensions coming from
-                            x2  =   abs(tempBottle->get(2).asInt()); // different modules.
+                            x1  =   abs(tempBottle->get(0).asInt()); 
+                            y1  =   abs(tempBottle->get(1).asInt()); 
+                            x2  =   abs(tempBottle->get(2).asInt()); 
                             y2  =   abs(tempBottle->get(3).asInt());
                             ID  =   tempBottle->get(4).asInt();  
 							x	=	(x1+x2)/2;
