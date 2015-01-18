@@ -1,0 +1,24 @@
+ Waiting for user goal 
+Sending snapshot to EPIM 
+Receiving Plan from server
+Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event
+Sending snapshot to EPIM 
+Receiving Plan from server
+Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event
+Exploring possibilities with Objects: Sending Object Hub activations to EPIM
+Sending snapshot to EPIM 
+Receiving Plan from server
+Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event
+Sending snapshot to EPIM 
+Receiving Plan from server
+Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event
+Sending snapshot to EPIM 
+Receiving Plan from server
+Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event
+Sending snapshot to EPIM 
+Receiving Plan from server
+Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event
+Sending snapshot to EPIM 
+Receiving Plan from server
+Minimal energy Plan or MemoChunk recd sucessfully: Requesting EPIM to wait for next event
+ Waiting for user goal 

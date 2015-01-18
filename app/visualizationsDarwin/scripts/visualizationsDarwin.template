@@ -1,245 +1,50 @@
 <application>
-<name>cognitiveGui</name>
-<dependencies>
+<authors>
+    <author email="ajaz.bhat@iit.it">Ajaz Bhat</author>
+</authors>
 
+<name>visualizationsDarwin</name>
+<dependencies>
   <port>/PlanXplore:o</port>
   <port>/Hub:o</port>
   <port>/Useful/PastXperiences:o</port>
   <port>/MyRemembered:o</port>
   <port>/PMP/activations:o</port>
-
+  <port>/grasp/yarp:i</port>
 </dependencies>
 
-<!--
-<module>
-  <name>yarpview</name>
-  <parameters>--name /partialCueView0 --x 000 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub16</node>
-  <tag>partialCueView0</tag>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /partialCueView1 --x 170 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>partialCueView1</tag>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /partialCueView2 --x 340 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>partialCueView2</tag>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /partialCueView3 --x 510 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>partialCueView3</tag>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /partialCueView4 --x 680 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>partialCueView4</tag>
-  <node>icub-cuda</node>
-</module>
-
--->
 
 
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /rememberedView0 --x 000 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>rememberedView0</tag>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /rememberedView1 --x 170 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>rememberedView1</tag>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /rememberedView2 --x 340 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>rememberedView2</tag>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /rememberedView3 --x 510 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>rememberedView3</tag>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /rememberedView4 --x 680 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>rememberedView4</tag>
-  <node>icub-cuda</node>
-</module>
-
-
-
-
-<!--
-<module>
-  <name>yarpview</name>
-  <parameters>--name /hubView0 --x 000 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>hubView0</tag>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /hubView1 --x 170 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>hubView1</tag>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /hubView2 --x 340 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>hubView2</tag>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /hubView3 --x 510 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>hubView3</tag>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /hubView4 --x 680 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
-  <tag>hubView4</tag>
-  <node>icub-cuda</node>
-</module>
--->
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /hubObjectView    --x 000 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>hubObjectView</tag>
-</module>
-<module>
-  <name>yarpview</name>
-  <parameters>--name /hubBodyView --x 170 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>hubBodyView</tag>
-</module>
-
-
-
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /plan1View     --x 340 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>plan1View</tag>
-</module>
-<module>
-  <name>yarpview</name>
-  <parameters>--name /plan2View     --x 510 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>plan2View</tag>
-</module>
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /weightView     --x 10 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>weightView</tag>
-</module>
-
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /observerObjectView     --x 200 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>observerObjectView</tag>
-</module>
-<module>
-  <name>yarpview</name>
-  <parameters>--name /observerBodyView     --x 400 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>observerBodyView</tag>
-</module>
-<module>
-  <name>yarpview</name>
-  <parameters>--name /observerActionView     --x 600 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>observerActionView</tag>
-</module>
-<module>
-  <name>yarpview</name>
-  <parameters>--name /observerColorWordShapeView     --x 780 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>observerColorWordShapeView</tag>
-</module>
-
-
-<module>
-  <name>yarpview</name>
-  <parameters>--name /motorNeuronalActivations     --x 1020 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
-  <node>icub-cuda</node>
-  <tag>motorNeuronalActivations</tag>
-</module>
-
-
-
-<!--
-<module>
-  <name>DarwinObserver</name>
-  <parameters>--name /DarwinObserver </parameters>
-  <tag>DarwinObserver</tag>
-  <node>icub-cuda</node>
-</module>
--->
-
-
-
-<module>
-  <name>TheNewEpiM</name>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>OPC</name>
-  <node>icub-cuda</node>
-</module>
-
-<module>
-  <name>PMPRX_Neural</name>
-  <node>icub-cuda</node>
-</module>
+<!-- IIT_DARWIN GUI Modules -->
 
 <module>
   <name>emPlotter</name>
   <parameters>--name /emPlotter </parameters>
   <tag>emPlotter</tag>
-  <node>icub-cuda</node>
+  <node>icub16</node>
 </module>
 <module>
   <name>neuronsVisualization</name>
   <parameters>--name /neuronsVisualization</parameters>
   <tag>neuronsVisualization</tag>
-  <node>icub-cuda</node>
+  <node>icub16</node>
+</module>
+<module>
+  <name>visualizationControl</name>
+  <parameters>--name /visualizationControl</parameters>
+  <tag>visualizationControl</tag>
+  <node>icub16</node>
+</module>
+<module>
+  <name>visualizationGui</name>
+  <parameters>--name /visualizationGui</parameters>
+  <tag>visualizationGui</tag>
+  <node>icub16</node>
 </module>
 
 
 
-
-
+<!-- connections from IIT_DARWIN Cognitive Modues and partners to Guis-->
 
 <connection>
   <from>/PlanXplore:o</from>
@@ -282,7 +87,209 @@
   <protocol>udp</protocol>
 </connection>
 
+<connection>
+  <from>/PMP/activations:o</from>
+  <to>/neuronsVisualization/data:i</to>
+  <protocol>tcp</protocol>
+</connection>
 
+<connection>
+  <from>/VisControl/GraspControl:o</from>
+  <to>/grasp/yarp:i</to>
+  <protocol>tcp</protocol>
+</connection>
+
+
+
+
+<!---Yarp  Viewers for IIT_DARWIN modules --> 
+
+<!--
+<module>
+  <name>yarpview</name>
+  <parameters>--name /partialCueView0 --x 000 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>partialCueView0</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /partialCueView1 --x 170 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>partialCueView1</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /partialCueView2 --x 340 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>partialCueView2</tag>
+  <node>icub16</node>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /partialCueView3 --x 510 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>partialCueView3</tag>
+  <node>icub16</node>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /partialCueView4 --x 680 --y 0 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>partialCueView4</tag>
+  <node>icub16</node>
+</module>
+
+-->
+
+
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /rememberedView0 --x 000 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>rememberedView0</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /rememberedView1 --x 170 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>rememberedView1</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /rememberedView2 --x 340 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>rememberedView2</tag>
+  <node>icub16</node>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /rememberedView3 --x 510 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>rememberedView3</tag>
+  <node>icub16</node>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /rememberedView4 --x 680 --y 150 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>rememberedView4</tag>
+  <node>icub16</node>
+</module>
+
+
+
+
+<!--
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView0 --x 000 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>hubView0</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView1 --x 170 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>hubView1</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView2 --x 340 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>hubView2</tag>
+  <node>icub16</node>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView3 --x 510 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>hubView3</tag>
+  <node>icub16</node>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubView4 --x 680 --y 300 --w 160 --h 140 --RefreshTime 33</parameters>
+  <tag>hubView4</tag>
+  <node>icub16</node>
+</module>
+-->
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubObjectView    --x 000 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>hubObjectView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /hubBodyView --x 170 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>hubBodyView</tag>
+</module>
+
+
+
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /plan1View     --x 340 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>plan1View</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /plan2View     --x 510 --y 450 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>plan2View</tag>
+</module>
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /weightView     --x 10 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>weightView</tag>
+</module>
+
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerObjectView     --x 200 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>observerObjectView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerBodyView     --x 400 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>observerBodyView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerActionView     --x 600 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>observerActionView</tag>
+</module>
+<module>
+  <name>yarpview</name>
+  <parameters>--name /observerColorWordShapeView     --x 780 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>observerColorWordShapeView</tag>
+</module>
+
+
+<module>
+  <name>yarpview</name>
+  <parameters>--name /motorNeuronalActivations     --x 1020 --y 650 --w 160 --h 140 --RefreshTime 33</parameters>
+  <node>icub16</node>
+  <tag>motorNeuronalActivations</tag>
+</module>
+
+<!-- Connections from Guis to Yarp Viewers>
 
 <connection>
   <from>/emPlotter/partialQ0/img:o</from>
@@ -423,17 +430,14 @@
   <protocol>udp</protocol>
 </connection>
 
-
-<connection>
-  <from>/PMP/activations:o</from>
-  <to>/neuronsVisualization/data:i</to>
-  <protocol>tcp</protocol>
-</connection>
 <connection>
   <from>/neuronsVisualization/image:o</from>
   <to>/motorNeuronalActivations</to>
   <protocol>udp</protocol>
 </connection>
+
+
+
 
 
 </application>

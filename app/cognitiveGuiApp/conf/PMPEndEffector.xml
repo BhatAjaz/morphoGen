@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<portscope rows="1" columns="1" carrier="mcast">
+    <plot gridx="0"
+          gridy="0"
+          hspan="1"
+          vspan="1"
+          title="PMP Time"
+          size="1000"
+          minval="0"
+          maxval="20"
+          bgcolor="Light Grey">
+        <graph remote="/PMP/cmd/endEffector:o"
+               index="0"
+               color="Blue"
+               title="Time"
+               type="Line"
+               size="2" />
+    </plot>
+
+
+    
+	<plot gridx="0"
+		  gridy="1"
+		  hspan="1"
+		  vspan="1"
+		  title="PMP AXIS (X,Y,Z)"
+		  size="1000"
+		  minval="-10"
+		  maxval="340"
+		  bgcolor="Light Grey">
+		<graph remote="/PMP/cmd/endEffector:o"
+			   index="1"
+			   color="Blue"
+			   title="PMP X-axis"
+			   type="Line"
+			   size="2" />
+         
+    <graph remote="/PMP/cmd/endEffector:o"
+               index="2"
+               color="Red"
+               title="PMP Y-axis"
+               type="Line"
+               size="2" />
+               
+    <graph remote="/PMP/cmd/endEffector:o"
+               index="3"
+               color="Green"
+               title="PMP Z-Axis"
+               type="Line"
+               size="2" />
+
+    </plot>
+
+    
+	<plot gridx="1"
+		  gridy="0"
+		  hspan="1"
+		  vspan="1"
+		  title="PMP Estimation Error"
+		  size="1000"
+		  minval="-10"
+		  maxval="10"
+		  bgcolor="Light Grey">
+		<graph remote="/PMP/cmd/endEffector:o"
+               index="4"
+               color="Magenta"
+               title="Mean Square Error"
+               type="Line"
+               size="2" />
+
+	</plot>
+
+
+
+    <plot gridx="1"
+          gridy="1"
+          hspan="1"
+          vspan="1"
+          title="Alignment: XY Distance between Fuse Tip and Hole"
+          size="1000"
+          minval="0"
+          maxval="20"
+          bgcolor="Light Grey">
+        <graph remote="/alignPlot:o"
+               index="0"
+               color="Light Green"
+               title="Alignment Distance"
+               type="Line"
+               size="2" />
+    </plot>
+
+
+
+
+</portscope>

@@ -1,0 +1,30 @@
+<application>
+<name>yarpscopeGui</name>
+
+
+<!--
+<module>
+  <name>yarpscope</name>
+  <parameters>--name /finger --x 000--y 000 --w 280 --h 210 --RefreshTime 33 --xml fingersScope.xml  --context yarpScopeDarwin</parameters>
+  <tag>finger</tag>
+  <node>icub16</node>
+</module>
+-->
+
+<module>
+  <name>yarpscope</name>
+  <parameters>--name /PMPEndEffector --x 320 --y 000 --w 280 --h 210 --RefreshTime 33 --xml PMPEndEffector.xml  --context cognitiveGuiApp</parameters>
+  <tag>PmpEndEffector</tag>
+  <node>icub16</node>
+</module>
+
+<module>
+  <name>yarpscope</name>
+  <parameters>--name /PMPJoints --x 620 --y 000 --w 280 --h 210 --RefreshTime 33 --xml PMPJoints.xml  --context cognitiveGuiApp</parameters>
+  <tag>PMPJoints</tag>
+  <node>icub16</node>
+</module>
+
+
+
+</application>
