@@ -70,6 +70,7 @@ bool EpisodicMemThread::threadInit() {
 	N=1000;
 	PrevSentPlan=50;
 	Network::connect("/what-to-do:o", "/world/analysis:i"); 
+	InitializeAM();
 	//Network::connect("/Strategy:o", "/strategy:i");  //check this
 	//Network::connect("/AckObserver:o","/EpimAck:i"); 
    
@@ -88,12 +89,12 @@ std::string EpisodicMemThread::getName(const char* p) {
     return str;
 }
 
-void EpisodicMemThread::setPath(string inS) {
-    pathPrefix	= inS.c_str();
-}
-
 void EpisodicMemThread::setInputPortName(string InpPort) {
     
+}
+
+void EpisodicMemThread::setPath(string inS) {
+    pathPrefix	= inS.c_str();
 }
 
 void EpisodicMemThread::run()
@@ -109,23 +110,24 @@ void EpisodicMemThread::run()
 			
 			if(!request.isNull()) {
 				printf("%s \n",request.toString().c_str());
-				cout<<"request!=NULL"<<endl;
+				//cout<<"request!=NULL"<<endl;
 				// request present
 				//reading
 				int cmd = request.get(0).asVocab();
-				cout<<cmd<<endl;
+				//cout<<cmd<<endl;
 				Goal_Context=request.get(1).asInt();
                 HubQuery=request.get(2).asInt();
-				cout<<"Goal Context is " << Goal_Context << "Hub context is" << HubQuery <<endl;
+				//cout<<"Goal Context is " << Goal_Context << "Hub context is" << HubQuery <<endl;
 				GoalID=request.get(3).asInt();
-				cout<<"ActionHUB ID is"<<GoalID<<endl;
+				GoalIDRef=GoalID;
+				//cout<<"ActionHUB ID is"<<GoalID<<endl;
                 NoB=request.get(4).asDouble();
-				cout<<"There are " << NoB << "neural activations in Hub" << HubQuery <<endl;
+				//cout<<"There are " << NoB << "neural activations in Hub" << HubQuery <<endl;
 				Largeness=request.get(5).asInt();
 
-                cout << Largeness << endl;
+                //cout << Largeness << endl;
 				ReplanStatus=request.get(6).asInt();
-				cout<< "Replan Status:::::" << ReplanStatus <<endl;
+				//cout<< "Replan Status:::::" << ReplanStatus <<endl;
 			   //=================================================================================
 
 				 for (int m =0; m<42; m++)
@@ -141,10 +143,13 @@ void EpisodicMemThread::run()
 					for(int i=0;i<NoB;i++)
 						{
 						  xid = request.get(i+7).asInt();
-						  if((xid != 50)&&(HubQuery==1))
+						  if((HubQuery==1))
 						  {
-							 OHub[xid]=1;
+							 OHub[i]=xid;
 							 cout << "Object HUB ID received" << xid << endl;
+							 if(Goal_Context!=1400){
+							 Goal_Context=50;
+							 }
 						  }
 						   if(HubQuery==2)
 						  {
@@ -158,11 +163,11 @@ void EpisodicMemThread::run()
                      if(Largeness == 1)
 						  {
 							 OHub[37]=1;  //size related neural activation
-							 cout<<"Largeness"<<Largeness<<endl;
+							 //cout<<"Largeness"<<Largeness<<endl;
 						  }  
 					 if(Largeness == 0)
 						  {
-							 OHub[36]=1;  //size related neural activation
+							 OHub[36]=0;  //size related neural activation
 						  }  
 					  if(ReplanStatus == 0)
 						  {
@@ -177,11 +182,11 @@ void EpisodicMemThread::run()
 							   SumVSSP=SumVSSP+OHub[m];
 							}
 					   }
-					cout << "Visuo Spatial sketch pad cumulative activity" << "\t" << SumVSSP << endl ;
-			        cout << "Remembering and Planning" << endl ;
+					//cout << "Visuo Spatial sketch pad cumulative activity" << "\t" << SumVSSP << endl ;
+			        //cout << "Remembering and Planning" << endl ;
 
 					//========================================================
-        if( HubQuery ==1) {
+        /*if( HubQuery ==1) {
 					  Bottle& HBU = HubObject.prepare();
 					  HBU.clear();
 					  HBU.addString("hubObject");
@@ -208,7 +213,7 @@ void EpisodicMemThread::run()
 					
 					    cout<<"Sending Plan to DARWIN GUI related to body hub"<<endl;
              	HubBody.write();
-          }
+          }*/
 					//========================================================
 
 					//make bottle to command VSSP bottom up activations to GUI here... 
@@ -228,20 +233,27 @@ void EpisodicMemThread::run()
 					response.addInt(41);
 					ChunkTerminate=iSPlan;
 				 }
-			   cout << "Sending out plan to Client" << endl;
+			   //cout << "Sending out plan to Client" << endl;
 					for(int i=0;i<1000;i++)
 						{
 						  response.addInt(PlanPastExp[i]);
 						}
-					cout<<"Point of Chunk Termination is"<<ChunkTerminate<<endl;
+					//cout<<"Point of Chunk Termination is"<<ChunkTerminate<<endl;
 					response.addInt(ChunkTerminate);
 					ObserverResponse.reply(response);
-						
-                fileName = pathPrefix;
-				fileName.append("PXper.txt");
-				ofstream PXper(fileName.c_str());
+					
+					fileName = pathPrefix;
+					fileName.append("PXper.txt");
+					ofstream PXper(fileName.c_str());	
+					for(int i=0; i<1000; i++)
+					{
+					 PXper<< PlanPastExp[i] <<endl;
+                     //planvalues.addInt(PlanPastExp[i]);
+					}
+					PXper.close();
+               // ofstream PXper("PXper.txt");
 
-				Bottle& Plan = PlanorXplore.prepare();
+				/*Bottle& Plan = PlanorXplore.prepare();
 				Plan.clear();
 				Plan.addString("plan1");
 				Bottle& planvalues = Plan.addList();
@@ -252,8 +264,8 @@ void EpisodicMemThread::run()
                      planvalues.addInt(PlanPastExp[i]);
 					}
 				
-			    cout<<"Sending Plan to DARWIN GUI"<<endl;
-             	PlanorXplore.write();
+			    //cout<<"Sending Plan to DARWIN GUI"<<endl;
+             	PlanorXplore.write();*/
 				//printf("%s \n",PlanResponse.toString().c_str());
 
 				//int Planresponsecode = PlanResponse.get(0).asInt();
@@ -266,19 +278,17 @@ void EpisodicMemThread::run()
 				
 			}
 			else {
-				cout<<"null requst"<<endl;
+				//cout<<"null requst"<<endl;
 			}
 		}
 	
-		Time::delay(1);
+		//Time::delay(1);
 
 	}
 	
 }
 
 void EpisodicMemThread::threadRelease() {
- 	free(data);
-	delete data;
     // nothing
 	ObserverResponse.close();
 	PlanF.close();
@@ -295,19 +305,19 @@ void EpisodicMemThread::onStop() {
 void EpisodicMemThread:: MemControl(int HubQuery, int GoalContext)
 	{
 		 int iCo;
+		 //ofstream PXper("PXper.txt");
 		 fileName = pathPrefix;
 		 fileName.append("PXper.txt");
 		 ofstream PXper(fileName.c_str());
-		 InitializeAM();
 		 int Nrelevent=RememberPast(HubQuery,GoalContext);  //remember my past episodic experiences based on the present context/hubs active/user goal
-		 if((HubQuery==1)||(GoalContext==4)) //activations in object or action hubs relayed by Observer or User
+		 if((GoalContext==4)) //activations in object or action hubs relayed by Observer or User
 			 {
 			 int nwinner=TDMemCompHub(Nrelevent); // find which memories out of all those rememebred are msot valuable	 
 			 int noverl=FindOverlap(nwinner); // find how various rememebred expereinces overlap in the knowledge they encode
 			 RipRealSequence(nwinner); // Take out useful object action sequnces that can be enacted in the present from these memories
 			 PlanFromPastXP(nwinner,noverl);   // synthesize a novel behaviour or combine past experience with exploration
 			 }
-		  if((HubQuery==2)||(GoalContext=14)) //activations in object or action hubs relayed by Observer or User
+		  if((HubQuery==1)||(HubQuery==2)||(GoalContext=14)) //activations in object or action hubs relayed by Observer or User
 			 {
              if(Nrelevent!=0)
 			 {
@@ -317,7 +327,7 @@ void EpisodicMemThread:: MemControl(int HubQuery, int GoalContext)
 			 }
 			 	
     //Make bottle to command to GUI about plotting remembered experiences /VM
-				Bottle& Plan = PlanorXplore.prepare();
+				/*Bottle& Plan = PlanorXplore.prepare();
 				Plan.clear();
 				Plan.addString("plan1");
 				Bottle& planvalues = Plan.addList();
@@ -328,8 +338,9 @@ void EpisodicMemThread:: MemControl(int HubQuery, int GoalContext)
                      planvalues.addInt(PlanPastExp[i]);
 					}
 				
-			    cout<<"Sending Plan to DARWIN GUI"<<endl;
+			    //cout<<"Sending Plan to DARWIN GUI"<<endl;
              	PlanorXplore.write();
+				*/
 
 			 }
 
@@ -347,7 +358,7 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 						if(NWine==1)
 							{
 							  Pctrr=0;
-						      cout << "Past Exp sequnce is directly available without  recombination/chunking" << endl;
+						      //cout << "Past Exp sequnce is directly available without  recombination/chunking" << endl;
 							   for(iCo=0; iCo<IndexM[0]; iCo++)
 										 {
 										 for(jCo=0; jCo<50; jCo++)
@@ -359,11 +370,11 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 							   PEnd=Pctrr;
 								   if((SumVSSP-SumTopDown)<0.8)
 									  {
-										  cout << "Full knowledge exists in past experiences: Plan Synthesized! " << endl;
+										  //cout << "Full knowledge exists in past experiences: Plan Synthesized! " << endl;
 									  } 
 								   if((SumVSSP-SumTopDown)>0.75)
 									  {
-										  cout << "Combining past experience with exploration: On novel objects " << endl;
+										  //cout << "Combining past experience with exploration: On novel objects " << endl;
 										  Olala=NovelObID[0];
 										  XploreCombact(Olala); 
 									  } 
@@ -371,7 +382,7 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 
 						if(NWine==2)
 							{
-						      cout << "need to combine nonoverlapping chunks of knowledge " << endl;
+						      //cout << "need to combine nonoverlapping chunks of knowledge " << endl;
 								// here u have to copy paste first action seq in usefulacseq as the plan
                             //=================================================================
 				for(composi=Largeness; composi<2; composi++)
@@ -403,8 +414,8 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 								PEnd=Pctrr;
                                 if((SumVSSP-SumTopDown)<0.5)
 									  {
-										  cout << "Full knowledge exists in past experiences: Plan Synthesized! " << endl;
-										  cout << "Trigger explorative action sequence 1 ? " << endl;
+										  //cout << "Full knowledge exists in past experiences: Plan Synthesized! " << endl;
+										  //cout << "Trigger explorative action sequence 1 ? " << endl;
 									  }
 
 								   if((SumVSSP-SumTopDown)>0.5)
@@ -442,7 +453,7 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
                              PEnd=Pctrr;
                                 if((SumVSSP-SumTopDown)<0.5)
 									  {
-										  cout << "Full knowledge exists in past experiences: Plan Synthesized! " << endl;
+										  //cout << "Full knowledge exists in past experiences: Plan Synthesized! " << endl;
 										//  cout << "Trigger explorative action sequence 2 ? " << endl;
 									  } 
 								   if((SumVSSP-SumTopDown)>0.5)
@@ -464,11 +475,11 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 					  MemComb(NWine);	
 					   if((SumVSSP-SumTopDown)<0.5)
 						  {
-							  cout << "Full knowledge exists the novel action sequence synthesized by recombinign memories! " << endl;
+							  //cout << "Full knowledge exists the novel action sequence synthesized by recombinign memories! " << endl;
 						  } 
 					  if((SumVSSP-SumTopDown)>0.5)
 						  {
-							  cout << "Combining past experience with exploration: On novel objects " << endl;
+							  //cout << "Combining past experience with exploration: On novel objects " << endl;
 							  Olala=NovelObID[0];
 							  XploreCombact(Olala); 
 						  }     
@@ -481,7 +492,7 @@ void EpisodicMemThread:: PlanFromPastXP(int NWine, int Noverlapp)
 		{
 		  int NovObID, iCo,jCo;
 		  NovObID=Ola;
-		  cout<<"entered Xplore mode: New object"<< Ola <<endl;
+		  //cout<<"entered Xplore mode: New object"<< Ola <<endl;
 		  for(jCo=0; jCo<42; jCo++)
 				{
 					if((jCo==NovObID)||(jCo==36)){
@@ -526,7 +537,7 @@ void EpisodicMemThread::MemComb(int NWiner)
 										   if((jCo==OLap[0])&&(ConcMem[compo][conccnt]==1))
 										   {
 											dis[0]=iCo;
-											cout << "Olap Element Mem1" << dis[0]<< endl;
+											//cout << "Olap Element Mem1" << dis[0]<< endl;
 										   }
 									   }
 										if(iCo >=IndexM[0])
@@ -535,7 +546,7 @@ void EpisodicMemThread::MemComb(int NWiner)
 											   if((jCo==OLap[0])&&(ConcMem[compo][conccnt]==1))
 											   {
 												dis[1]=iCo;
-												cout << "Olap Element Mem2" << dis[1]<< endl;
+												//cout << "Olap Element Mem2" << dis[1]<< endl;
 											   }
 											   coun2=coun2+1;
 											}
@@ -549,7 +560,7 @@ void EpisodicMemThread::MemComb(int NWiner)
 										   if((jCo==OLap[0])&&(ConcMem[compo][conccnt]==1))
 										   {
 											dis[0]=iCo;
-											cout << "Olap Element Mem1" << dis[0]<< endl;
+											//cout << "Olap Element Mem1" << dis[0]<< endl;
 										   }
 									   }
 										if(iCo >=IndexM[1])
@@ -558,7 +569,7 @@ void EpisodicMemThread::MemComb(int NWiner)
 											   if((jCo==OLap[0])&&(ConcMem[compo][conccnt]==1))
 											   {
 												dis[1]=iCo;
-												cout << "Olap Element Mem2" << dis[1]<< endl;
+												//cout << "Olap Element Mem2" << dis[1]<< endl;
 											   }
 											   coun2=coun2+1;
 											}
@@ -570,7 +581,7 @@ void EpisodicMemThread::MemComb(int NWiner)
 						 }// end of iCo loop
 
 						 disDiff[compo]=dis[1]-dis[0];
-						 cout << "Compo diss diff" << compo << "   " << disDiff[compo]<< endl;
+						 //cout << "Compo diss diff" << compo << "   " << disDiff[compo]<< endl;
 
 						}// end of compo loop 
 							
@@ -637,9 +648,10 @@ void EpisodicMemThread::MemComb(int NWiner)
 void EpisodicMemThread:: RipRealSequence(int nme)
 	{
 	 int iCo,jCo,jCoo,MCnt,UnfM[20][50], UseSeq[20][50];
-	 fileName = pathPrefix;
-	 fileName.append("UsefulAcSeqs.txt");
-	 ofstream UsePCue(fileName.c_str());
+					fileName = pathPrefix;
+					fileName.append("UsefulAcSeqs.txt");
+					ofstream UsePCue(fileName.c_str());
+	 //ofstream UsePCue("UsefulAcSeqs.txt");
      for(MCnt=0; MCnt<nme; MCnt++)
 	 {
 //====================================================================================
@@ -701,11 +713,11 @@ void EpisodicMemThread:: RipRealSequence(int nme)
   // ========================================================================================================        
   //for MCnt ends below
 	 }
-	 for(iCo=0; iCo<nme; iCo++)
-	  {
+	 //for(iCo=0; iCo<nme; iCo++)
+	  //{
 
-		cout<<"Sending useful experiences DARWIN GUI: "<<iCo<<endl;
-		Bottle& Useful = UsefulPastXperiences.prepare();	
+		//cout<<"Sending useful experiences DARWIN GUI: "<<iCo<<endl;
+		/*Bottle& Useful = UsefulPastXperiences.prepare();	
 		Useful.clear();
 
 		 string str;
@@ -744,11 +756,11 @@ void EpisodicMemThread:: RipRealSequence(int nme)
 			usevalues.addInt(NowObAcSeq[iCo][jCo]);
 		}
 	 
-	UsefulPastXperiences.write();  
+	UsefulPastXperiences.write();*/  
 	//RememberedMemories.write();
-	Time::delay(2);
+	//Time::delay(2);
 
-	}
+	//}
    	};
 
 int EpisodicMemThread::FindOverlap(int NW)
@@ -762,20 +774,20 @@ int EpisodicMemThread::FindOverlap(int NW)
 	  NNovobs=0;
 	  if(NW==1)
 		  {
-		  cout << "There is a single winner" << endl;
+		  //cout << "There is a single winner" << endl;
            for(iCo=0; iCo<36; iCo++)
 				{
 					vssptddiff=VSSP[iCo]-HubTopDown[MemID[0]][iCo];
                  
 					if(vssptddiff>vsspThresh)
 						{
-							cout << "There is a novel object in VSSP that is not there in TD Hub activity" << endl;
+							//cout << "There is a novel object in VSSP that is not there in TD Hub activity" << endl;
 							NovelObID[NNovobs]=iCo;
 							NNovobs=NNovobs+1; //size issue is here : to solve it make VSSP neural activity 
 							//a unique ID that codes for both size and shape, only large objects need to be reassigned a new neuron
 						}
 				}
-		   cout << "Novel obejcts" << NNovobs <<endl;
+		   //cout << "Novel obejcts" << NNovobs <<endl;
 		  }
 
       if(NW==2)
@@ -792,14 +804,14 @@ int EpisodicMemThread::FindOverlap(int NW)
                    vssptddiff=VSSP[iCo]-(HubTopDown[MemID[0]][iCo]+HubTopDown[MemID[1]][iCo]);
 					if(vssptddiff>0.2)
 						{
-							cout << "There is a novel object in VSSP that is not there in TD Hub activity" << endl;
+							//cout << "There is a novel object in VSSP that is not there in TD Hub activity" << endl;
 							NovelObID[NNovobs]=iCo;
 							NNovobs=NNovobs+1; //size issue is here : to solve it make VSSP neural activity 
 							//a unique ID that codes for both size and shape, only large objects need to be reassigned a new neuron
 						} 
 			    }
-			cout << "No of overlaps" << "   " <<  Overl <<endl;
-			cout << "Novel obejcts" << NNovobs <<endl;
+			//cout << "No of overlaps" << "   " <<  Overl <<endl;
+			//cout << "Novel obejcts" << NNovobs <<endl;
 		   }
 return Overl;
  };
@@ -810,9 +822,11 @@ int EpisodicMemThread:: TDMemCompBodyHub(int Nrelevant) // this deals with top d
 		int SunHIB[6];
 		SumTopDownB=0;
 		ChunkTerminate=0;
-		fileName = pathPrefix;
-	 	fileName.append("MinEnergyPlan.txt");
-		ofstream HeeHuBod(fileName.c_str());
+					fileName = pathPrefix;
+					fileName.append("MinEnergyPlan.txt");
+					ofstream HeeHuBod(fileName.c_str());
+		//ofstream HeeHuBod("MinEnergyPlan.txt");
+
 		for(jCo=0; jCo<6; jCo++)
 						{
 							SunHIB[jCo]=0;
@@ -849,7 +863,7 @@ int EpisodicMemThread:: TDMemCompBodyHub(int Nrelevant) // this deals with top d
 											}
 									}  
         
-                   cout << "Anticipated Energy of memory"  << "\t" << comprel+1 << "is"  << "\t" << rewno  << endl;
+                   //cout << "Anticipated Energy of memory"  << "\t" << comprel+1 << "is"  << "\t" << rewno  << endl;
 					   if(rewno<MaxEnergy)
 					   {
                           MaxEnergy=rewno;
@@ -861,7 +875,7 @@ int EpisodicMemThread:: TDMemCompBodyHub(int Nrelevant) // this deals with top d
 		int counUnf=0;
 		int memindexy= MemIDBhub[0];
 		
-		cout << "MemindexY"  << "\t" <<  memindexy  << endl;
+		//cout << "MemindexY"  << "\t" <<  memindexy  << endl;
 					for(iCo=0; iCo<1000; iCo++)
 							{
 								 HeeHuBod<< NRelPast[memindexy][iCo]<< "    ";
@@ -869,10 +883,14 @@ int EpisodicMemThread:: TDMemCompBodyHub(int Nrelevant) // this deals with top d
 							 }
 						 HeeHuBod << "    " << endl; 
 
-  ChunkTerminate=SunHIB[memindexy];
+						ChunkTerminate=SunHIB[memindexy];
+						if((Goal_Context==1400)&&(ChunkTerminate==0))
+						{
+						ChunkTerminate=6;
+						}
   int MaxPlan=0;
   int tempMaxPlan=0;
-   for(iCo=0; iCo<6; iCo++)
+   for(iCo=0; iCo<9; iCo++)
 	   {
 		  int ScorePlanMem=0;
 		  for(jCo=0; jCo<1000; jCo++)
@@ -885,7 +903,7 @@ int EpisodicMemThread:: TDMemCompBodyHub(int Nrelevant) // this deals with top d
 		       PrevSentPlan=iCo;
 		  	  }
 		   }
-   cout << "Sending plan:::::"  << "\t" <<  PrevSentPlan  << endl;
+   //cout << "Sending plan:::::"  << "\t" <<  PrevSentPlan  << endl;
    return MaxEnergy;
    };
 
@@ -897,12 +915,14 @@ int EpisodicMemThread:: TDMemCompHub(int Nrelev)
 					 
 		SumTopDown=0;
 		fileName = pathPrefix;
-	 	fileName.append("HubTDownCont.txt");
+		fileName.append("HubTDownCont.txt");
 		ofstream HeeHu(fileName.c_str());
+		//ofstream HeeHu("HubTDownCont.txt");
 
 		fileName = pathPrefix;
-	 	fileName.append("HubTDCom.txt");
+		fileName.append("HubTDCom.txt");
 		ofstream HeeHoo(fileName.c_str());
+		//ofstream HeeHoo("HubTDCom.txt");
        
 				   for(jCo=0; jCo<6; jCo++)
 						{
@@ -952,7 +972,7 @@ int EpisodicMemThread:: TDMemCompHub(int Nrelev)
 											}
 									}  
                    
-                   cout << "Anticipated reward for memory"  << "\t" << comprel+1 << "is" << "\t" << nom << "\t"  << InstMk << "\t" << rewno  << endl;
+                   //cout << "Anticipated reward for memory"  << "\t" << comprel+1 << "is" << "\t" << nom << "\t"  << InstMk << "\t" << rewno  << endl;
 				//   HubActNote[comprel][6]=nom;
 				  				   
 	//====================== here u extract the top down influence of this experience =============================
@@ -979,7 +999,7 @@ int EpisodicMemThread:: TDMemCompHub(int Nrelev)
        //    if(Largeness==1)
 		//			 {
 		//			   SunhiDiff=0.95;
-		//			   cout<<"Setting sunhiDiff"<<SunhiDiff<<endl;
+		//			   //cout<<"Setting sunhiDiff"<<SunhiDiff<<endl;
 		//			 }
 if(Nrelev>1)
 		{
@@ -1037,19 +1057,19 @@ for(iCo=0; iCo<Nrelev; iCo++)
 					 {
 					  Nmemos=Nmemos+1;
 					  MemID[Nmemos-1]=iCo;
-					  cout << "Winning MemID"  << "  " << MemID[Nmemos-1] << " power " << SunHI[Nrelev] << " No of winners so far " << Nmemos  <<endl ;
-                      cout<<SunhiDiff<<endl; 					
+					  //cout << "Winning MemID"  << "  " << MemID[Nmemos-1] << " power " << SunHI[Nrelev] << " No of winners so far " << Nmemos  <<endl ;
+                      //cout<<SunhiDiff<<endl; 					
 					 }
 					 SumTopDown=SumTopDown+SunHI[Nrelev];
     }
 //here we get the final result of competing memories, know how many survived Nmemos, who all are they...
-cout << "Top Down Sum"  << "  " << SumTopDown << endl ;
+//cout << "Top Down Sum"  << "  " << SumTopDown << endl ;
 
-for(iCo=0; iCo<Nrelev; iCo++)
-	  {
+//for(iCo=0; iCo<Nrelev; iCo++)
+	  //{
 
-		cout<<"Sending Hub Top Down Competition components to DARWIN GUI: "<<iCo<<endl;
-		Bottle& HubTDOWN = HumTopDownCompete.prepare();	
+		//cout<<"Sending Hub Top Down Competition components to DARWIN GUI: "<<iCo<<endl;
+		/*Bottle& HubTDOWN = HumTopDownCompete.prepare();	
 		HubTDOWN.clear();
 
 		 string str;
@@ -1088,11 +1108,11 @@ for(iCo=0; iCo<Nrelev; iCo++)
 			hubvalues.addDouble(HubTopDown[iCo][jCo]);
 		}
 	 
-	HumTopDownCompete.write();  
+	HumTopDownCompete.write();*/  
 	//RememberedMemories.write();
-	Time::delay(0.2);
+	//Time::delay(0.2);
 
-	}
+	//}
 
 return Nmemos;
 	};
@@ -1103,16 +1123,24 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 {
 	int icn,HE[1000],AE[1000],sumhe,tempHE,iCo,jCo,VunF[20][50],TagPQ,ActivIndex;  //OHub WHub2Epim Episodes
 	kk=0;
-	fileName = pathPrefix;
-	fileName.append("PCue.txt");
-	ofstream PCue(fileName.c_str());
+		fileName = pathPrefix;
+		fileName.append("PCue.txt");
+		ofstream PCue(fileName.c_str());
+	//ofstream PCue("PCue.txt");
 
-	fileName = pathPrefix;
-	fileName.append("HeEpMult.txt");
-	ofstream Hee(fileName.c_str());		 
-	for(icn=0; icn<6; icn++) //NumEpi //Made this change to test online learning
+		fileName = pathPrefix;
+		fileName.append("HeEpMult.txt");
+		ofstream Hee(fileName.c_str());
+	//ofstream Hee("HeEpMult.txt");	 
+		int sttr=0; 
+		int endtr=0;
+		if(Goal_Context==1400)
+		{
+		  sttr=7;
+		}
+	for(icn=sttr; icn<NumEpi; icn++) //NumEpi //VM Made this change to test online learning
 			{
-				if(icn!=PrevSentPlan)
+				if((icn!=PrevSentPlan)&&(icn!=6)) //VM made change here to take into account word:Assemble
 				{
 				for(iCo=0; iCo<20; iCo++)
 							{
@@ -1155,17 +1183,18 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 							TagPQ=1;
 							kk=kk+1;
 							cout<<"generating Partial cue"<<kk<<"  "<<icn<< tempHE <<endl;
-						//=====================Add Acn==============================================
-							for(iCo=0; iCo<1000; iCo++)
-									{
-										int pr_CooA=0;
-										 for(jCo=0; jCo<9; jCo++)
-											{
-												pr_CooA = pr_CooA + WAct2Epim[iCo][jCo]*Action[jCo];
-											}
 
-										AE[iCo]=(pr_CooA+HE[iCo])*Episodes[icn][iCo]; //bloody
-									}
+						//=====================Add Acn==============================================
+							//for(iCo=0; iCo<1000; iCo++)   //commented VM 12 12
+							//		{
+							//			int pr_CooA=0;
+							//			 for(jCo=0; jCo<9; jCo++)
+							//				{
+							//					pr_CooA = pr_CooA + WAct2Epim[iCo][jCo]*Action[jCo];
+							//				}
+
+							//			AE[iCo]=(pr_CooA+HE[iCo])*Episodes[icn][iCo]; //bloody
+							//		}
 						// Increment no of past experiences, Add tags
 						// Retrieve full memo
 						// Store experience in WM
@@ -1175,7 +1204,8 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 									{
 									  for(jCo=0; jCo<50; jCo++)
 											{
-												VunF[iCo][jCo]=AE[counUnf];
+												//VunF[iCo][jCo]=AE[counUnf]; //converted to HE
+												VunF[iCo][jCo]=HE[counUnf];
 												counUnf=counUnf+1;
 											}
 										}
@@ -1196,32 +1226,62 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 								  }
 								} //this is for body hub tag
 							}
+							//=================================
+							if(HubID==1) //Object
+							{
+								 for(iCo=0; iCo<20; iCo=iCo+1)
+								{
+								  int sumUnf=0;
+								  for(jCo=0; jCo<50; jCo++)
+									  {
+									   sumUnf=sumUnf+VunF[iCo][jCo];
+									  }
+								  if(sumUnf>0)
+								  {
+								  VunF[iCo][49]=1;
+								  VunF[iCo][47]=1;
+								//  VunF[iCo][42]=1;
+								  }
+								} //this is for body hub tag
+								 if(GoalID==10)
+								 {
+								   VunF[0][49]=1;
+								   VunF[0][48]=1;
+								   VunF[0][9]=1;
+								   VunF[0][21]=1;
+
+								 }
+							}
 					}
 			
 				}
 
-		if((GoalRoot==14)&&(GoalNAact[icn][1]==GoalID))
+		if((GoalRoot==14)&&(GoalNAact[icn][1]==GoalIDRef))
 					  {
 					  kk=kk+1;
 					  //NRelEp=NRelEpi;
-				//	  cout<<"generating Partial cue for Goal"<<endl;
+				//	  //cout<<"generating Partial cue for Goal"<<endl;
 					  TagPQ=1;
 						  ActivIndex=GoalNAact[icn][0];
-						  VunF[ActivIndex-1][GoalID-1]=1; 
-						  VunF[ActivIndex-1][GoalID+11]=1; 
-						  VunF[ActivIndex-1][GoalID+23]=1; 
+						  VunF[ActivIndex-1][GoalIDRef-1]=1; 
 						  VunF[ActivIndex-1][48]=1; 
 						  VunF[ActivIndex-1][49]=1; 
 						  VunF[ActivIndex][47]=1; 
 						  VunF[ActivIndex][49]=1; 
-						  VunF[ActivIndex][47]=1; 
-						  VunF[ActivIndex][49]=1; //Pointer to the Global workspace activation
+						  if(GoalIDRef!=10){
+						 //Pointer to the Global workspace activation
+                          VunF[ActivIndex-1][GoalIDRef+11]=1; 
+						  VunF[ActivIndex-1][GoalIDRef+23]=1; 
 						  VunF[ActivIndex][38]=1; 
 						  VunF[ActivIndex][39]=1; 
 						  VunF[ActivIndex][40]=1; 
 						  VunF[ActivIndex][41]=1; 
+						  }
+						  if(GoalIDRef==10){
+						  VunF[ActivIndex][32]=1; 
+						  }
 					  }
-				// cout<<"Goal Partial Cue"<<VunF[6][0]<<VunF[6][49]<<endl;
+				// //cout<<"Goal Partial Cue"<<VunF[6][0]<<VunF[6][49]<<endl;
 				// printf("%d" "%d" "%d \n",kk,VunF[6][0],VunF[6][49]);
 				 //=======================================================================================
 			 if(TagPQ==1)
@@ -1246,7 +1306,7 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 						 Hee<< NRelPast[kk-1][iCo]<< "    ";
 						 }
 						 Hee << "    " << endl; 
-	     	 // cout<<"KK Val"<<kk<<endl; 
+	     	 // //cout<<"KK Val"<<kk<<endl; 
 				}
 
 				 //=======================================================================================
@@ -1257,14 +1317,14 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 	//===================================================================
 
 //GUI Commented out
-	//cout<<"Sending Remembered past experiences to DARWIN GUI"<<endl;
+	////cout<<"Sending Remembered past experiences to DARWIN GUI"<<endl;
 	//Bottle& Remembered = RememberedMemories.prepare();	
 	//Remembered.clear();
 	//Remembered.addInt(NRelEp-1);
 	//	// The GUI Stuff is commented //==============================================
  //   for(iCo=0; iCo<kk; iCo++)
 	//  {
-	//			cout<<"Sending Remembered past experiences to DARWIN GUI: "<<iCo<<endl;
+	//			//cout<<"Sending Remembered past experiences to DARWIN GUI: "<<iCo<<endl;
 	//			Bottle& Remembered = RememberedMemories.prepare();	
 	//			Remembered.clear();
 	//			string str;
@@ -1300,8 +1360,9 @@ int EpisodicMemThread::RememberPast(int HubID, int GoalRoot) // loops from the p
 	//			}
 	// 
 	//		RememberedMemories.write();
-	//		Time::delay(2);
- //   } 
+	//		//Time::delay(2);
+ //   }
+		PCue.close();
 	return kk;
 };
 
@@ -1329,7 +1390,7 @@ for (k=1; k<500; k++)
 			{
 			 inhibi=0;
 			}
-			//cout << inhibi << endl ;
+			////cout << inhibi << endl ;
 			//==================== Instantaneous VT 1000*1000 x 1000*1========================================
             int iCo,jCo;
 			for(iCo=0; iCo<N; iCo++)
@@ -1360,10 +1421,11 @@ for (k=1; k<500; k++)
 	  }
                				
 //=====================================================================
-     	int iCo; 
-      	fileName = pathPrefix;
-  		fileName.append("Remembered.txt");
-      	ofstream RecMem(fileName.c_str());
+      int iCo;
+		fileName = pathPrefix;
+		fileName.append("Remembered.txt");
+		ofstream RecMem(fileName.c_str());
+      //ofstream RecMem("Remembered.txt");
     			for (iCo=0; iCo<1000; iCo++)
 				    	{
                          if(Vsig[iCo]>0) 
@@ -1433,7 +1495,7 @@ void EpisodicMemThread::InitializeAM()
 	fileName.append("Numepi.txt");
 	//ifstream NEp(fileName.c_str()); //Commented it 07/12
    // NEp>> NumEpi;
-	NumEpi=6;//just for testing
+	NumEpi=10;//just for testing
 	//GoalID=1;//just for testing..this must come from the User-Observer loop
 	cout << "Number of episodes experiences in memory" << "\t" <<NumEpi << endl ;
 /*	if(Largeness==0)
@@ -1441,7 +1503,8 @@ void EpisodicMemThread::InitializeAM()
 		  NumEpi=3;
 		}*/  //This is related to stacking goal commented 07/12
   	fileName = pathPrefix;
-	fileName.append("Episodes7.txt");
+	//fileName.append("Episodes77N.txt");
+	fileName.append("E770.txt");  //append
 	ifstream EpiW(fileName.c_str());//loaded the weights for Reivesd Body Hub-Goal-Object Hub network , need to swich to the right neural net in the future based on Context
     if(!EpiW)     
            { cout << "Error opening Network weight matrix" << endl; }
@@ -1455,10 +1518,13 @@ void EpisodicMemThread::InitializeAM()
 						//  cout << Episodes[m][n] << endl ;
 					}
 				}
+
+		cout << "Loading Episodes" <<Episodes[6][0] << endl ;
 //===================================================================================
 
 	fileName = pathPrefix;
-	fileName.append("WMems7.txt");
+	//fileName.append("WMems77N.txt");
+	fileName.append("WeightNOPres.txt");
 	ifstream TCo(fileName.c_str());  //Episodic Patch new
 
 data = (int **) malloc(1000 * sizeof(int)); 
@@ -1474,7 +1540,7 @@ for (int h = 0; h < 1000; h++)
 	 for (n =0; n<1000; n++)
 				{
 						 TCo >> data[m][n];
-					     cout << data[m][n] ;
+					    // cout << data[m][n] ;
 					}
  }
 
@@ -1482,7 +1548,7 @@ for (int h = 0; h < 1000; h++)
 
  /////////////////////////////////////////////////////////////////////////////////////////////////Change to visualize weight matrix
 		
- Bottle& weight = PlanorXplore.prepare();
+ /*Bottle& weight = PlanorXplore.prepare();
 				weight.clear();
 				weight.addString("weight");
 				Bottle& weightValues = weight.addList();
@@ -1495,30 +1561,33 @@ for (int h = 0; h < 1000; h++)
                      weightValues.addInt(data[i][j]);
 					}
 				}
-			    cout<<"Sending Weight Matrix to DARWIN GUI"<<endl;
-             	PlanorXplore.write();
+			    //cout<<"Sending Weight Matrix to DARWIN GUI"<<endl;
+             	PlanorXplore.write();*/
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-
+ 
+		cout << "Loading Episodes" <<data[100][100] << endl ;
 	//DumpAM();
     //===================================================================================
 
  	fileName = pathPrefix;
 	fileName.append("cue.txt");
  	ifstream Cu(fileName.c_str());
-    { cout << "Loading partial cue" << endl;}
+    { //cout << "Loading partial cue" << endl;
+	}
 					for (n=0; n<1000; n++)
 					{
 						 Cu >> Uini[n];
 				    }
-                    cout << Uini[42] << endl ;
-					cout << Uini[55] << endl ;
+                    //cout << Uini[42] << endl ;
+					//cout << Uini[55] << endl ;
 //===================================================================================
 					// RetrievalFromCue();
 //===================================================================================
 fileName = pathPrefix;
-fileName.append("whepis.txt");
+ //fileName.append("whepisN.txt");
+fileName.append("WHubEpNew.txt");
 ifstream Whub(fileName.c_str());
   for (m =0; m<1000; m++)
 				{
@@ -1527,11 +1596,11 @@ ifstream Whub(fileName.c_str());
 						 Whub >> WHub2Epim[m][n];
 					}
 				}
-cout << "Loading Hub Epim Net" <<WHub2Epim[18][18] << endl ;
+cout << "Loading Hub Epim Net" <<WHub2Epim[73][23] << endl ;
 
 //===================================================================================
 fileName = pathPrefix;
-fileName.append("WHubToEpis.txt");
+fileName.append("WHubToEpisN.txt");
 ifstream WhubTt(fileName.c_str());
   for (m =0; m<42; m++)
 				{
@@ -1540,16 +1609,18 @@ ifstream WhubTt(fileName.c_str());
 						 WhubTt >> WHub2EpimT[m][n];
 					}
 				}
-cout << "Loading Hub Epim NetT" <<WHub2EpimT[18][18] << endl ;
+//cout << "Loading Hub Epim NetT" <<WHub2EpimT[18][18] << endl ;
 
 //===================================================================================
    	fileName = pathPrefix;
 	fileName.append("WActToEpis.txt");
    	ifstream WAcE(fileName.c_str());
     if(!WAcE)
-           { cout << "Error opening Hub Epim Net" << endl; }
+           { //cout << "Error opening Hub Epim Net" << endl;
+	}
     else
-           { cout << "Loading Act Epim Net" << endl;}
+           { //cout << "Loading Act Epim Net" << endl;
+	}
 		for (m =0; m<1000; m++)
 				{
 					for (n=0; n<9; n++)
@@ -1557,14 +1628,14 @@ cout << "Loading Hub Epim NetT" <<WHub2EpimT[18][18] << endl ;
 						 WAcE >> WAct2Epim[m][n];
 					}
 				}
-					cout << WAct2Epim[55][5] << endl ;
+					//cout << WAct2Epim[55][5] << endl ;
 					
 //===================================================================================
    
 //===================================================================================
    for (m =0; m<42; m++)
 	   {
-		OHub[m]=0;
+	//	OHub[m]=0;
 		VSSP[m]=0;
 		//BHub[m]=0;
 	   }
@@ -1585,7 +1656,7 @@ for (m =0; m<42; m++)
 			   SumVSSP=SumVSSP+OHub[m];
 			}
 	   }
-cout << "Visuo Spatial sketch pad cumulative activity" << "\t" << SumVSSP << endl ;
+//cout << "Visuo Spatial sketch pad cumulative activity" << "\t" << SumVSSP << endl ;
 //===================================================================================
 for (m =0; m<9; m++)
 	   {
@@ -1618,7 +1689,7 @@ ifstream GActivateW(fileName.c_str()); //loaded the weights for Reivesd Body Hub
            { cout << "Error opening weight matrix" << endl; }
     else
            { cout << "Loading Existing expereince" << endl;}
-		for (m =0; m<7; m++)
+		for (m =0; m<9; m++)
 				{
 					for (n=0; n<2; n++)
 					{
@@ -1639,7 +1710,7 @@ ifstream WBodhub(fileName.c_str());
 						 WBodhub >> WBody2Epim[m][n];
 					}
 				}
-cout << "Loading Body to Hub Epim Net" <<WBody2Epim[18][18] << endl ;
+//cout << "Loading Body to Hub Epim Net" <<WBody2Epim[18][18] << endl ;
 
 //===================================================================================
 };
@@ -1682,6 +1753,7 @@ void EpisodicMemThread::DumpAM()
 
 }
 
+
 int EpisodicMemThread::Random_Zel(int lim)
 {
    srand( (unsigned)time( NULL ) );
@@ -1690,7 +1762,7 @@ int EpisodicMemThread::Random_Zel(int lim)
    int p;
    a = (a * 125) % 2796203;   
    p= ((a % lim));
-   cout << "\n\n Random Select %d" << "\t" << p << endl;
+   //cout << "\n\n Random Select %d" << "\t" << p << endl;
    return p;
 };
 

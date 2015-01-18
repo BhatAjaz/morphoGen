@@ -33,12 +33,14 @@ using namespace std;
 #define THRATE 33 //ms
 
 planThread::planThread():RateThread(THRATE) {
-    robot = "icub";        
+    robot = "icub";      
+    switchVisFlag = true;
 }
 
 planThread::planThread(string _robot, string _configFile):RateThread(THRATE){
     robot = _robot;
     configFile = _configFile;
+    switchVisFlag = true;
 }
 
 planThread::~planThread() {
@@ -158,7 +160,7 @@ void planThread::updateWeight(Bottle* weightBottle) {
 
 void planThread::planPlotting(int i) {
 
-    if (outputPort[i].getOutputCount()) {
+    if ((outputPort[i].getOutputCount()) && (switchVisFlag)) {
         yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = outputPort[i].prepare();
         
         // processing of the outputImage
@@ -202,7 +204,7 @@ void planThread::planPlotting(int i) {
 
 void planThread::weightPlotting() {
 
-    if (weightPort.getOutputCount()) {
+    if ((weightPort.getOutputCount()) && (switchVisFlag)) {
         yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = weightPort.prepare();
         
         // processing of the outputImage
@@ -264,7 +266,7 @@ void planThread::run() {
  */           
              mutexA1->wait();          
             if(planA1->size() > 0){
-                printf("received not null function as plan \n");  
+                printf("received  valid data as plan \n");  
                 this->updatePlan(planA1);
             }
             planA1->clear();
@@ -277,7 +279,7 @@ void planThread::run() {
             
             mutexB1->wait();          
             if(planB1->size() > 0){
-                printf("received not null function as plan \n");  
+                printf("received  valid data as plan \n");  
                 this->updatePlan(planB1);
             }
             planB1->clear();
@@ -290,7 +292,7 @@ void planThread::run() {
 
 			weightMutex->wait();          
             if(weightBottle->size() > 0){
-                printf("received not null function as plan \n");  
+                printf("received  valid data as plan \n");  
                 this->updateWeight(weightBottle);
             }
             weightBottle->clear();

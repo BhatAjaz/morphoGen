@@ -132,7 +132,15 @@
  * This file can be edited at \c $ICUB_ROOT/main/src/emPlotters/emPlotter/include/iCub/emPlotter.h
  * 
  */
-
+#define COMMAND_VOCAB_HELP    VOCAB4('h','e','l','p')
+#define COMMAND_VOCAB_QUIT    VOCAB4('q','u','i','t')
+#define COMMAND_VOCAB_FAILED  VOCAB4('f','a','i','l')
+#define COMMAND_VOCAB_OK      VOCAB2('o','k')
+#define COMMAND_VOCAB_ON      VOCAB2('o','n')
+#define COMMAND_VOCAB_OFF     VOCAB3('o','f','f')
+#define COMMAND_VOCAB_VIS     VOCAB3('V','I','S')
+#define COMMAND_VOCAB_REM     VOCAB3('R','E','M')
+#define COMMAND_VOCAB_CSH     VOCAB3('C','S','H')
 
 #include <iostream>
 #include <string>
@@ -162,14 +170,17 @@ class emPlotterModule:public yarp::os::RFModule {
     std::string handlerPortName;            // name of handler port
     std::string configFile;                 // name of the configFile that the resource Finder will seek
     
-    yarp::os::Port handlerPort;             // a port to handle messages 
+    yarp::os::RpcServer handlerPort;             // a port to handle messages 
     emPlotterRatethread* rThread;           // pointer to a new thread to be created and started in configure() and stopped in... 
                                             // close(). This thread opens input ports and communicates with the other threads
     rememberedxThread*  remThread;          // pointer to a new thread that generates gui of incoming bottles-- from remembered Experiences
     partialThread*      pt[5];              // pointer to a new thread that generates gui of incoming bottles-- from partial cues
     hubThread*          hThread;            // pointer to a new thread that generates gui of incoming bottles-- from hubThread
     planThread*         pThread;            // pointer to a new thread that generates gui of incoming bottles-- from planThread
-    hubTypeThread*         htThread;    
+    hubTypeThread*         htThread;
+
+    yarp::os::Semaphore respondLock;         // check in the case of the respond function
+    
 public:
     /**
     *  configure all the emPlotter parameters and return true if successful

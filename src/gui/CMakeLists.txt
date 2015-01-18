@@ -9,6 +9,7 @@ cmake_minimum_required(VERSION 2.6)
 add_subdirectory( emPlotter )
 add_subdirectory( neuronsVisualization )
 add_subdirectory( visualizationGui )
+add_subdirectory( visualizationControl)
 
 # single modules that are going to be sorted into subsection
 

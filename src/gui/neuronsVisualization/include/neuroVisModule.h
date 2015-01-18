@@ -131,6 +131,14 @@
  * 
  */
 
+#define COMMAND_VOCAB_HELP    VOCAB4('h','e','l','p')
+#define COMMAND_VOCAB_QUIT    VOCAB4('q','u','i','t')
+#define COMMAND_VOCAB_FAILED  VOCAB4('f','a','i','l')
+#define COMMAND_VOCAB_OK      VOCAB2('o','k')
+#define COMMAND_VOCAB_ON      VOCAB2('O','N')
+#define COMMAND_VOCAB_OFF     VOCAB3('O','F','F')
+#define COMMAND_VOCAB_VIS     VOCAB3('V','I','S')
+
 
 #include <iostream>
 #include <string>
@@ -158,9 +166,11 @@ class neuroVisModule:public yarp::os::RFModule {
     std::string configFile;                 // name of the configFile that the resource Finder will seek
     int width;                              // name of the width of the output
     int height;                             // name of the  height of the output
-    yarp::os::Port handlerPort;             // a port to handle messages 
+    yarp::os::RpcServer handlerPort;             // a port to handle messages 
     neuroVisRatethread* rThread;       // pointer to a new thread to be created and started in configure() and stopped in... 
                                             // close(). This thread opens input ports and communicates with the other threads
+
+     yarp::os::Semaphore respondLock;         // check in the case of the respond function
        
 public:
     /**

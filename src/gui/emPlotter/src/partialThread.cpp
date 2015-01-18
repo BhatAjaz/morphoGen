@@ -156,7 +156,7 @@ void partialThread::run() {
              
         mute->wait();
         if(bottleReceiving->size() > 0){
-           printf("received not null function \n");
+           printf("received  valid data as partial cue \n");
                
            this->updateCue(bottleReceiving);
         }

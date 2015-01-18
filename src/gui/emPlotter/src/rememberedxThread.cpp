@@ -33,12 +33,14 @@ using namespace std;
 #define THRATE 33 //ms
 
 rememberedxThread::rememberedxThread():RateThread(THRATE) {
-    robot = "icub";        
+    robot = "icub";
+    switchVisFlag = true;
 }
 
 rememberedxThread::rememberedxThread(string _robot, string _configFile):RateThread(THRATE){
     robot = _robot;
     configFile = _configFile;
+    switchVisFlag = true;
 }
 
 rememberedxThread::~rememberedxThread() {
@@ -140,7 +142,7 @@ void rememberedxThread::updateCue(Bottle* remBottle) {
 
 void rememberedxThread::cuePlotting(int i) {
 
-    if (outputPort[i].getOutputCount()) {
+    if ((outputPort[i].getOutputCount()) && (true)) {
         yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = outputPort[i].prepare();
         
         // processing of the outputImage
@@ -187,7 +189,7 @@ void rememberedxThread::run() {
         for (int i = 0; i < 5; i++) {     
             mute[i]->wait();
             if(bottleReceiving[i]->size() > 0){
-                printf("received not null function as remembered experience \n");
+                printf("received  valid data as remembered experience \n");
                
                 this->updateCue(bottleReceiving[i]);
                 this->cuePlotting(i);

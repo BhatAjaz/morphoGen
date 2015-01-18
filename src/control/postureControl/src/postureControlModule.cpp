@@ -61,7 +61,6 @@ bool postureControlModule::configure(yarp::os::ResourceFinder &rf) {
 			                Value(":i"),
                             "Input port name (string)").asString();
     
-    
     /*
     * attach a port of the same name as the module (prefixed with a /) to the module
     * so that messages received from the port are redirected to the respond method
@@ -126,7 +125,9 @@ bool postureControlModule::respond(const Bottle& command, Bottle& reply)
                 " commands are: \n" +  
                 "help \n" +
                 "quit \n";
-    reply.clear(); 
+    reply.clear();     
+    bool ok = false;
+    bool rec = false; // is the command recognized?
 
     if (command.get(0).asString()=="quit") {
         reply.addString("quitting");
@@ -134,10 +135,36 @@ bool postureControlModule::respond(const Bottle& command, Bottle& reply)
     }
     else if (command.get(0).asString()=="help") {
         cout << helpMessage;
-        reply.addString("ok");
+        reply.addString(helpMessage.c_str());
+    }
+
+
+
+    respondLock.wait();
+    switch (command.get(0).asVocab()) {
+    case COMMAND_VOCAB_HELP: {
+        rec = true;
+        ok = true; 
+        reply.addString("HELP");
+    }break;
+    default:
+        rec = false;
+        ok  = false;
+    }    
+    respondLock.post();
+
+    if (!rec){
+        ok = RFModule::respond(command,reply);
     }
     
-    return true;
+    if (!ok) {
+        reply.clear();
+        reply.addVocab(COMMAND_VOCAB_FAILED);
+    }
+    else
+        reply.addVocab(COMMAND_VOCAB_OK);
+
+    return ok;
 }
 
 /* Called periodically every getPeriod() seconds */

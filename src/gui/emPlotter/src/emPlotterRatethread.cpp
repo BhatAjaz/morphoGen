@@ -156,11 +156,12 @@ void emPlotterRatethread::run() {
     hubTypeIncoming     = inputPorthubType.read(false);
 
     if (cueIncoming!=NULL){
-        printf(" bottle %s \n",cueIncoming->toString().c_str()); 
+        //printf(" bottle %s \n",cueIncoming->toString().c_str()); 
         string name;
         name = cueIncoming->get(0).asString();
                    
         if(!strcmp(name.c_str(), "cue0")) {
+			printf("correctly detected the cue0 \n");
             if (cueIncoming->size() > 0){
                 pmutex[0]->wait();
                 *pbot [0] = *cueIncoming->get(1).asList();
@@ -173,12 +174,13 @@ void emPlotterRatethread::run() {
             if (cueIncoming->size() > 0){
                 pmutex[1]->wait();
                 *pbot [1] = *cueIncoming->get(1).asList();
-                printf("bot1 %08x got secondary list %s \n",pbot[1], pbot[1]->toString().c_str());
+                //printf("bot1 %08x got secondary list %s \n",pbot[1], pbot[1]->toString().c_str());
                 pmutex[1]->post();
             }                    
         }
                 
         else if(!strcmp(name.c_str(), "cue2")) {
+			printf("correctly detected the cue2 \n");
             if (cueIncoming->size() > 0){
                 pmutex[2]->wait();
                 *pbot [2] = *cueIncoming->get(1).asList();
@@ -187,6 +189,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "cue3")) {
+			printf("correctly detected the cue3 \n");
             if (cueIncoming->size() > 0){
                 pmutex[3]->wait();
                 *pbot [3] = *cueIncoming->get(1).asList();
@@ -195,6 +198,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "cue4")) {
+			printf("correctly detected the cue4 \n");
             if (cueIncoming->size() > 0){
                 pmutex[4]->wait();
                 *pbot [4] = *cueIncoming->get(1).asList();
@@ -207,10 +211,11 @@ void emPlotterRatethread::run() {
 
           
     if (remIncoming!=NULL){           
-        printf(" \n remembered bottle %s \n",remIncoming->toString().c_str());               
+        //printf(" \n remembered bottle %s \n",remIncoming->toString().c_str());               
         string name;
         name = remIncoming->get(0).asString();      
         if(!strcmp(name.c_str(), "rem0")) {
+			printf("correctly detected the rememberedExp0 \n");
             if (remIncoming->size() > 0){
                 rmutex[0]->wait();
                 *rbot [0] = *remIncoming->get(1).asList();
@@ -219,6 +224,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "rem1")) {
+			printf("correctly detected the rememberedExp1 \n");
             if (remIncoming->size() > 0){
                 rmutex[1]->wait();
                 *rbot [1] = *remIncoming->get(1).asList();
@@ -227,6 +233,7 @@ void emPlotterRatethread::run() {
         }
         
         else if(!strcmp(name.c_str(), "rem2")) {
+			printf("correctly detected the rememberedExp2 \n");
             if (remIncoming->size() > 0){
                 rmutex[2]->wait();
                 *rbot [2] = *remIncoming->get(1).asList();
@@ -235,6 +242,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "rem3")) {
+			printf("correctly detected the rememberedExp3 \n");
             if (remIncoming->size() > 0){
                 rmutex[3]->wait();
                 *rbot [3] = *remIncoming->get(1).asList();
@@ -243,6 +251,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "rem4")) {
+			printf("correctly detected the rememberedExp4 \n");
             if (remIncoming->size() > 0){
                 rmutex[4]->wait();
                 *rbot [4] = *remIncoming->get(1).asList();
@@ -257,11 +266,12 @@ void emPlotterRatethread::run() {
     
     
     if (planIncoming!=NULL){
-        printf(" bottle %s \n",planIncoming->toString().c_str()); 
+        //printf(" bottle %s \n",planIncoming->toString().c_str()); 
         string name;
         name = planIncoming->get(0).asString();
                    
        if(!strcmp(name.c_str(), "plan1")) {
+		   printf("correctly detected the plan1 \n");
             if (planIncoming->size() > 0){
                 mutexA->wait();
                 *planA = *planIncoming->get(1).asList();
@@ -270,6 +280,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "plan2")) {
+			printf("correctly detected the plan2 \n");
             if (planIncoming->size() > 0){
                 mutexB->wait();
                 *planB = *planIncoming->get(1).asList();
@@ -278,6 +289,7 @@ void emPlotterRatethread::run() {
         } 
 
 		else if(!strcmp(name.c_str(), "weight")) {
+			printf("correctly detected the weights \n");
             if (planIncoming->size() > 0){
                 weightMutex->wait();
                 *weight = *planIncoming->get(1).asList();
@@ -286,7 +298,7 @@ void emPlotterRatethread::run() {
         }
                
         else 
-            printf("Please provide a  plan with a name like   \"planA\"   \"planB\" \n");
+            printf("Please provide a  plan with a name like   \"planA\"   \"planB\"   \"weight\" \n");
         }  
         
         
@@ -296,10 +308,11 @@ void emPlotterRatethread::run() {
         
         
         if (hubIncoming!=NULL){           
-        printf(" hub bottle %s \n",hubIncoming->toString().c_str());               
+        //printf(" hub bottle %s \n",hubIncoming->toString().c_str());               
         string name;
         name = hubIncoming->get(0).asString();      
         if(!strcmp(name.c_str(), "hub0")) {
+			printf("correctly detected the hub0 \n");
             if (hubIncoming->size() > 0){
                 hmutex[0]->wait();
                 *hbot [0] = *hubIncoming->get(1).asList();
@@ -308,6 +321,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "hub1")) {
+			printf("correctly detected the hub1 \n");
             if (hubIncoming->size() > 0){
                 hmutex[1]->wait();
                 *hbot [1] = *hubIncoming->get(1).asList();
@@ -316,6 +330,7 @@ void emPlotterRatethread::run() {
         }
         
         else if(!strcmp(name.c_str(), "hub2")) {
+			printf("correctly detected the hub2 \n");
             if (hubIncoming->size() > 0){
                 hmutex[2]->wait();
                 *hbot [2] = *hubIncoming->get(1).asList();
@@ -324,6 +339,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "hub3")) {
+			printf("correctly detected the hub3 \n");
             if (hubIncoming->size() > 0){
                 hmutex[3]->wait();
                 *hbot [3] = *hubIncoming->get(1).asList();
@@ -332,6 +348,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "hub4")) {
+			printf("correctly detected the hub4 \n");
             if (hubIncoming->size() > 0){
                 hmutex[4]->wait();
                 *hbot [4] = *hubIncoming->get(1).asList();
@@ -340,6 +357,7 @@ void emPlotterRatethread::run() {
         }
         
        /* else if(!strcmp(name.c_str(), "hubTop")) {
+			printf("correctly detected the hubTop \n");
             if (hubIncoming->size() > 0){
                 mutexTop->wait();
                 *hubTop = *hubIncoming->get(1).asList();
@@ -352,7 +370,7 @@ void emPlotterRatethread::run() {
             if (hubIncoming->size() > 0){
                 mutexObject->wait();
                 *hubObject = *hubIncoming->get(1).asList();
-                printf("hubObject %08x got secondary list %s \n",hubObject, hubObject->toString().c_str());
+                //printf("hubObject %08x got secondary list %s \n",hubObject, hubObject->toString().c_str());
                 mutexObject->post();
             }                    
         }
@@ -361,7 +379,7 @@ void emPlotterRatethread::run() {
             if (hubIncoming->size() > 0){
                 mutexBody->wait();
                 *hubBody = *hubIncoming->get(1).asList();
-                printf("hubBody %08x got secondary list %s \n",hubBody, hubBody->toString().c_str());
+                //printf("hubBody %08x got secondary list %s \n",hubBody, hubBody->toString().c_str());
                 mutexBody->post();
             }                    
         }          
@@ -371,11 +389,12 @@ void emPlotterRatethread::run() {
     }
         
 	if (hubTypeIncoming!=NULL){
-        printf(" bottle %s \n",hubTypeIncoming->toString().c_str()); 
+        //printf(" bottle %s \n",hubTypeIncoming->toString().c_str()); 
         string name;
         name = hubTypeIncoming->get(0).asString();
                    
        if(!strcmp(name.c_str(), "object")) {
+		   printf("correctly detected the object hub from observer \n");
             if (hubTypeIncoming->size() > 0){
                 mutexObjectObs->wait();
                 *hubObjectObs = *hubTypeIncoming->get(1).asList();
@@ -384,6 +403,7 @@ void emPlotterRatethread::run() {
         }
                 
         else if(!strcmp(name.c_str(), "body")) {
+			printf("correctly detected the body hub from observer \n");
             if (hubTypeIncoming->size() > 0){
                 mutexBodyObs->wait();
                 *hubBodyObs = *hubTypeIncoming->get(1).asList();
@@ -391,6 +411,7 @@ void emPlotterRatethread::run() {
             }                   
         }
 		else if(!strcmp(name.c_str(), "action")) {
+			printf("correctly detected the action hub from observer \n");
             if (hubTypeIncoming->size() > 0){
                 mutexActionObs->wait();
                 *hubActionObs = *hubTypeIncoming->get(1).asList();
@@ -399,6 +420,7 @@ void emPlotterRatethread::run() {
         }
 
 		else if(!strcmp(name.c_str(), "CWS")) {
+			printf("correctly detected the CWS hub from observer \n");
             if (hubTypeIncoming->size() > 0){
                 mutexCWS->wait();
                 *hubCWS = *hubTypeIncoming->get(1).asList();

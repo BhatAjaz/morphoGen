@@ -28,6 +28,15 @@
 #include <string.h>
 #include <sstream>
 
+#define COMMAND_VOCAB_VIS VOCAB3('V','I','S')
+#define COMMAND_VOCAB_OFF VOCAB3('O','F','F')
+#define COMMAND_VOCAB_IIT VOCAB3('I','I','T')
+#define COMMAND_VOCAB_NEU VOCAB3('N','E','U')
+#define COMMAND_VOCAB_REM VOCAB3('R','E','M')
+#define COMMAND_VOCAB_CSH VOCAB3('C','S','H')
+#define COMMAND_VOCAB_GRA VOCAB3('G','R','A')
+#define COMMAND_VOCAB_VIS VOCAB3('V','I','S')
+#define COMMAND_VOCAB_ON  VOCAB2('O','N')
 
 #define COMMAND_VOCAB_SET VOCAB3('s','e','t')
 #define COMMAND_VOCAB_GET VOCAB3('g','e','t')
@@ -65,13 +74,30 @@ int _frameN;            //Frame Number
 bool _savingSet;        //Save Set of Images mode
 // 
 //yarp::os::BufferedPort<yarp::os::Bottle> *_pOutPort=0; //Output Point Port
+Port* _nocaPort         = 0;
+Port* _profactorPort    = 0;
+Port* _visControlPort   = 0;
 Port* _pOutPort         = 0;
+
 Port* _iitPort1, *_iitPort2, *_iitPort3;
 Port* _kclPort1,*_kclPort2,*_kclPort3;
 Port* _forthPort1,*_forthPort2,*_forthPort3;
 Port* _cvutPort1,*_cvutPort2,*_cvutPort3;
-Port* _nocaPort = 0;
-Port* _profactorPort    = 0;
+
+bool _iitBool1   = false; 
+bool _iitBool2   = false; 
+bool _iitBool3   = false;
+bool _kclBool1   = false;
+bool _kclBool2   = false;
+bool _kclBool3   = false;
+bool _forthBool1 = false;
+bool _forthBool2 = false;
+bool _forthBool3 = false;
+bool _cvutBool1  = false;
+bool _cvutBool2  = false;
+bool _cvutBool3  = false;
+bool _nocaBool   = false;
+bool _profactorBool = false;
 
 yarp::os::Bottle _outBottle;//Output Bottle Container
 pgmOptions _options; //option set by the config file
@@ -154,15 +180,45 @@ static void callback( GtkWidget *widget,gpointer   data ){
 
 //iit call backs
 static void cb_iit_mod1( GtkWidget *widget, gpointer data ) {
+    
     if (_iitPort1!=NULL) {
         if(_iitPort1->getOutputCount()){
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_iitBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool1 = true;
+            }
+            
             _iitPort1->write(bot,in);
-        }
-    
+        }    
+    }
+
+    if (_visControlPort!=NULL) {
+        printf("iit_mod1 \n");
+        if(_visControlPort->getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot;
+            bot.clear();
+            //bot.addVocab(COMMAND_VOCAB_IIT);
+            bot.addVocab(COMMAND_VOCAB_CSH);
+            if(_iitBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool1 = true;
+            }            
+            _visControlPort->write(bot,in);
+        }    
     }
 }
 
@@ -172,11 +228,38 @@ static void cb_iit_mod2( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_iitBool2){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool2 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool2 = true;
+            }
             _iitPort2->write(bot,in);
            
-        }
-        
+        }   
+    }
+    if (_visControlPort!=NULL) {        
+        printf("iit_mod2 \n");
+        if(_visControlPort->getOutputCount()){
+            
+            Bottle in;
+            yarp::os::Bottle bot;
+            bot.clear();
+            //bot.addVocab(COMMAND_VOCAB_IIT);
+            bot.addVocab(COMMAND_VOCAB_REM);
+            if(_iitBool2){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool2 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool2 = true;
+            }            
+            _visControlPort->write(bot,in);
+        }    
     }
 }
 
@@ -187,13 +270,42 @@ static void cb_iit_mod3( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
-            _iitPort3->write(bot,in);
-           
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_iitBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool1 = true;
+            }
+            
+            _iitPort1->write(bot,in);
         }
-        
+    }
+    if (_visControlPort!=NULL) {
+        printf("iit_mod3 \n");
+        if(_visControlPort->getOutputCount()){
+            
+            Bottle in;
+            yarp::os::Bottle bot;
+            bot.clear();
+            //bot.addVocab(COMMAND_VOCAB_IIT);
+            bot.addVocab(COMMAND_VOCAB_NEU);
+            if(_iitBool3){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool3 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool3 = true;
+            }            
+            _visControlPort->write(bot,in);
+        }    
     }
 }
+
+
 
 
 // kcl call backs
@@ -203,11 +315,37 @@ static void cb_kcl_mod1( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_kclBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _kclBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _kclBool1 = true;
+            }
             _kclPort1->write(bot,in);
            
-        }
-        
+        }      
+    }
+    if (_visControlPort!=NULL) {
+        printf("kcl_mod1 \n");
+        if(_visControlPort->getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot;
+            bot.clear();
+            //bot.addVocab(COMMAND_VOCAB_IIT);
+            bot.addVocab(COMMAND_VOCAB_GRA);
+            if(_iitBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool1 = true;
+            }            
+            _visControlPort->write(bot,in);
+        }    
     }
 }
 
@@ -217,11 +355,35 @@ static void cb_kcl_mod2( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
-            _kclPort2->write(bot,in);
-           
-        }
-        
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_kclBool2){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _kclBool2 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _kclBool2 = true;
+            }
+            _kclPort2->write(bot,in);           
+        }        
+    }
+    if (_visControlPort!=NULL) {
+        if(_visControlPort->getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot;
+            bot.clear();
+            //bot.addVocab(COMMAND_VOCAB_IIT);
+            bot.addVocab(COMMAND_VOCAB_GRA);
+            if(_iitBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool1 = true;
+            }            
+            _visControlPort->write(bot,in);
+        }    
     }
 }
 
@@ -231,7 +393,15 @@ static void cb_kcl_mod3( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_kclBool3){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _kclBool3 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _kclBool3 = true;
+            }
             _kclPort3->write(bot,in);
            
         }
@@ -247,11 +417,36 @@ static void cb_forth_mod1( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_forthBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _forthBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _forthBool1 = true;
+            }
             _forthPort1->write(bot,in);
-           
         }
-        
+    }
+    if (_visControlPort!=NULL) {
+        printf("forth_mod1 \n");
+        if(_visControlPort->getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot;
+            bot.clear();
+            //bot.addVocab(COMMAND_VOCAB_IIT);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_iitBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool1 = true;
+            }            
+            _visControlPort->write(bot,in);
+        }    
     }
 }
 
@@ -261,11 +456,36 @@ static void cb_forth_mod2( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
-            _forthPort2->write(bot,in);
-           
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_forthBool2){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _forthBool2 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _forthBool2 = true;
+            }
+            _forthPort2->write(bot,in);           
         }
-        
+    }
+    if (_visControlPort!=NULL) {
+        printf("forth_mod2 \n");
+        if(_visControlPort->getOutputCount()){
+            Bottle in;
+            yarp::os::Bottle bot;
+            bot.clear();
+            //bot.addVocab(COMMAND_VOCAB_IIT);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_iitBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _iitBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _iitBool1 = true;
+            }            
+            _visControlPort->write(bot,in);
+        }    
     }
 }
 
@@ -275,7 +495,15 @@ static void cb_forth_mod3( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_forthBool3){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _forthBool3 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _forthBool3 = true;
+            }
             _forthPort3->write(bot,in);
            
         }
@@ -289,7 +517,15 @@ static void cb_cvut_mod1( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_cvutBool1){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _cvutBool1 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _cvutBool1 = true;
+            }
             _cvutPort1->write(bot,in);
            
         }
@@ -303,7 +539,15 @@ static void cb_cvut_mod2( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_cvutBool2){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _cvutBool2 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _cvutBool2 = true;
+            }
             _cvutPort2->write(bot,in);
            
         }
@@ -317,7 +561,15 @@ static void cb_cvut_mod3( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_cvutBool3){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _cvutBool3 = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _cvutBool3 = true;
+            }
             _cvutPort3->write(bot,in);
            
         }
@@ -332,7 +584,15 @@ static void cb_noca_mod1( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_nocaBool){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _nocaBool = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _nocaBool = true;
+            }
             _nocaPort->write(bot,in);
            
         }
@@ -346,31 +606,21 @@ static void cb_profactor_mod1( GtkWidget *widget, gpointer data ) {
             Bottle in;
             yarp::os::Bottle bot; //= _pOutPort->prepare();
             bot.clear();
-            bot.addVocab(COMMAND_VOCAB_SET);
+            bot.addVocab(COMMAND_VOCAB_VIS);
+            if(_profactorBool){
+                bot.addVocab(COMMAND_VOCAB_OFF);
+                _profactorBool = false;
+            }
+            else {
+                bot.addVocab(COMMAND_VOCAB_ON);
+                _profactorBool = true;
+            }
             _profactorPort->write(bot,in);
            
         }
         
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*
@@ -987,10 +1237,6 @@ GtkWidget* createMainWindow(void) {
         }*/
     //gtk_box_pack_start(GTK_BOX(box), da, TRUE, TRUE, 0);
     
-
-    
-
-
     
     //Toolbox area
     //creates the area as collection of port processes sequence
@@ -1016,7 +1262,7 @@ GtkWidget* createMainWindow(void) {
     GtkWidget *button3d1,*button3d2,*button3d3;
     //GtkWidget *scale;
 
-//Add some space here
+   //Add some space here
 
     box2=  gtk_vbox_new (FALSE, 0);   
     gtk_box_pack_start (GTK_BOX (box1), box2, FALSE, TRUE, 0);
@@ -1026,32 +1272,33 @@ GtkWidget* createMainWindow(void) {
     gtk_box_pack_start (GTK_BOX (box2), label, FALSE, FALSE, 0);
     gtk_widget_show (label);
 
-// Add some space here
+    // Add some space here
 
-//subsection a
+    //subsection a
     box2a=  gtk_hbox_new (TRUE, 0);   
     gtk_box_pack_start (GTK_BOX (box2), box2a, FALSE, TRUE, 0);
     gtk_widget_show (box2a);
     
-    button2a1 = gtk_check_button_new_with_label("IIT_all");
+    button2a1 = gtk_check_button_new_with_label("Reasoning(IIT)");
     gtk_box_pack_start (GTK_BOX (box2a), button2a1, TRUE, FALSE, 0);
     gtk_widget_show (button2a1);
     
-    button2a2 = gtk_check_button_new_with_label("KCL_all");
+    button2a2 = gtk_check_button_new_with_label("Grasping(KCL)");
     gtk_box_pack_start (GTK_BOX (box2a), button2a2, TRUE, FALSE, 0);
     gtk_widget_show (button2a2);
-//subsection b
+    
+    //subsection b
     box2b=  gtk_hbox_new (TRUE, 0);   
     gtk_box_pack_start (GTK_BOX (box2), box2b, FALSE, TRUE, 0);
     gtk_widget_show (box2b);
 
-    button2b1 = gtk_check_button_new_with_label("FORTH_all");
+    button2b1 = gtk_check_button_new_with_label("vision(CVUT-FORTH)");
     gtk_box_pack_start (GTK_BOX (box2b), button2b1, TRUE, FALSE, 0);
     gtk_widget_show (button2b1);
 
-    button2b2 = gtk_check_button_new_with_label("CVUT_all");
-    gtk_box_pack_start (GTK_BOX (box2b), button2b2, TRUE, FALSE, 0);
-    gtk_widget_show (button2b2);
+    //button2b2 = gtk_check_button_new_with_label("CVUT_all");
+    //gtk_box_pack_start (GTK_BOX (box2b), button2b2, TRUE, FALSE, 0);
+    // gtk_widget_show (button2b2);
 
     separator = gtk_hseparator_new ();
     gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, FALSE, 10);
@@ -1075,30 +1322,26 @@ GtkWidget* createMainWindow(void) {
     gtk_box_pack_start (GTK_BOX (box3), box3a, TRUE, FALSE, 0);
     gtk_widget_show (box3a);
 
-    label = gtk_label_new ("IIT");
+    label = gtk_label_new ("Reasoning(IIT)");
     gtk_box_pack_start (GTK_BOX (box3a), label, FALSE, FALSE, 0);
     gtk_widget_show (label);
 
-    button3a1 = gtk_check_button_new_with_label("module 1");
+    button3a1 = gtk_check_button_new_with_label("colourShape");
     gtk_box_pack_start (GTK_BOX (box3a), button3a1, TRUE, FALSE, 0);
     gtk_widget_show (button3a1);
      
-
-    button3a2 = gtk_check_button_new_with_label("module 2");
+    button3a2 = gtk_check_button_new_with_label("remembering");
     gtk_box_pack_start (GTK_BOX (box3a), button3a2, TRUE, FALSE, 0);
     gtk_widget_show (button3a2);
     
-    button3a3 = gtk_check_button_new_with_label("module 3");
+    button3a3 = gtk_check_button_new_with_label("neuronVisualization");
     gtk_box_pack_start (GTK_BOX (box3a), button3a3, TRUE, FALSE, 0);
     gtk_widget_show (button3a3);
 
-//signal connects
+    //signal connects
     g_signal_connect (GTK_OBJECT (button3a1), "clicked", GTK_SIGNAL_FUNC (cb_iit_mod1), NULL); 
     g_signal_connect (GTK_OBJECT (button3a2), "clicked", GTK_SIGNAL_FUNC (cb_iit_mod2), NULL); 
     g_signal_connect (GTK_OBJECT (button3a3), "clicked", GTK_SIGNAL_FUNC (cb_iit_mod3), NULL); 
-
-
-
 
 
     separator = gtk_vseparator_new ();
@@ -1112,24 +1355,25 @@ GtkWidget* createMainWindow(void) {
     gtk_box_pack_start (GTK_BOX (box3), box3b, FALSE, FALSE, 0);
     gtk_widget_show (box3b);
 
-    label = gtk_label_new ("KCL");
+    label = gtk_label_new ("Grasping(KCL)");
     gtk_box_pack_start (GTK_BOX (box3b), label, FALSE, FALSE, 0);
     gtk_widget_show (label);
 
-    button3b1 = gtk_check_button_new_with_label("module 1");
+    button3b1 = gtk_check_button_new_with_label("grasp Left/Right");
     gtk_box_pack_start (GTK_BOX (box3b), button3b1, TRUE, FALSE, 0);
     gtk_widget_show (button3b1);
 
-    button3b2 = gtk_check_button_new_with_label("module 2");
-    gtk_box_pack_start (GTK_BOX (box3b), button3b2, TRUE, FALSE, 0);
-    gtk_widget_show (button3b2);
+    //button3b2 = gtk_check_button_new_with_label("grasp Right");
+    //gtk_box_pack_start (GTK_BOX (box3b), button3b2, TRUE, FALSE, 0);
+    //gtk_widget_show (button3b2);
     
-    button3b3 = gtk_check_button_new_with_label("module 3");
-    gtk_box_pack_start (GTK_BOX (box3b), button3b3, TRUE, FALSE, 0);
-    gtk_widget_show (button3b3);
+    //button3b3 = gtk_check_button_new_with_label("module 3");
+    //gtk_box_pack_start (GTK_BOX (box3b), button3b3, TRUE, FALSE, 0);
+    //gtk_widget_show (button3b3);
 
-
-
+    //signal connects
+    g_signal_connect (GTK_OBJECT (button3b1), "clicked", GTK_SIGNAL_FUNC (cb_kcl_mod1), NULL); 
+    //g_signal_connect (GTK_OBJECT (button3b2), "clicked", GTK_SIGNAL_FUNC (cb_kcl_mod1), NULL); 
 
     separator = gtk_vseparator_new ();
     gtk_box_pack_start (GTK_BOX (box3), separator, FALSE, TRUE, 10);
@@ -1142,50 +1386,54 @@ GtkWidget* createMainWindow(void) {
     gtk_box_pack_start (GTK_BOX (box3), box3c, FALSE, FALSE, 0);
     gtk_widget_show (box3c);
 
-    label = gtk_label_new ("FORTH");
+    label = gtk_label_new ("Vision(CVUT-FORTH)");
     gtk_box_pack_start (GTK_BOX (box3c), label, FALSE, FALSE, 0);
     gtk_widget_show (label);
 
-    button3c1 = gtk_check_button_new_with_label("module 1");
+    button3c1 = gtk_check_button_new_with_label("2D3D recognition");
     gtk_box_pack_start (GTK_BOX (box3c), button3c1, TRUE, FALSE, 0);
     gtk_widget_show (button3c1);
 
-    button3c2 = gtk_check_button_new_with_label("module 2");
-    gtk_box_pack_start (GTK_BOX (box3c), button3c2, TRUE, FALSE, 0);
-    gtk_widget_show (button3c2);
+    //button3c2 = gtk_check_button_new_with_label("3D localization");
+    //gtk_box_pack_start (GTK_BOX (box3c), button3c2, TRUE, FALSE, 0);
+    //gtk_widget_show (button3c2);
     
-    button3c3 = gtk_check_button_new_with_label("module 3");
-    gtk_box_pack_start (GTK_BOX (box3c), button3c3, TRUE, FALSE, 0);
-    gtk_widget_show (button3c3);
+    //signal connects
+    g_signal_connect (GTK_OBJECT (button3c1), "clicked", GTK_SIGNAL_FUNC (cb_forth_mod1), NULL); 
+    //g_signal_connect (GTK_OBJECT (button3c2), "clicked", GTK_SIGNAL_FUNC (cb_forth_mod1), NULL);
+
+    
+    //button3c3 = gtk_check_button_new_with_label("module 3");
+    //gtk_box_pack_start (GTK_BOX (box3c), button3c3, TRUE, FALSE, 0);
+    //gtk_widget_show (button3c3);
 
 
-
-   separator = gtk_vseparator_new ();
-   gtk_box_pack_start (GTK_BOX (box3), separator, FALSE, TRUE, 10);
-   gtk_widget_show (separator);
+    //separator = gtk_vseparator_new ();
+    //gtk_box_pack_start (GTK_BOX (box3), separator, FALSE, TRUE, 10);
+    //gtk_widget_show (separator);
 
 
     //----------BOX3 SUBSECTION:d
-    box3d = gtk_vbox_new (FALSE, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (box3), 0);
-    gtk_box_pack_start (GTK_BOX (box3), box3d, FALSE, FALSE, 0);
-    gtk_widget_show (box3d);
+    //box3d = gtk_vbox_new (FALSE, 0);
+    //gtk_container_set_border_width (GTK_CONTAINER (box3), 0);
+    //gtk_box_pack_start (GTK_BOX (box3), box3d, FALSE, FALSE, 0);
+    //gtk_widget_show (box3d);
 
-    label = gtk_label_new ("CVUT");
-    gtk_box_pack_start (GTK_BOX (box3d), label, FALSE, FALSE, 0);
-    gtk_widget_show (label);
+    //label = gtk_label_new ("CVUT");
+    //gtk_box_pack_start (GTK_BOX (box3d), label, FALSE, FALSE, 0);
+    //gtk_widget_show (label);
 
-    button3d1 = gtk_check_button_new_with_label("module 1");
-    gtk_box_pack_start (GTK_BOX (box3d), button3d1, TRUE, FALSE, 0);
-    gtk_widget_show (button3d1);
+    //button3d1 = gtk_check_button_new_with_label("grasping");
+    //gtk_box_pack_start (GTK_BOX (box3d), button3d1, TRUE, FALSE, 0);
+    //gtk_widget_show (button3d1);
 
-    button3d2 = gtk_check_button_new_with_label("module 2");
-    gtk_box_pack_start (GTK_BOX (box3d), button3d2, TRUE, FALSE, 0);
-    gtk_widget_show (button3d2);
+    //button3d2 = gtk_check_button_new_with_label("module 2");
+    //gtk_box_pack_start (GTK_BOX (box3d), button3d2, TRUE, FALSE, 0);
+    //gtk_widget_show (button3d2);
     
-    button3d3 = gtk_check_button_new_with_label("module 3");
-    gtk_box_pack_start (GTK_BOX (box3d), button3d3, TRUE, FALSE, 0);
-    gtk_widget_show (button3d3);
+    //button3d3 = gtk_check_button_new_with_label("module 3");
+    //gtk_box_pack_start (GTK_BOX (box3d), button3d3, TRUE, FALSE, 0);
+    //gtk_widget_show (button3d3);
 
 
 
@@ -1472,7 +1720,18 @@ bool openPorts() {
             g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
             return false;
     }
-    
+
+    portStr = _options.portName.c_str();
+    _visControlPort=new Port;
+    portStr+="/visControl/command:o";
+    ok = _visControlPort->open(portStr.c_str());
+    if (ok) {
+        g_print("Port registration succeed!\n");
+    }
+    else {
+        g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
+        return false;
+    }
     
     portStr = _options.portName.c_str();
     _iitPort1=new Port;
@@ -1561,7 +1820,6 @@ bool openPorts() {
             return false;
     }
 
-
     portStr = _options.portName.c_str();
     _profactorPort=new Port;
     portStr+="/industrial/command:o";
@@ -1573,13 +1831,6 @@ bool openPorts() {
             g_print("ERROR: Port registration failed.\nQuitting, sorry.\n");
             return false;
     }
-
-
-    
-
-
-
-
 
     return true;
 }
@@ -1596,7 +1847,7 @@ void closePorts() {
     delete _pOutPort;
     _pOutPort = NULL;
 
-
+    _visControlPort->close();
 
     _iitPort1->close();
     _iitPort2->close();

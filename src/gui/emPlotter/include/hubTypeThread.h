@@ -51,7 +51,7 @@ private:
     yarp::os::Semaphore *mutexBody, *mutexObject, *mutexAction, *mutexcolorWordShape;
     double bodyHub[6][7],objectHub[6][7],actionHub[3][4],colorWordShapeHub[5][18]; // matrix to represent the hubs 
 	
-
+    bool switchVisFlag;
     bool idle;                      // flag that indicates whether the thread is active
 
 public:
@@ -121,7 +121,10 @@ public:
     void updateHub(yarp::os::Bottle *queueBottle, int i);
     
 
-	
+	/*
+    * function that switch plots activation
+    */
+    void switchVis(bool value){switchVisFlag = value;};
     
 
     /*

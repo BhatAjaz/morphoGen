@@ -33,12 +33,14 @@ using namespace std;
 #define THRATE 33 //ms
 
 hubTypeThread::hubTypeThread():RateThread(THRATE) {
-    robot = "icub";        
+    robot = "icub";
+    switchVisFlag = false;
 }
 
 hubTypeThread::hubTypeThread(string _robot, string _configFile):RateThread(THRATE){
     robot = _robot;
     configFile = _configFile;
+    switchVisFlag = false;
 }
 
 hubTypeThread::~hubTypeThread() {
@@ -404,7 +406,7 @@ void hubTypeThread::run() {
  */           
              mutexObject->wait();          
             if(object->size() > 0){
-                printf("received not null function as object hub \n");  
+                printf("received  valid data as object hub \n");  
                 this->updateHub(object,0);
             }
             object->clear();
@@ -417,7 +419,7 @@ void hubTypeThread::run() {
             
             mutexBody->wait();          
             if(body->size() > 0){
-                printf("received not null function as body hub \n");  
+                printf("received  valid data as body hub \n");  
                 this->updateHub(body,1);
             }
             body->clear();
@@ -432,7 +434,7 @@ void hubTypeThread::run() {
 
 			mutexAction->wait();          
             if(action->size() > 0){
-                printf("received not null function as action hub \n");  
+                printf("received  valid data as action hub \n");  
                 this->updateHub(action,2);
             }
             action->clear();
@@ -445,7 +447,7 @@ void hubTypeThread::run() {
             
             mutexcolorWordShape->wait();          
             if(colorWordShape->size() > 0){
-                printf("received not null function as colorwordshape hub \n");  
+                printf("received  valid data as colorwordshape hub \n");  
                 this->updateHub(colorWordShape,3);
             }
             colorWordShape->clear();

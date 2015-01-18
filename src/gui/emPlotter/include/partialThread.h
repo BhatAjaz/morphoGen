@@ -52,6 +52,7 @@ private:
     double pCue[20][50]; 
 
     bool idle;                      // flag that indicates whether the thread is active
+    bool switchVisFlag;
 
 public:
     /**
@@ -123,6 +124,11 @@ public:
     * function that plots the contents of the cue
     */
     void cuePlotting();
+
+    /*
+    * function that switch plots activation
+    */
+    void switchVis(bool value){switchVisFlag = value;};
 };
 
 #endif  //_PARTIAL_THREAD_H_
