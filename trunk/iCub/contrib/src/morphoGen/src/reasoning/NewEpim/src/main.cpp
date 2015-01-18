@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
     rf.setVerbose(true);
     rf.setDefaultConfigFile("epimConfig.ini");    //overridden by --from parameter
     rf.setDefaultContext("perceptionActionCycleApp");    //overridden by --context parameter
-    rf.configure("ICUB_ROOT", argc, argv);  
+    rf.configure(argc, argv);  
 	printf("running the module \n");
     EpisodicM.runModule(rf);
 	printf("module closed with success \n");

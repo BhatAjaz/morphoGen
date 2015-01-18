@@ -36,10 +36,9 @@
 
 #define COMMAND_RIGHT_ARM    VOCAB4('r','a','r','m')
 #define COMMAND_LEFT_ARM     VOCAB4('l','a','r','m')
-#define COMMAND_TORSO_ARM    VOCAB4('t','o','r','s')
+#define COMMAND_TORSO        VOCAB4('t','o','r','s')
 #define COMMAND_RIGHT_HAND   VOCAB4('r','h','a','n')
 #define COMMAND_LEFT_HAND    VOCAB4('l','h','a','n')
-
 
 class postureControlThread : public yarp::os::Thread {
 private:
@@ -52,6 +51,9 @@ private:
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
     
     yarp::sig::Vector encodersRightArm;      // encoders position
+    yarp::sig::Vector encodersLeftArm;       // encoders position
+    yarp::sig::Vector encodersTorsoArm;      // encoders position
+    yarp::sig::Vector encoders;              // encoders position
 
     yarp::dev::PolyDriver        *robotDeviceRightArm;  // device right arm
     yarp::dev::PolyDriver        *robotDeviceLeftArm;   // device left arm
@@ -63,17 +65,17 @@ private:
     yarp::dev::IImpedanceControl *iimpRightArm;         // impedence control of the robot RightArm
     yarp::dev::ITorqueControl    *itrqRightArm;         // torque control of the robot RightArm
 
-    yarp::dev::IPositionControl  *posLeftArm;          // position control of the robot LeftArm
-    yarp::dev::IEncoders         *encsLeftArm;         // encoders readings from the robot LeftArm
-    yarp::dev::IControlMode      *ictrlLeftArm;        // sets the modality of the control LeftArm
-    yarp::dev::IImpedanceControl *iimpLeftArm;         // impedence control of the robot LeftArm
-    yarp::dev::ITorqueControl    *itrqLeftArm;         // torque control of the robot LeftArm
+    yarp::dev::IPositionControl  *posLeftArm;           // position control of the robot LeftArm
+    yarp::dev::IEncoders         *encsLeftArm;          // encoders readings from the robot LeftArm
+    yarp::dev::IControlMode      *ictrlLeftArm;         // sets the modality of the control LeftArm
+    yarp::dev::IImpedanceControl *iimpLeftArm;          // impedence control of the robot LeftArm
+    yarp::dev::ITorqueControl    *itrqLeftArm;          // torque control of the robot LeftArm
 
-    yarp::dev::IPositionControl  *posTorso;            // position control of the robot Torso
-    yarp::dev::IEncoders         *encsTorso;           // encoders readings from the robot Torso
-    yarp::dev::IControlMode      *ictrlTorso;          // sets the modality of the control Torso
-    yarp::dev::IImpedanceControl *iimpTorso;           // impedence control of the robot Torso
-    yarp::dev::ITorqueControl    *itrqTorso;           // torque control of the robot Torso
+    yarp::dev::IPositionControl  *posTorso;             // position control of the robot Torso
+    yarp::dev::IEncoders         *encsTorso;            // encoders readings from the robot Torso
+    yarp::dev::IControlMode      *ictrlTorso;           // sets the modality of the control Torso
+    yarp::dev::IImpedanceControl *iimpTorso;            // impedence control of the robot Torso
+    yarp::dev::ITorqueControl    *itrqTorso;            // torque control of the robot Torso
 
     yarp::sig::ImageOf<yarp::sig::PixelRgb>* inputImage;
 
@@ -161,6 +163,12 @@ public:
     const bool checkArm(const yarp::os::Bottle* b);
 
     /*
+    * function that checks the validity of the hand bottle
+    * @param b bottle that has arm position
+    */
+    const bool checkHand(const yarp::os::Bottle* b);
+
+    /*
     * function that checks the validity of the content of the torso bottle
     * @param b bottle that has torso position
     */
@@ -172,7 +180,7 @@ public:
      * @param dim dimension of the control vector
      * @result vector of the control of the body part
      */
-    yarp::sig::Vector parseBottle(yarp::os::Bottle* b, int dim);
+    void parseBottle(yarp::dev::IEncoders *encs, yarp::os::Bottle* b,const int dim,const int shift, yarp::sig::Vector* result);
 
 
 };

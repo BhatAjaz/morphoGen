@@ -35,11 +35,13 @@ using namespace cv;
 
 neuroVisRatethread::neuroVisRatethread():RateThread(THRATE) {
     robot = "icub";        
+    visFlag = true;
 }
 
 neuroVisRatethread::neuroVisRatethread(string _robot, string _configFile):RateThread(THRATE){
     robot = _robot;
     configFile = _configFile;
+    visFlag = true;
 }
 
 neuroVisRatethread::~neuroVisRatethread() {
@@ -85,7 +87,7 @@ void neuroVisRatethread::setInputPortName(string InpPort) {
 void neuroVisRatethread::run() {
 
 
-    if (outputPort.getOutputCount() && inputPort.getInputCount()) {
+    if ((outputPort.getOutputCount()) && (inputPort.getInputCount()) && (true)) {
     
         inputData  =   inputPort.read(false);            
         

@@ -153,7 +153,7 @@ void hubThread::updateHub(Bottle* hubBottle) {
 
 void hubThread::hubPlotting(int i) {
 
-    if (outputPort[i].getOutputCount()) {
+    if ((outputPort[i].getOutputCount())&&(switchVisFlag)) {
         yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = outputPort[i].prepare();
         
         // processing of the outputImage
@@ -202,7 +202,7 @@ void hubThread::run() {
         
         mutexBottom[i]->wait();          
         if(hubBottom[i]->size() > 0){
-            printf("received not null function as hub \n");  
+            printf("received  valid data from episodic as hub \n");  
             this->updateHub(hubBottom[i]);
             this->hubPlotting(i);
         }
@@ -218,7 +218,7 @@ void hubThread::run() {
         
         mutexTop1->wait();          
         if(hubTop1->size() > 0){
-            printf("received not null function as hubTop \n");  
+            printf("received valid data from episodic hubTop \n");  
             this->updateHub(hubTop1);
         }
         hubTop1->clear();
@@ -231,7 +231,7 @@ void hubThread::run() {
                   
         mutexBottomAll1->wait();          
         if(hubBottomAll1->size() > 0){
-            printf("received not null function as hubBottom \n");  
+            printf("received valid data from episodic as hubBottom \n");  
             this->updateHub(hubBottomAll1);
         }
         hubBottomAll1->clear();

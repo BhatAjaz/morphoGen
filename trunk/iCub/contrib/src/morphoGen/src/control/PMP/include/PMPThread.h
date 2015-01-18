@@ -42,11 +42,11 @@
 #define COMMAND_VOCAB_CACT   VOCAB4('C','A','C','T')
 #define COMMAND_VOCAB_BCHA   VOCAB4('B','C','H','A')
 #define COMMAND_VOCAB_MSIM   VOCAB4('M','S','I','M')
-#define COMMAND_VOCAB_TRAT   VOCAB4('T','R','A','T')
+#define COMMAND_VOCAB_TRAJ   VOCAB4('T','R','A','J')
 #define COMMAND_VOCAB_MICG   VOCAB4('M','I','C','G')
 //#define COMMAND_VOCAB_GLEF   VOCAB4('G','L','E','F')
-#define COMMAND_VOCAB_OLEF   VOCAB4('O','L','E','F')
-#define COMMAND_VOCAB_ORIG   VOCAB4('O','R','I','G')
+#define COMMAND_VOCAB_OBST   VOCAB4('O','B','S','T')
+//#define COMMAND_VOCAB_ORIG   VOCAB4('O','R','I','G')
 #define COMMAND_VOCAB_WRIO   VOCAB4('W','R','I','O')
 #define COMMAND_VOCAB_FAILED VOCAB4('F','A','I','L')
 #define COMMAND_VOCAB_REA    VOCAB3('R','E','A')
@@ -68,8 +68,10 @@ private:
 	//yarp::os::BufferedPort<yarp::os::Bottle > Inpjoints;
 	
 	// output ports to command the robot parts
-	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort,cmdEndEffectorPort;  
-	yarp::os::BufferedPort<yarp::os::Bottle > activationsPort;   
+	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort,cmdEndEffectorPort;
+	yarp::os::BufferedPort<yarp::os::Bottle > gazePort;
+	yarp::os::BufferedPort<yarp::os::Bottle > activationsPort;
+
 	//PMPServer to Observer
 	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result and motor commands
    	double *foof;
@@ -125,7 +127,7 @@ private:
 
     double angCup,angT1,angT2,angT3,angI1,angI2,angM1,angM2,angRP,angCupL,angTL1,angTL2,angTL3,angIL1,angIL2,angML1,angML2,angRPL;
         
-    double janini3,janini4,janini5,janini6,janini7,janini8,janini9,janini0,janini2;
+    double janini3,janini4,janini5,janini6,janini7,janini8,janini9,janini0,janini1,janini2;
     double janini3L,janini4L,janini5L,janini6L,janini7L,janini8L,janini9L;
 	
     double x_iniIC,y_iniIC,z_iniIC,x_iniICL,y_iniICL,z_iniICL;
@@ -289,6 +291,7 @@ public:
     void GraspL();
     void PandP();
     void Interpret(int CCode,int PtCode,double AmplificationX,double AmplificationZ);
+	void gazeControl(double x, double y, double z);
 };
 
 #endif  //_PMP_THREAD_H_

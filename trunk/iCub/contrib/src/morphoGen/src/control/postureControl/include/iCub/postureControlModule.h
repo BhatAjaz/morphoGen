@@ -144,6 +144,10 @@
 //within project includes  
 #include <iCub/postureControlThread.h>
 
+#define COMMAND_VOCAB_HELP    VOCAB4('h','e','l','p')
+#define COMMAND_VOCAB_QUIT    VOCAB4('q','u','i','t')
+#define COMMAND_VOCAB_FAILED  VOCAB4('f','a','i','l')
+#define COMMAND_VOCAB_OK      VOCAB2('o','k')
 
 class postureControlModule:public yarp::os::RFModule {
 
@@ -159,6 +163,7 @@ class postureControlModule:public yarp::os::RFModule {
     yarp::os::Port handlerPort;              // a port to handle messages 
     /*  */
     postureControlThread *rThread;             // pointer to a new thread to be created and started in configure() and stopped in close()
+    yarp::os::Semaphore respondLock; // to lock updating through respond 
 
 public:
     /**

@@ -52,6 +52,7 @@ private:
     double hub[6][7];            // matrix to represent the hub or plan
 
     bool idle;                      // flag that indicates whether the thread is active
+    bool switchVisFlag;
 
 public:
     /**
@@ -123,6 +124,11 @@ public:
     * function that plots the contents of the cue
     */
     void hubPlotting(int i);
+
+    /*
+    * function that switch plots activation
+    */
+    void switchVis(bool value){switchVisFlag = value;};
 };
 
 #endif  //_HUB_THREAD_H_

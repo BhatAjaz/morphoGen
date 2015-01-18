@@ -53,6 +53,7 @@ private:
 	int weight[1000][1000];            //weight  matrix to represent the hub or plan
 
     bool idle;                      // flag that indicates whether the thread is active
+    bool switchVisFlag;
 
 public:
     /**
@@ -132,7 +133,10 @@ public:
     */
     void planPlotting(int i);
 
-
+    /*
+    * function that switch plots activation
+    */
+    void switchVis(bool value){switchVisFlag = value;};
 
 	 /*
     * function that plots the contents of the weights

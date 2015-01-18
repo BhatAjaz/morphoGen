@@ -131,22 +131,97 @@ bool neuroVisModule::close() {
 
 bool neuroVisModule::respond(const Bottle& command, Bottle& reply) 
 {
+    bool ok = false;
+    bool rec = false; // is the command recognized?
+
     string helpMessage =  string(getName().c_str()) + 
                 " commands are: \n" +  
                 "help \n" +
                 "quit \n";
     reply.clear(); 
 
-    if (command.get(0).asString()=="quit") {
-        reply.addString("quitting");
-        return false;     
+    //if (command.get(0).asString()=="quit") {
+    //    reply.addString("quitting");
+    //    return false;     
+    //}
+    //else if (command.get(0).asString()=="help") {
+    //    cout << helpMessage;
+    //    reply.addString("ok");
+    //}
+ respondLock.wait();
+    switch (command.get(0).asVocab()) {
+    case COMMAND_VOCAB_HELP:
+        rec = true;
+        {
+            reply.addVocab(Vocab::encode("many"));
+            reply.addString("help");
+            reply.addString("commands are:");
+            reply.addString(" help    : to get help");
+            reply.addString(" quit    : to quit the module");
+            reply.addString(" ");
+            reply.addString(" ");
+            reply.addString(" sus     : to suspend the processing");
+            reply.addString(" res     : to resume  the processing");
+            reply.addString(" ");
+            reply.addString(" ");
+            reply.addString(" VIS ON  : to enable  the visualization");
+            reply.addString(" VIS OFF : to disable the visualization");
+            reply.addString("    ");
+            reply.addString(" test    : automatic test of the features of the module");
+            reply.addString(" ");
+            reply.addString(" ");
+            //reply.addString(helpMessage.c_str());
+            ok = true;
+        }
+        break;
+    case COMMAND_VOCAB_QUIT:
+        rec = true;
+        {
+            reply.addString("quitting");
+            
+            ok = true;
+        }
+        break;
+    case COMMAND_VOCAB_VIS:
+        rec = true;
+        {
+            reply.addString("vision");
+            switch (command.get(1).asVocab()) {
+            case COMMAND_VOCAB_ON:{
+                reply.addString("on");
+                rThread->switchVis(true);
+                printf("VIS ON \n");
+            }break;
+            case COMMAND_VOCAB_OFF:{
+                reply.addString("off");
+                rThread->switchVis(false);
+                printf("VIS OFF \n");
+            }break;
+            }
+            
+            ok = true;
+        }
+        break;
+    default:
+        rec = false;
+        ok  = false;
     }
-    else if (command.get(0).asString()=="help") {
-        cout << helpMessage;
-        reply.addString("ok");
+
+    respondLock.post();
+
+    if (!rec){
+        ok = RFModule::respond(command,reply);
     }
     
+    if (!ok) {
+        reply.clear();
+        reply.addVocab(COMMAND_VOCAB_FAILED);
+    }
+    else
+        reply.addVocab(COMMAND_VOCAB_OK);
+    
     return true;
+    
 }
 
 /* Called periodically every getPeriod() seconds */

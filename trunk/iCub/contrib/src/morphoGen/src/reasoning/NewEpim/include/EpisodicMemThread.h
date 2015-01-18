@@ -83,7 +83,7 @@ private:
 		int PlanPastExp[1000];
 		int NoB,Largeness;
 		bool idle;
-		int GoalNAact[7][2];
+		int GoalNAact[9][2];
 		int GoalID, HubQuery, Goal_Context;
 		int PartCue[15][1000];
 		int kk;
@@ -93,6 +93,8 @@ private:
 		int PrevSentPlan;
 		int ReplanStatus;
 		int iSPlan;
+		int GoalIDRef;
+
    
 public:
     /**

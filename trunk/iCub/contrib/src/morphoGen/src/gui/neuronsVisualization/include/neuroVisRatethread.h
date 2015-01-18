@@ -33,12 +33,14 @@
 #include <fstream>
 #include <sstream>
 #include <time.h>
-#include <cv.h>                     // These header files include openCV libraries
-#include <cvaux.h>                  //
-#include <highgui.h>
+#include <opencv/cv.h>                     // These header files include openCV libraries
+#include <opencv/cvaux.h>                  //
+#include <opencv/highgui.h>
 
 class neuroVisRatethread : public yarp::os::RateThread {
 private:
+    bool visFlag;
+    
     std::string robot;              // name of the robot
     std::string configFile;         // name of the configFile where the parameter of the camera are set
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
@@ -108,6 +110,10 @@ public:
     */
     void setInputPortName(std::string inpPrtName);
 
+    void switchVis(bool value){
+        visFlag = value;
+        printf("visFlag: %d \n", visFlag);
+    }
 
 
 };

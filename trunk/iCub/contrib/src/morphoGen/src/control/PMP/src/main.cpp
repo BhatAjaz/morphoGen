@@ -38,7 +38,7 @@ int main(int argc, char * argv[])
     rf.setVerbose(true);
     rf.setDefaultConfigFile("pmpConfig.ini");    //overridden by --from parameter
     rf.setDefaultContext("perceptionActionCycleApp");    //overridden by --context parameter
-    rf.configure("ICUB_ROOT", argc, argv);  
+    rf.configure(argc, argv);  
     pmpiCubClient.runModule(rf);
     return 0;
 }

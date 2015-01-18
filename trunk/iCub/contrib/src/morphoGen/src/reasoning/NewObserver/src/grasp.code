@@ -1,0 +1,77 @@
+int ObserverThread::PrimGraspIndustrial(GraspTypeType GraspReq,int BodyChain){
+	int returnval = 0;
+	try {
+						if(!(Network::isConnected(GraspPort.getName().c_str(),"/grasp/command:i"))){
+							Network::connect(GraspPort.getName().c_str(),"/grasp/command:i");
+						}
+						if(!(Network::isConnected("/grasp/outcome:o",GraspResultPort.getName().c_str()))){
+							Network::connect("/grasp/outcome:o",GraspResultPort.getName().c_str());
+						}
+
+						GraspCommand Grasp_cmd; //sending and receiving message formats changed by Kris
+						switch (BodyChain) {
+						case 0://left arm
+							Grasp_cmd.add(GraspDescriptor().seteffector(GRASP_LEFT).settype(GraspReq));
+							break;
+						case 1://right arm
+							Grasp_cmd.add(GraspDescriptor().seteffector(GRASP_RIGHT).settype(GraspReq));
+							break;
+						case 2://whole body
+							Grasp_cmd.add(GraspDescriptor().seteffector(GRASP_LEFT).settype(GraspReq));
+							Grasp_cmd.add(GraspDescriptor().seteffector(GRASP_RIGHT).settype(GraspReq));
+							break;
+						default:
+							//cout<< "PrimGrasp: expecting other value for body side - use BodyChain" <<BodyChain <<endl;
+							cout << "PrimGrasp: expecting other value for body side - use BodyChain" <<BodyChain<<endl;
+						}
+						//Bottle Grasp_cmd, Grasp_response; //commented by Kris
+						//Grasp_cmd.addInt(RobID);
+						//Grasp_cmd.addInt(GraspReq);
+						GraspTimeStamp.update();
+						GraspCommand& Grasp_write = GraspPort.prepare();
+						  Grasp_write = Grasp_cmd;
+						  GraspPort.setEnvelope(GraspTimeStamp);
+						  GraspPort.write();
+
+						  int graspcommandssent = Grasp_cmd.size();
+						  VectorBottle<GraspResult> tempgraspresponse;
+
+						  while (graspcommandssent > 0) {
+							  if (GraspResultPort.getPendingReads()) {
+								  //make sure to read the timestamp
+								  tempgraspresponse.add(*(GraspResultPort.read()));
+								  --graspcommandssent;
+							  }
+						  }
+						printf("%s \n",tempgraspresponse.toString().c_str());
+
+  //int Gresponsecode = Grasp_response.get(0).asInt();
+  GraspResultType Gresponsecode = static_cast<GraspResultType>(tempgraspresponse[0].result());
+  //cout<< "Reply recd from Grasp server" << Gresponsecode<<endl;
+  Report<< "Reply recd from Grasp server" << Gresponsecode<<endl;
+  
+   int GrRead=-1; //TODO: Deal with multiple response from grasp module
+  switch(Gresponsecode)
+          {
+			  case GRASP_SUCC:
+				{
+				  GrRead = 1;
+				}
+				break;
+			  case GRASP_FAIL:
+			 {
+				 GrRead=0;
+			 //Do something
+			 }
+			 break;
+			                  
+          }
+	returnval = GrRead;
+	}
+	 catch (std::exception& e) {
+	  cout << e.what();
+	  cout << "error in PrimGraspIndustrial";
+  }
+  return returnval;
+
+}
