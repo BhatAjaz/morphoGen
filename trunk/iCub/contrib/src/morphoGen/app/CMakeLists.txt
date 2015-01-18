@@ -19,9 +19,11 @@
 #SET(ICUB_APPLICATIONS_PREFIX "$ENV{ICUB_ROOT}"  CACHE PATH "Application path prefix")
 				
 
-add_subdirectory(morphoGenApp)
+add_subdirectory(visualizationsDarwin)
 add_subdirectory(cognitiveGuiApp)
 add_subdirectory(perceptionActionCycleApp)
+add_subdirectory(morphoGenApp)
+add_subdirectory(RXNeural)
 ## make all applications show up as single target
 #icub_app_all()
 

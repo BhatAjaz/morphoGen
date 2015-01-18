@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<portscope rows="1" columns="1" carrier="mcast">   
+
+        <plot gridx="0"
+          gridy="0"
+          hspan="1"
+          vspan="1"
+          title="PMP Joints [1 to 9]"
+          size="1000"
+          minval="-360"
+          maxval="360"
+          bgcolor="Light Grey">
+               
+        <graph remote="/PMP/cmd/endEffector:o"
+               index="5"
+               color="Cyan"
+               title="Joint 0"
+               type="Line"
+               size="2" />
+               
+        <graph remote="/PMP/cmd/endEffector:o"
+               index="6"
+               color="Green"
+               title="Joint 1"
+               type="Line"
+               size="2" />
+               
+        <graph remote="/PMP/cmd/endEffector:o"
+               index="7"
+               color="Yellow"
+               title="Joint 2"
+               type="Line"
+               size="2" />
+               
+       <graph remote="/PMP/cmd/endEffector:o"
+               index="8"
+               color="Blue"
+               title="Joint 3"
+               type="Line"
+               size="2" />
+        <graph remote="/PMP/cmd/endEffector:o"
+               index="9"
+               color="Red"
+               title="Joint 4"
+               type="Line"
+               size="2" />
+		<graph remote="/PMP/cmd/endEffector:o"
+               index="10"
+               color="Orange"
+               title="Joint 5"
+               type="Line"
+               size="2" />
+       <graph remote="/PMP/cmd/endEffector:o"
+
+               index="11"
+               color="Indigo"
+               title="Joint 6"
+               type="Line"
+               size="2" />
+        <graph remote="/PMP/cmd/endEffector:o"
+               index="12"
+               color="Magenta"
+               title="Joint 7"
+               type="Line"
+               size="2" />
+		<graph remote="/PMP/cmd/endEffector:o"
+               index="13"
+               color="Light Blue"
+               title="Joint 8"
+               type="Line"
+               size="2" />
+		<graph remote="/PMP/cmd/endEffector:o"
+               index="14"
+               color="Light Red"
+               title="Joint 9"
+               type="Line"
+               size="2" />	
+
+    </plot>
+    
+    
+</portscope>

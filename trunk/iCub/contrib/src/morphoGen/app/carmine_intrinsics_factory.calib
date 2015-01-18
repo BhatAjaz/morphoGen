@@ -1,0 +1,35 @@
+%Calibration File v 1.0.3 - Matlab Load() compatible Scale Unit: 24.6
+%CameraID=1
+%CameraNo=0
+%Date=
+%ImageWidth=1280
+%ImageHeight=960
+%Description=
+%Intrinsics I[1,1], I[1,2], I[1,3], I[2,1], I[2,2], I[2,3], I[3,1], I[3,2] I[3,3]
+%I
+525.0
+0.0
+319.5
+0.0
+525.0
+239.5
+0.0
+0.0
+1.0
+%Distortion D[1], D[2], D[3], D[4] D[5]
+%D
+0.0
+0.0
+0.0
+0.0
+0.0
+%Translation T.X, T.Y, T.Z
+%T
+-12.89252047291809
+-105.10828951808854
+724.65794368588502
+%Rotation Vector (Rodrigues) R.X, R.Y, R.Z
+%R
+1.6914304514964020
+1.7037556058075023
+-0.7843790686801017
