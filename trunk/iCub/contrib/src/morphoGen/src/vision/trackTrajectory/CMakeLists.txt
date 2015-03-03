@@ -18,6 +18,7 @@ INCLUDE_DIRECTORIES(
     ${YARP_INCLUDE_DIRS} 	
     ${ICUB_INCLUDE_DIRS}	
     ${ICUB_CONTRIB_DIRS}
+    ${iKin_INCLUDE_DIRS}
 )
 
 # Search for source code.
@@ -34,8 +35,9 @@ IF (folder_source)
     )
 
     TARGET_LINK_LIBRARIES(${KEYWORD}        
-
-      ${YARP_LIBRARIES}
+	iKin
+	icubmod
+        ${YARP_LIBRARIES}
       )	
 
     INSTALL_TARGETS(/bin ${KEYWORD})
