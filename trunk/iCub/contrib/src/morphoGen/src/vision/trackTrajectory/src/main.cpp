@@ -47,17 +47,24 @@ using namespace alglib;
 #define COMMAND_VOCAB_END   VOCAB3('E','N','D')
 
 //****************** global variables *******************************************
-double xPoint[10000],yPoint[10000],xLeft[10000],yLeft[10000],xRight[10000],yRight[10000], a[3],locBegin[3],shapesArray[20][3],shapeType[20];
+double xPoint[10000],yPoint[10000],xLeft[10000],yLeft[10000],xRight[10000],yRight[10000], a[3],locBegin[3],shapesArray[20][3],shapeType[20],shapeIndex[20];
 int dataSize,originalSize,shapesCount=0;
+int inBmp;
 std::ofstream shapesFile;
 yarp::os::BufferedPort<yarp::os::Bottle> outputPort;
+//yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> > plotPort;
+yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > plotPort;
 yarp::dev::IGazeControl *igaze; // Ikin controller of the gaze
 yarp::dev::PolyDriver* clientGazeCtrl;          // polydriver for the gaze controller
 int originalContext;                    // original context for the gaze Controller
 YARP_DECLARE_DEVICES(icubmod)
 bool FIX= true; 
-bool Find3D = false;
 bool visionON = true;
+bool saccadeON=true;
+bool Find3D = false;
+
+
+
 //**************************************************************************
 
 int signum(double n) { return (n < 0) ? -1 : (n > 0) ? +1 : 0; }
@@ -131,7 +138,7 @@ void useSaccade3D(int i){
 	//plane[2]=1;
 	//plane[3]=-0.135;
 	igaze->lookAtStereoPixels(pxL,pxR);
-	Time::delay(1);
+	Time::delay(2);
 	igaze->getFixationPoint(position);
 	//igaze->triangulate3DPoint(pxL,pxR,position);
 	//igaze->get3DPointOnPlane(0,pxL,plane,position);
@@ -143,208 +150,9 @@ void useSaccade3D(int i){
 	//igaze->blockNeckRoll();
 	//igaze->blockNeckYaw();
 }
-void Get3dfromVision()
+void GetBothEyesVision()
 {
-	yarp::dev::IGazeControl *igaze;                 // Ikin controller of the gaze
-
-	//initializing gazecontrollerclient
-    printf("initialising gazeControllerClient \n");
-    Property option;
-    option.put("device","gazecontrollerclient");
-    option.put("remote","/iKinGazeCtrl");
-    string localCon("/client/gaze");
-    //localCon.append(getName(""));
-    option.put("local",localCon.c_str());
-
-	yarp::dev::PolyDriver* clientGazeCtrl;          // polydriver for the gaze controller
-    clientGazeCtrl=new yarp::dev::PolyDriver();
-    clientGazeCtrl->open(option);
-    igaze=NULL;
-
-    if (clientGazeCtrl->isValid()) {
-       clientGazeCtrl->view(igaze);
-    }
-    
-	int originalContext;                    // original context for the gaze Controller
-    igaze->storeContext(&originalContext);
-  
-    //if(blockNeckPitchValue != -1) {
-    //    igaze->blockNeckPitch(blockNeckPitchValue);
-    //    printf("pitch fixed at %f \n",blockNeckPitchValue);
-    //}
-    //else {
-    //    printf("pitch free to change\n");
-    //}
-
-	yarp::os::BufferedPort<yarp::os::Bottle> inputLeft,inputRight,imitPort; 
-	yarp::os::Bottle *incomingBottleLeft,*incomingBottleRight,*imitBottle;
-	std::ofstream camFile,visionFile;
-	camFile.open("gazeData.txt");
-	visionFile.open("visionData.txt");
-	//outputPort.open("/trackTrajectory/data:o");
-    inputLeft.open("/trackTrajectory/left/data:i");
-	inputRight.open("/trackTrajectory/right/data:i");
-	imitPort.open("/trackTrajectory/imitationCtrl:i");
-	if (!Network::connect("/colorVisionLeft/colordata:o","/trackTrajectory/left/data:i"))
-	{
-		Network::connect("/colorVisionLeft/colordata:o","/trackTrajectory/left/data:i");
-	}
-	if (!Network::connect("/colorVisionRight/colordata:o","/trackTrajectory/right/data:i"))
-	{
-		Network::connect("/colorVisionRight/colordata:o","/trackTrajectory/right/data:i");
-	}
-	int i = 0;
-	int x1,y1,x2,y2,x3,y3,x4,y4,countL,ID,countR; //move these DOWN
-	double uL,vL,uR,vR;
-	int sameData=0;
-	bool moving =false;
-
-	while( !imitPort.getInputCount()){
-		imitBottle    =   imitPort.read(true);
-		if (imitBottle  !=  NULL)   {           
-			int ctrl = 1234;
-			ctrl = imitBottle->get(0).asInt();	
-			if (ctrl==1){
-				moving=true;
-			}
-			imitBottle->clear();
-		}
-	}
-	while (moving){
-        if( inputLeft.getInputCount() && inputRight.getInputCount()){
-			//fprintf (trajFile,"running the module%d %d %d",i,j);
-            incomingBottleLeft    =   inputLeft.read(true);
-			incomingBottleRight   =   inputRight.read(true);
-            if ((incomingBottleLeft  !=  NULL) && (incomingBottleRight  !=  NULL))  {             
-                if ( (incomingBottleLeft->size() > 0) && (incomingBottleRight->size() > 0) ) {
-					countL = incomingBottleLeft->get(0).asInt();
-					Bottle * tempBottleLeft =   incomingBottleLeft->get(1).asList();
-
-					countR = incomingBottleRight->get(0).asInt();
-					Bottle * tempBottleRight =   incomingBottleRight->get(1).asList();
-					/*while(count>1)
-					{
-						int tempID = tempBottle->get(4).asInt();
-						if (tempID==2) break;
-						else
-						{
-							tempBottle =   tempBottle->get(5).asList();
-							count--;
-						}
-					}*/
-					//CHANGE NEEDED// using count read the correct bottle with id == 2 only
-					if ((tempBottleLeft != NULL) && (tempBottleRight != NULL)){
-						x1  =   abs(tempBottleLeft->get(0).asInt()); 
-						y1  =   abs(tempBottleLeft->get(1).asInt()); 
-						x2  =   abs(tempBottleLeft->get(2).asInt()); 
-						y2  =   abs(tempBottleLeft->get(3).asInt());
-						ID  =   tempBottleLeft->get(4).asInt();  
-						uL	=	x1+ x2/2.0;
-						vL	=	y1+ y2/2.0;
-						printf("Left Eye Found object with ID\t %d: and centroid at \t %f \t %f  \n", ID, uL,vL);
-
-						x3  =   abs(tempBottleRight->get(0).asInt()); 
-						y3  =   abs(tempBottleRight->get(1).asInt()); 
-						x4  =   abs(tempBottleRight->get(2).asInt()); 
-						y4  =   abs(tempBottleRight->get(3).asInt());
-						ID  =   tempBottleRight->get(4).asInt();  
-						uR	=	x3+ x4/2.0;
-						vR	=	y3+ y4/2.0;
-						printf("Right Eye Found object with ID \t %d: and centroid at \t %f \t %f  \n", ID, uR,vR);
-						visionFile <<uL <<"\t"<<vL <<"\t"<<uR <<"\t"<<vR <<"\t"<<std::endl;
-						yarp::sig::Vector pxL(2);
-						pxL[0] = uL;
-						pxL[1] = vL;
-						yarp::sig::Vector pxR(2);
-						pxR[0] = uR;
-						pxR[1] = vR;
-						yarp::sig::Vector position(3);
-						yarp::sig::Vector plane(4);
-						plane[0]=0;
-						plane[1]=0;
-						plane[2]=1;
-						plane[3]=-0.1;
-						igaze->lookAtStereoPixels(pxL,pxR);
-						Time::delay(0.1);
-						igaze->getFixationPoint(position);
-						//igaze->triangulate3DPoint(pxL,pxR,position);
-						//igaze->get3DPointOnPlane(0,pxL,plane,position);
-						double x = position[0]*1000;
-						double y = position[1]*1000;
-						double z = position[2]*1000;
-						printf("Corresponding 3D location \t %.1f \t %.1f \t %.1f \n", x, y,z);
-						if(ID==2) {
-							if (i==0){
-								xPoint[i]=x;
-								yPoint[i]=y;
-								//printf("Saving object at new location with ID \t %d: and centroid at \t %d \t %d  \n", ID, x,y);
-								//fprintf (trajFile, "%d %d\n", x,y);
-								camFile <<x << "\t"<<y << "\t"<<std::endl;
-								i++;
-								//igaze->blockNeckPitch();
-								//igaze->blockNeckRoll();
-								//igaze->blockNeckYaw();
-							}
-						
-							if (i>0&& i<10000){
-								if ( (fabs(x - xPoint[i-1]) >=1) || (fabs(y - yPoint[i-1]) >= 1) ) {
-									xPoint[i]=x;
-									yPoint[i]=y;
-									//printf("Saving object at new location with ID \t %d: and centroid at \t %d \t %d  \n", ID, x,y);
-									//fprintf (trajFile, " %d %d\n", x,y);
-									camFile <<x << "\t"<<y << "\t"<<std::endl;
-									i++;
-									//sameData=0;
-								}
-							}
-						}
-						else
-						{
-						printf("object id not green");
-						}
-					}
-					else
-					{
-					printf ("temp Bottles are NULL \n");
-					}
-                }
-				else {
-				printf("Bottle size less than 0 \n");
-				}
-                incomingBottleLeft->clear();
-				incomingBottleRight->clear();
-                if( (incomingBottleLeft->size() != 0) || (incomingBottleLeft->size() != 0)) {
-                    printf("Error\n");   
-                }
-            }
-			else
-			{
-				printf("Either of input bottles is NULL \n");
-			}
-        }
-		else
-		{
-			printf("Missing connections\n");
-		}
-		if( imitPort.getInputCount()){
-			imitBottle    =   imitPort.read(false);
-			if (imitBottle  !=  NULL)   {           
-				int ctrl = 1234;
-				ctrl = imitBottle->get(0).asInt();	
-				if (ctrl==0){
-					moving=false;
-				}
-			}
-		}
-	}
-	camFile.close();
-	visionFile.close();
-	dataSize = i;
-	igaze->restoreContext(originalContext);
-    delete clientGazeCtrl;
-}
-void getColorTrajectory(){
-/////////////////using input data from vision::: control input by writing "/trackTrajectory/imitationCtrl:i" port with 1 (start) or 0 (stop)  
+	/////////////////using input data from vision::: control input by writing "/trackTrajectory/imitationCtrl:i" port with 1 (start) or 0 (stop)  
 	yarp::os::BufferedPort<yarp::os::Bottle> inputLeft,inputRight,imitPort; 
 	yarp::os::Bottle *incomingBottleLeft,*incomingBottleRight,*imitBottle;
 	std::ofstream visionFile;
@@ -397,18 +205,6 @@ void getColorTrajectory(){
             if ((incomingBottleLeft  !=  NULL) && (incomingBottleRight  !=  NULL))  {             
                 if ( (incomingBottleLeft->size() > 0) && (incomingBottleRight->size() > 0) ) {
 
-					/*while(count>1)
-					{
-						int tempID = tempBottle->get(4).asInt();
-						if (tempID==2) break;
-						else
-						{
-							tempBottle =   tempBottle->get(5).asList();
-							count--;
-						}
-					}*/
-					//CHANGE NEEDED// using count read the correct bottle with id == 2 only
-					/////
 					countL = incomingBottleLeft->get(0).asInt();
 					int indxLeft=1;
 					bool objLeftFound=false;
@@ -416,7 +212,7 @@ void getColorTrajectory(){
 					{
 						Bottle * tempBottleLeft =   incomingBottleLeft->get(indxLeft).asList();
 						int tempID = tempBottleLeft->get(4).asInt();
-						if (tempID==2) 
+						if (tempID==2) //green object
 						{
 							objLeftFound=true;
 						}
@@ -477,56 +273,25 @@ void getColorTrajectory(){
 								yRight[i]=vR;
 								printf("Saving object at new location with ID \t %d: and centroid at \t %.1f \t %.1f  \n", IDL, uL,vL);
 								visionFile <<uL <<"\t"<<vL <<"\t"<<uR <<"\t"<<vR <<"\t"<<std::endl;
-								useSaccade3D(i);
+								//useSaccade3D(i);
 
-								/////////////////////////just new saccade
-								//incomingBottleLeft    =   inputLeft.read(true);
-								//incomingBottleRight   =   inputRight.read(true);
-								//if ((incomingBottleLeft  !=  NULL) && (incomingBottleRight  !=  NULL))  {
-								//	countL = incomingBottleLeft->get(0).asInt();
-								//	Bottle * tempBottleLeft =   incomingBottleLeft->get(1).asList();
-
-								//	countR = incomingBottleRight->get(0).asInt();
-								//	Bottle * tempBottleRight =   incomingBottleRight->get(1).asList();
-								//	if ((tempBottleLeft != NULL) && (tempBottleRight != NULL)){
-								//		x1  =   abs(tempBottleLeft->get(0).asInt()); 
-								//		y1  =   abs(tempBottleLeft->get(1).asInt()); 
-								//		x2  =   abs(tempBottleLeft->get(2).asInt()); 
-								//		y2  =   abs(tempBottleLeft->get(3).asInt());
-								//		IDL  =   tempBottleLeft->get(4).asInt();  
-								//		uL	=	x1+ x2/2.0;
-								//		vL	=	y1+ y2/2.0;
-								//		//printf("Left Eye Found object with ID\t %d: and centroid at \t %f \t %f  \n", ID, uL,vL);
-
-								//		x3  =   abs(tempBottleRight->get(0).asInt()); 
-								//		y3  =   abs(tempBottleRight->get(1).asInt()); 
-								//		x4  =   abs(tempBottleRight->get(2).asInt()); 
-								//		y4  =   abs(tempBottleRight->get(3).asInt());
-								//		IDR  =   tempBottleRight->get(4).asInt();  
-								//		uR	=	x3+ x4/2.0;
-								//		vR	=	y3+ y4/2.0;
-								//		//printf("Right Eye Found object with ID \t %d: and centroid at \t %f \t %f  \n", ID, uR,vR);
-								//		if((IDL==2) && (IDR==2)) {
-								//			xLeft[i]=uL;
-								//			yLeft[i]=vL;
-								//			xRight[i]=uR;
-								//			yRight[i]=vR;
-								//			useSaccade3D(i);
-								//		}
-								//	}
-								//	printf("Teach me tool use\n");
-								//}
 								//////////////// saccade again ends
 								i++;
 
 							}
 						
 							if (i>0&& i<5000){
-								if ( (fabs(uL - xLeft[i-1]) >=1) || (fabs(vL - yLeft[i-1]) >= 1) ) {
+								if ( (fabs(uL - xLeft[i-1]) >=1) || (fabs(vL - yLeft[i-1]) >= 1) ) {								
 									xLeft[i]=uL;
 									yLeft[i]=vL;
 									xRight[i]=uR;
 									yRight[i]=vR;
+									if (i==1){
+										xLeft[0]=uL;
+										yLeft[0]=vL;
+										xRight[0]=uR;
+										yRight[0]=vR;
+									}
 									printf("Saving object at new location with ID \t %d: and centroid at \t %.1f \t %.1f  \n", IDL, uL,vL);
 									visionFile <<uL <<"\t"<<vL <<"\t"<<uR <<"\t"<<vR <<"\t"<<std::endl;
 									i++;
@@ -548,7 +313,7 @@ void getColorTrajectory(){
 				}
                 incomingBottleLeft->clear();
 				incomingBottleRight->clear();
-                if( (incomingBottleLeft->size() != 0) || (incomingBottleLeft->size() != 0)) {
+                if( (incomingBottleLeft->size() != 0) || (incomingBottleRight->size() != 0)) {
                     printf("Error\n");   
                 }
             }
@@ -576,6 +341,155 @@ void getColorTrajectory(){
 			{
 				Network::connect("/rightDetector/shapeData:o","/trackTrajectory/right/data:i");
 			}*/
+			if (!Network::connect("/commandImitato:o", "/trackTrajectory/imitationCtrl:i"))
+			{
+				Network::connect("/commandImitato:o", "/trackTrajectory/imitationCtrl:i");
+			}
+			
+		}
+		if( imitPort.getInputCount()){
+			imitBottle    =   imitPort.read(false);
+			if (imitBottle  !=  NULL)   {           
+				int ctrl = 1234;
+				ctrl = imitBottle->get(0).asInt();	
+				if (ctrl==0){
+					moving=false;
+				}
+			}
+		}
+	}
+	visionFile.close();
+	dataSize = i;
+	originalSize=i;
+	for (int i=0;i<dataSize;i++){
+		xPoint[i]=xLeft[i];
+		yPoint[i]=yLeft[i];
+	}
+	
+}
+void getColorTrajectory(){
+	/////////////////using input data from vision::: control input by writing "/trackTrajectory/imitationCtrl:i" port with 1 (start) or 0 (stop)  
+	yarp::os::BufferedPort<yarp::os::Bottle> inputLeft,inputRight,imitPort; 
+	yarp::os::Bottle *incomingBottleLeft,*incomingBottleRight,*imitBottle;
+	std::ofstream visionFile;
+	visionFile.open("visionDataLeft.txt");
+    inputLeft.open("/trackTrajectory/left/data:i");
+	inputRight.open("/trackTrajectory/right/data:i");
+	imitPort.open("/trackTrajectory/imitationCtrl:i");
+	if (!Network::connect("/colorVisionLeft/colordata:o","/trackTrajectory/left/data:i"))
+	{
+		Network::connect("/colorVisionLeft/colordata:o","/trackTrajectory/left/data:i");
+	}
+	/*if (!Network::connect("/colorVisionRight/colordata:o","/trackTrajectory/right/data:i"))
+	{
+		Network::connect("/colorVisionRight/colordata:o","/trackTrajectory/right/data:i");
+	}*/
+	
+	int i = 0;
+	int x1,y1,x2,y2,x3,y3,x4,y4,countL,IDL,IDR,countR; //move these DOWN
+	double uL,vL,uR,vR;
+	int sameData=0;
+	bool moving =false;
+	while( !imitPort.getInputCount()){
+		imitBottle    =   imitPort.read(true);
+		if (imitBottle  !=  NULL)   {           
+			int ctrl = 1234;
+			ctrl = imitBottle->get(0).asInt();	
+			if (ctrl==1){
+				moving=true;
+			}
+			imitBottle->clear();
+		}
+	}
+	while (moving){
+        if( inputLeft.getInputCount()){
+            incomingBottleLeft    =   inputLeft.read(true);
+            if ((incomingBottleLeft  !=  NULL))  {             
+                if ( (incomingBottleLeft->size() > 0)) {
+
+					countL = incomingBottleLeft->get(0).asInt();
+					int indxLeft=1;
+					bool objLeftFound=false;
+					while((!objLeftFound) && (countL>0))
+					{
+						Bottle * tempBottleLeft =   incomingBottleLeft->get(indxLeft).asList();
+						int tempID = tempBottleLeft->get(4).asInt();
+						if (tempID==2) //green object
+						{
+							objLeftFound=true;
+						}
+						else
+						{
+							indxLeft++;
+							countL--;
+						}
+					}
+					/////
+
+
+					if (objLeftFound){
+						Bottle * tempBottleLeft =   incomingBottleLeft->get(indxLeft).asList();
+						x1  =   abs(tempBottleLeft->get(0).asInt()); 
+						y1  =   abs(tempBottleLeft->get(1).asInt()); 
+						x2  =   abs(tempBottleLeft->get(2).asInt()); 
+						y2  =   abs(tempBottleLeft->get(3).asInt());
+						IDL  =   tempBottleLeft->get(4).asInt();  
+						uL	=	x1+ x2/2.0;
+						vL	=	y1+ y2/2.0;
+						//printf("Left Eye Found object with ID\t %d: and centroid at \t %f \t %f  \n", ID, uL,vL);
+						if((IDL==2)) {//green object
+							if (i==0){
+								xLeft[i]=uL;
+								yLeft[i]=vL;
+								printf("Saving object at new location with ID \t %d: and centroid at \t %.1f \t %.1f  \n", IDL, uL,vL);
+								visionFile <<uL <<"\t"<<vL<<std::endl;
+								i++;
+							}
+						
+							if (i>0&& i<5000){
+								if ( (fabs(uL - xLeft[i-1]) >=1) || (fabs(vL - yLeft[i-1]) >= 1) ) {								
+									xLeft[i]=uL;
+									yLeft[i]=vL;
+									if (i==1){
+										xLeft[0]=uL;
+										yLeft[0]=vL;
+									}
+									printf("Saving object at new location with ID \t %d: and centroid at \t %.1f \t %.1f  \n", IDL, uL,vL);
+									visionFile <<uL <<"\t"<<vL <<std::endl;
+									i++;
+								}
+							}
+						}
+						else
+						{
+						printf("Object ID not Green");
+						}
+					}
+					else
+					{
+					printf ("No Object Found:::::Bottles are NULL \n");
+					}
+                }
+				else {
+				printf("Bottle size less than 0 \n");
+				}
+                incomingBottleLeft->clear();
+                if( (incomingBottleLeft->size() != 0)) {
+                    printf("Error\n");   
+                }
+            }
+			else
+			{
+				printf("Either of input bottles is NULL \n");
+			}
+        }
+		else
+		{
+			printf("Missing connections trying reconnection\n");
+			if (!Network::connect("/colorVisionLeft/colordata:o","/trackTrajectory/left/data:i"))
+			{
+				Network::connect("/colorVisionLeft/colordata:o","/trackTrajectory/left/data:i");
+			}
 			if (!Network::connect("/commandImitato:o", "/trackTrajectory/imitationCtrl:i"))
 			{
 				Network::connect("/commandImitato:o", "/trackTrajectory/imitationCtrl:i");
@@ -717,8 +631,8 @@ void FindShape(int startPt, int shapePt, int endPt)
 			if (cosRatio >cuspLimit)
 			 { 
 				
-				shapesFile<<"Cusp \t" <<xPoint[shapePt] <<"\t" << yPoint[shapePt] <<std::endl;
-				int iN=findClosestPoint(xPoint[shapePt],xPoint[shapePt]);
+				shapesFile<<"Cusp through findshape\t" <<xPoint[shapePt] <<"\t" << yPoint[shapePt] <<std::endl;
+				int iN=findClosestPoint(xPoint[shapePt],yPoint[shapePt]);
 				std::cout<< "Cusp at \t" <<xLeft[iN] <<"\t" << yLeft[iN] <<std::endl;
 				if (Find3D)
 				{
@@ -726,17 +640,21 @@ void FindShape(int startPt, int shapePt, int endPt)
 					std::cout<< "Corresponding x y locations in robot frame \t" <<a[0] <<"\t" << a[1] <<std::endl;
 					std::cout<<std::endl;
 				}
-				shapesArray[shapesCount][0]=a[0];
-				shapesArray[shapesCount][1]=a[1];
-				shapesArray[shapesCount][2]=a[2];
-				shapeType[shapesCount]=2;
-				shapesCount++;
+				if (!FIX){
+					shapesArray[shapesCount][0]=a[0];
+					shapesArray[shapesCount][1]=a[1];
+					shapesArray[shapesCount][2]=a[2];
+					shapeIndex[shapesCount]=iN;
+					shapeType[shapesCount]=2;
+					shapesCount++;
+				}
 			}
 			if (cosRatio >bumpLimit && cosRatio <cuspLimit)
 			{
 				
 				shapesFile<<"Bump \t" <<xPoint[shapePt] <<"\t" << yPoint[shapePt] <<std::endl;
-				int iN=findClosestPoint(xPoint[shapePt],xPoint[shapePt]);
+				int iN=findClosestPoint(xPoint[shapePt],yPoint[shapePt]);
+				inBmp=iN;
 				std::cout<< "Bump at \t" <<xLeft[iN] <<"\t" << yLeft[iN] <<std::endl;
 				if (Find3D)
 				{
@@ -744,12 +662,14 @@ void FindShape(int startPt, int shapePt, int endPt)
 					std::cout<< "Corresponding x y locations in robot frame \t" <<a[0] <<"\t" << a[1] <<std::endl;
 					std::cout<<std::endl;
 				}
+				if (FIX){
 				shapesArray[shapesCount][0]=-320;//a[0];
 				shapesArray[shapesCount][1]=-245;//a[1];
 				shapesArray[shapesCount][2]=45;//a[2];
+				shapeIndex[shapesCount]=iN;
 				shapeType[shapesCount]=1;
 				shapesCount++;
-				
+				}
 			}
 }
 void removeJunkData()
@@ -1282,6 +1202,115 @@ void writeOutput(){
 	}
 }
 
+void trajPlotter()
+{
+	Network::connect("/trackTrajectory/plotPoints:o","/trajView");
+	if (plotPort.getOutputCount()) {
+         //yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = plotPort.prepare();
+		 yarp::sig::ImageOf<yarp::sig::PixelRgb> &outputImage = plotPort.prepare();
+        // processing of the outputImage
+        int height = 240;
+        int width  = 320;
+        //int scale  = 10;
+		int maxX =0;
+		int minX = 320;
+		int maxY = 0;
+		int minY = 240;
+		for(int i=0;i<originalSize;i++)
+		{
+			if (xLeft[i]>maxX){
+				maxX=xLeft[i];
+			}
+			else if (xLeft[i]<minX){
+				minX=xLeft[i];
+			}
+
+			if (yLeft[i]>maxY){
+				maxY=yLeft[i];
+			}
+			else if (yLeft[i]<minY){
+				minY=yLeft[i];
+			}
+		}
+		if(maxX<310) maxX+=10;
+		if(maxY<230) maxY+=10;
+		if(minX>10) minX-=10;
+		if(minY>10) minY-=10;
+
+		int imgMat[320][240]={0};
+
+		int shapesEncoded=0;
+		for(int i=0;i<originalSize;i++)
+		{
+
+			if((shapesEncoded<=shapesCount) && (shapeIndex[shapesEncoded]==i)){
+				if(shapeType[shapesEncoded]==1) //BUMP
+				{
+					imgMat[round_int(xLeft[i])][round(yLeft[i])]=5;
+					imgMat[round_int(xLeft[i])-1][round(yLeft[i])]=5;
+					imgMat[round_int(xLeft[i])+1][round(yLeft[i])]=5;
+					imgMat[round_int(xLeft[i])][round(yLeft[i])-1]=5;
+					imgMat[round_int(xLeft[i])][round(yLeft[i])+1]=5;
+				}
+				else if(shapeType[shapesEncoded]==2) //CUSP
+				{
+					imgMat[round_int(xLeft[i])][round(yLeft[i])]=6;
+					imgMat[round_int(xLeft[i])-1][round(yLeft[i])]=6;
+					imgMat[round_int(xLeft[i])+1][round(yLeft[i])]=6;
+					imgMat[round_int(xLeft[i])][round(yLeft[i])-1]=6;
+					imgMat[round_int(xLeft[i])][round(yLeft[i])+1]=6;
+				}
+				else//End points
+				{
+					imgMat[round_int(xLeft[i])][round(yLeft[i])]=7;
+					imgMat[round_int(xLeft[i])-1][round(yLeft[i])]=7;
+					imgMat[round_int(xLeft[i])+1][round(yLeft[i])]=7;
+					imgMat[round_int(xLeft[i])][round(yLeft[i])-1]=7;
+					imgMat[round_int(xLeft[i])][round(yLeft[i])+1]=7;
+				}
+
+				shapesEncoded++;
+			}
+			else
+				imgMat[round_int(xLeft[i])][round(yLeft[i])]=1;
+		}
+
+		width  = maxX-minX;
+		height = maxY-minY;
+       	
+        outputImage.resize(width, height);
+
+		 for (int c = minX; c < maxX; c++) {
+			for (int r = maxY; r > minY; r--) {                   
+                yarp::sig::PixelRgb& pix = outputImage.pixel(c-minX,maxY-r);
+				if (imgMat[c][r]==7){// Yellow start and end
+					pix.r = 255;
+					pix.g = 255;
+					pix.b = 0;
+				}
+				else if (imgMat[c][r]==6){//Blue Cusps
+					pix.r = 0;
+					pix.g = 0;
+					pix.b = 255;
+				}
+				else if (imgMat[c][r]==5){//Red Bumps
+					pix.r = 255;
+					pix.g = 0;
+					pix.b = 0;
+				}
+				else
+				{//green trajectory and black background
+					pix.r = 0;
+					pix.g = imgMat[c][r] * 255;
+					pix.b = 0;
+				}
+            }                                   
+        }
+
+        plotPort.write();  
+    }
+
+}
 void main(int argc, char * argv[])
 {
     
@@ -1294,26 +1323,28 @@ void main(int argc, char * argv[])
     rf.configure("ICUB_ROOT", argc, argv);  
     //yarp::os::ConstString path = rf.findPath("trajPoints.txt");
     //printf("File found! path %s \n", path.c_str());
-	yarp::os::BufferedPort<yarp::os::Bottle> yarpScopePort;
+	plotPort.open("/trackTrajectory/plotPoints:o");
 	outputPort.open("/trackTrajectory/shapePoints:o");
 	std::ofstream smoothFile;//,visionFile;
 	smoothFile.open("smoothData.txt");
-	if (visionON) initGaze();
-				//locBegin[0]=-272;
-				//locBegin[1]=-146;
-				//Get3dfromVision();
-	if (visionON) getColorTrajectory();
+	if (visionON){
+		if (saccadeON) initGaze();
+					//locBegin[0]=-272;
+					//locBegin[1]=-146;
+					//
+		if (saccadeON) {GetBothEyesVision();}
+		else {getColorTrajectory();}
+		}
 //////////////////////////data from vision loaded///////////////////////////////////////////////////////
 	if (!visionON)
 	{
 /////////////// ALTERNATE USE INPUT DATA FROM FILE ::testing purpose ...generally this section is commmented out/////////////////////////////
 		std::ifstream tempFile;
-		tempFile.open("trajectory.txt");
+		tempFile.open("trajFile.txt");
 		int i=0;
 		while(!tempFile.eof())
 		{
-			//double waste;
-			//tempFile >> waste;
+			double waste;
 			double x,y;
 			tempFile >> x;
 			xPoint[i]=x;
@@ -1321,6 +1352,8 @@ void main(int argc, char * argv[])
 			tempFile >> y;
 			yPoint[i]=y;
 			yLeft[i]=y;
+			//tempFile >> waste;
+			//tempFile >> waste;
 			printf("loaded object location centroid as \t %f \t %f  \n", xPoint[i],yPoint[i]);
 			i++;
 		}
@@ -1330,7 +1363,7 @@ void main(int argc, char * argv[])
 		originalSize=i;
 	}
 	//////////////////////////////////////Trajectory saved/////////////////////////////////////////////////////////////////
-	
+		
 		if (originalSize >0) {
 			shapesFile.open("shapesData.txt");
 			double startPx=xPoint[0];
@@ -1345,9 +1378,20 @@ void main(int argc, char * argv[])
 				std::cout<< "Corresponding x y locations in robot frame \t" <<a[0] <<"\t" << a[1] <<"\t" << a[2]<<std::endl;
 				std::cout<<std::endl;
 			}
+
+			if (FIX)
+			{
 			shapesArray[shapesCount][0]=-300;//a[0];
 			shapesArray[shapesCount][1]=-100;//a[1];
 			shapesArray[shapesCount][2]=45;//a[2];
+			}
+			else
+			{
+			shapesArray[shapesCount][0]=a[0];
+			shapesArray[shapesCount][1]=a[1];
+			shapesArray[shapesCount][2]=a[2];
+			}
+			shapeIndex[shapesCount]=0;
 			shapeType[shapesCount]=0;
 			shapesCount++;
 			double endPx=xPoint[originalSize-1];
@@ -1357,6 +1401,7 @@ void main(int argc, char * argv[])
 			removeJunkData();
 		//////////////////////Preprocessing of pixels to generate continuous data////////////////////////////
 			//pixelIncrease();
+			
 
 			if (dataSize>2) {
 				//////////////////////////////////////////////Smoothening the trajectory follows/////////////////////////////
@@ -1367,7 +1412,7 @@ void main(int argc, char * argv[])
 					xPoint[i]=tmp1[i];
 					yPoint[i]=tmp2[i];
 				}*/
-
+				
 
 
 		///////////////////////New Code
@@ -1408,7 +1453,7 @@ void main(int argc, char * argv[])
 						xPrev = xPoint[i];
 						yPrev = yPoint[i];
 						oneFound=true;
-						int iN=findClosestPoint(xPoint[i],xPoint[i]);
+						int iN=findClosestPoint(xPoint[i],yPoint[i]);
 						std::cout<< "Cusp at \t" <<xLeft[iN] <<"\t" << yLeft[iN] <<std::endl;
 						if (Find3D)
 						{
@@ -1418,11 +1463,17 @@ void main(int argc, char * argv[])
 							std::cout<< "Corresponding x y locations in robot frame \t" <<a[0] <<"\t" << a[1] <<"\t" << a[2]<<std::endl;
 							std::cout<<std::endl;
 						}
-						/*shapesArray[shapesCount][0]=a[0];
+						
+						
+						if(!FIX){
+						shapesArray[shapesCount][0]=a[0];
 						shapesArray[shapesCount][1]=a[1];
 						shapesArray[shapesCount][2]=a[2];
+						
+						shapeIndex[shapesCount]=iN;
 						shapeType[shapesCount]=2;
-						shapesCount++;*/
+						shapesCount++;
+						}
 					}
 				}
 
@@ -1434,7 +1485,8 @@ void main(int argc, char * argv[])
 						xPrev = xPoint[i];
 						yPrev = yPoint[i];
 						oneFound=true;
-						int iN=findClosestPoint(xPoint[i],xPoint[i]);
+						int iN=findClosestPoint(xPoint[i],yPoint[i]);
+						inBmp=iN;
 						std::cout<< "Bump at \t" <<xLeft[iN] <<"\t" << yLeft[iN] <<std::endl;
 						if (Find3D)
 						{
@@ -1444,16 +1496,23 @@ void main(int argc, char * argv[])
 							std::cout<< "Corresponding x y locations in robot frame \t" <<a[0] <<"\t" << a[1]<<"\t" << a[2] <<std::endl;
 							std::cout<<std::endl;
 						}
+						if (FIX){
 						shapesArray[shapesCount][0]=-320;//a[0];
 						shapesArray[shapesCount][1]=-245;//a[1];
 						shapesArray[shapesCount][2]=45;//a[2];
+						}
+						else{
+						shapesArray[shapesCount][0]=a[0];
+						shapesArray[shapesCount][1]=a[1];
+						shapesArray[shapesCount][2]=a[2];					
+						}
+						shapeIndex[shapesCount]=iN;
 						shapeType[shapesCount]=1;
 						shapesCount++;
 						if (FIX) i=dataSize-4;
 					}
+		
 				}
-		
-		
 				/*if ( ( (isZero(xD)) && (!isZero(xDD)) && (!isZero(yD)) ) || ( (isZero(yD)) && (!isZero(yDD)) && (!isZero(xD)) ))
 				{
 					std::cout <<"bump location" <<"\t"<< xPoint[i] <<"\t"<< yPoint[i] <<std::endl;
@@ -1469,7 +1528,7 @@ void main(int argc, char * argv[])
 				i=i+inc;
 			}
 			//smoothFile.close();
-	
+
 
 			if (!oneFound)
 			{	
@@ -1478,6 +1537,7 @@ void main(int argc, char * argv[])
 				xPoint[dataSize-1] =endPx;
 				yPoint[dataSize-1]=endPy;
 				FindShape(0,dataSize/2,dataSize-1);	
+
 			}
 		/*	
 			i = 1;
@@ -1534,14 +1594,25 @@ void main(int argc, char * argv[])
 				std::cout<< "Corresponding x y locations in robot frame \t" <<a[0] <<"\t" << a[1] <<"\t" << a[2]<<std::endl;
 				std::cout<<std::endl;
 			}
-			shapesArray[shapesCount][0]=-440;//a[0];
-			shapesArray[shapesCount][1]=-270;//a[1];
-			shapesArray[shapesCount][2]=45;//a[2];
+			if (FIX){
+				shapesArray[shapesCount][0]=-440;//a[0];
+				shapesArray[shapesCount][1]=-270;//a[1];
+				shapesArray[shapesCount][2]=45;//a[2];
+			}
+			else{
+				shapesArray[shapesCount][0]=a[0];
+				shapesArray[shapesCount][1]=a[1];
+				shapesArray[shapesCount][2]=a[2];
+			}
+			shapeIndex[shapesCount]=originalSize-1;
 			shapeType[shapesCount]=3;
 			shapesCount++;
 			shapesFile.close();
-			writeOutput();
+			trajPlotter();
+			if (saccadeON) writeOutput();
 			outputPort.close();
+			plotPort.close();
+			
 		}
 		else
 		{
@@ -1549,7 +1620,7 @@ void main(int argc, char * argv[])
 		}
 	
 	
-	if (visionON)	releaseGaze();
+	if (saccadeON)	releaseGaze();
     return;
 	
 }
