@@ -1204,7 +1204,9 @@ void writeOutput(){
 
 void trajPlotter()
 {
-	Network::connect("/trackTrajectory/plotPoints:o","/trajView");
+	if (!Network::connect("/trackTrajectory/plotPoints:o","/trajView")){
+		Network::connect("/trackTrajectory/plotPoints:o","/trajView");
+	}
 	if (plotPort.getOutputCount()) {
          //yarp::sig::ImageOf<yarp::sig::PixelMono> &outputImage = plotPort.prepare();
 		 yarp::sig::ImageOf<yarp::sig::PixelRgb> &outputImage = plotPort.prepare();

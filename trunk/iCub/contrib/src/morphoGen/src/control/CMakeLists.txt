@@ -5,8 +5,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 
-add_subdirectory( postureControl  )
-add_subdirectory( PMP             )
+#add_subdirectory( postureControl  )
+add_subdirectory( pmpAnalytic)
 
-add_subdirectory( PMPRX_Neural    )
+#add_subdirectory( PMPRX_Neural    )
 
