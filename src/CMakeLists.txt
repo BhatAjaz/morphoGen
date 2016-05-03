@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 2.6)
 #add here the name of the directory you want to build
 
 add_subdirectory( control         )
-add_subdirectory( gui             )
-add_subdirectory( reasoning       )
+#add_subdirectory( gui             )
+#add_subdirectory( reasoning       )
 add_subdirectory( tutorials       )
 add_subdirectory( vision          )
 add_subdirectory( tutorialThread  )
