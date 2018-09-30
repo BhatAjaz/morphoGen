@@ -32,10 +32,11 @@ else()
 endif() #note 5/11/13 introduced manually to help DARWIN partners
 
 include(YarpInstallationHelpers)
-
+FIND_PACKAGE(PkgConfig REQUIRED)
+PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)
 #find_package(IPP REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(GtkPlus REQUIRED)
+#find_package(GtkPlus REQUIRED)
 find_package(GSL)
 find_package(IPOPT)
 
@@ -60,4 +61,3 @@ set(ICUB_APPLICATIONS_PREFIX "$ENV{ICUB_ROOT}" CACHE PATH "Application path pref
 #ADD_SUBDIRECTORY(morphoGenLib)
 add_subdirectory(app)
 add_subdirectory(src)
-
