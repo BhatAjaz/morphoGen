@@ -30,9 +30,6 @@
 #include <string>
 #include <math.h>
 
-#include "MessageFormats/DarwinMessages.h"
-using namespace darwin::msg;
-
 #define COMMAND_VOCAB_FIND         VOCAB4('F','I','N','D')  //with OPC module
 
 //shared vocabulary with Observer module
@@ -45,15 +42,12 @@ private:
     std::string inputPortName;      // name of input port for incoming events, typically from aexGrabber
         
    	yarp::os::RpcServer OPCServer;  //Connects to external clients: User
-	yarp::os::BufferedPort<VisualScene> WorldSnap;   
-	yarp::os::BufferedPort<VisualScene> SendScene;
-	//BufferedPort<VisualScene> objport;
+	yarp::os::BufferedPort<yarp::os::Bottle > WorldSnap;   
 	std::string name;           // rootname of all the ports opened by this thread
 
 	double Eighteens[10][18]; //face coordinates
-	double NumObject;
-	double IOD[10];
-  double Graspability[10];
+	int NumObject;
+	int IOD[10];
 	
 public:
     /**
@@ -109,6 +103,7 @@ public:
 
     /*
     * function that sets the inputPort name
+
     */
     /*
     * function that sets the inputPort name

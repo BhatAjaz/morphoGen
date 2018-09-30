@@ -30,8 +30,8 @@
 #include <string>
 #include <math.h>
 
-#include "MessageFormats/VocabDefinitions.h"
-#include "MessageFormats/DarwinMessages.h"
+//#include "MessageFormats/VocabDefinitions.h"
+//#include "MessageFormats/DarwinMessages.h"
 
 #define COMMAND_VOCAB_REQ          VOCAB3('R','E','Q') //with episodic mem module
 #define COMMAND_VOCAB_ACK          VOCAB3('A','C','K')
@@ -68,6 +68,8 @@
 #define COMMAND_FAST   VOCAB4('f','a','s','t')
 #define CMD_RIGHT_HAND	VOCAB4('r','h','a','n')
 #define CMD_LEFT_HAND	VOCAB4('l','h','a','n')
+#define GRASP_PINCH 1
+#define GRASP_RELEASE 0
 
 enum RobotBodySide {
 	BODY_SIDE_LEFT,
@@ -197,8 +199,8 @@ public:
 
 	double PrimBodySchema(int PMPGoalCode,int OIDinPM,int PIdentifier, int MsimFlag, int WristOrient, int TrajType);
 
-	int PrimGrasp(darwin::msg::GraspTypeType GraspReq,int BodyChain);
-	int PrimGraspIndustrial(darwin::msg::GraspTypeType GraspReq,int BodyChain);
+	int PrimGrasp(int type, int BodyChain);
+	int PrimGraspIndustrial(int type, int BodyChain);
 
 
 	int PickandPlace(int pick, int place, int seqNumber);
@@ -245,7 +247,7 @@ public:
     // Function that sets path for files
     void setPath(std::string inP);
 
-	bool ObserverThread::Align(double& AlignF);
+	bool Align(double& AlignF);
 
   bool SceneChanged(double threshold);
 

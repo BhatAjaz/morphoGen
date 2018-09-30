@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.6)
 add_subdirectory( EpisodicMemory    )
 add_subdirectory( NewObserver       )
 #add_subdirectory( ObserverIndustrial)
-#add_subdirectory( OPC               )
+add_subdirectory( OPC               )
 
 
 # single modules that are going to be sorted into subsection

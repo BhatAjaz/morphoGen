@@ -48,6 +48,7 @@
 #define COMMAND_VOCAB_OBST   VOCAB4('O','B','S','T')
 //#define COMMAND_VOCAB_ORIG   VOCAB4('O','R','I','G')
 #define COMMAND_VOCAB_WRIO   VOCAB4('W','R','I','O')
+#define COMMAND_VOCAB_WRIS	 VOCAB4('W','R','I','S')
 #define COMMAND_VOCAB_FAILED VOCAB4('F','A','I','L')
 #define COMMAND_VOCAB_REA    VOCAB3('R','E','A')
 #define COMMAND_VOCAB_OK     VOCAB2('O','K')
@@ -71,7 +72,7 @@ private:
 	yarp::os::BufferedPort<yarp::os::Bottle > cmdLeft_armPort,cmdRight_armPort,cmdTorsoPort,cmdInterfacePort,cmdEndEffectorPort;
 	yarp::os::BufferedPort<yarp::os::Bottle > gazePort;
 	yarp::os::BufferedPort<yarp::os::Bottle > activationsPort;
-
+    yarp::os::BufferedPort<yarp::os::Bottle > right_arm_joints_Current,left_arm_joints_Current,torso_joints_Current;
 	//PMPServer to Observer
 	yarp::os::RpcServer PMPResponse; //server responding to Observer Client Port(/BodySchemaSim/io), with the result and motor commands
    	double *foof;
@@ -135,7 +136,7 @@ private:
     double X_pos[3],ffield[3],JoVel[20],X_posL[3],ffieldL[3];
     double *ptr;
     double KFORCE,ITERATION,RAMP_KONSTANT,t_dur;
-    double KOMP_JANG,KOMP_WAISZT,KOMP_WAISZT2;
+    double KOMP_JANG,KOMP_WAISZT,KOMP_WAISZT1,KOMP_WAISZT2;
     double J0H,J1H,J2H,J5H,J6H,J7H,J8H,J9H,J3H,J4H;
     float s[5000];
     //		int ParamStiff;
@@ -148,9 +149,9 @@ private:
     int dividen,NoBjS,Obj1ID,Obj2ID,GoalCodePMP,BodyChain,MSimExec,TrajType,TSEC;
     // Global information management
     double MiniGoal[12], PlaceMap[10][10],BodyTrack[2][15],GoalSpace[10][23],WristOrR,WristOrL;
-    double PickX,PickY,PickZ,PlacX,PlacY,PlacZ, WristO;
+    double PickX,PickY,PickZ,PlacX,PlacY,PlacZ, WristO,Wrist2;
     double Proprioceptive[2];
-	int XmitGreen;
+	double XmitGreen;
     double meanJan[10],JHd[10], meanJanL[10],JHdL[10];
 
 public:
@@ -268,7 +269,7 @@ public:
     void cmdInterfacePassT();
     void cmdInterfacePassRhand();
     void cmdInterfacePassLhand();
-    void initiCubUp();
+    void initiCubUp(double wrio);
     void InitializeJan();
     void InitializeJanObst();
     void InitializeWrld(int visiontype);
@@ -292,6 +293,7 @@ public:
     void PandP();
     void Interpret(int CCode,int PtCode,double AmplificationX,double AmplificationZ);
 	void gazeControl(double x, double y, double z);
+    void readCurrentJoints();
 };
 
 #endif  //_PMP_THREAD_H_

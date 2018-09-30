@@ -4,7 +4,7 @@
 #include <string>
 #include<time.h>
 #include <math.h>
-#include <windows.h>
+//#include <windows.h>
 #include <iostream>
 #include <fstream>
 
@@ -13,7 +13,7 @@ using namespace yarp::os;
 using namespace yarp::sig;
 using namespace std;
 
-using namespace darwin::msg;
+//using namespace darwin::msg;
 
 ObserverThread::ObserverThread() {
     robot = "icub";
@@ -26,7 +26,7 @@ ObserverThread::ObserverThread(string _robot, string _configFile){
 
 ObserverThread::~ObserverThread() {
     // do nothing
-}
+}//
 
 bool ObserverThread::threadInit() {
 
@@ -1203,7 +1203,8 @@ int ObserverThread::MicroMonitor(int stateMicormonitor)
 				}
 			    cout<<"Sending Action hub Matrix to DARWIN GUI"<<endl;
              	actionPlot.write();
-				Sleep(2000);
+				//Sleep(2000);
+				Time::delay(2);
 			}
 			if (bodyPlot.getOutputCount()) {	
 				////////////////changes to add visualization BODY
@@ -1219,7 +1220,7 @@ int ObserverThread::MicroMonitor(int stateMicormonitor)
 				}
 			    cout<<"Sending Body hub Matrix to DARWIN GUI"<<endl;
              	bodyPlot.write();
-				Sleep(3000);
+				Time::delay(2);
 			}
 
 		return ConsMicro;
@@ -2276,11 +2277,11 @@ double ObserverThread::PrimSearch(int obj1, int obj2, int goalidentity){
    return FindResp;
 }
 
-int ObserverThread::PrimGrasp(GraspTypeType GraspReq,int BodyChain){
+int ObserverThread::PrimGrasp(int type, int BodyChain){
 						return 1;
 }
 
-int ObserverThread::PrimGraspIndustrial(GraspTypeType GraspReq,int BodyChain){
+int ObserverThread::PrimGraspIndustrial(int type, int BodyChain){
    return 1;
 }
 
@@ -2776,7 +2777,7 @@ void ObserverThread::Retroactivate(int PropWC)
 			}
 		//	cout<<"Sending  Color Word Shape hubs to DARWIN GUI"<<endl;
 			cwsPlot.write();
-			 Sleep(100);
+			 Time::delay(2);
 
 			 }
 	  }

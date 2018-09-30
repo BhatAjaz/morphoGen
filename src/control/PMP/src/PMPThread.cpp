@@ -2,7 +2,7 @@
 
 /*
   * Copyright (C)2013  Department of Robotics Brain and Cognitive Sciences - Istituto Italiano di Tecnologia
-  * Author:Vishwanathan Mohan, Rea Francesco
+  * Author:Vishwanathan Mohan, Rea Francesco, Ajaz A Bhat
   * email: Vishwanathan.Mohan@iit.it, francesco.rea@iit.it, ajaz.bhat@iit.it
 
   * Permission is granted to copy, distribute, and/or modify this program
@@ -133,7 +133,20 @@ bool PMPThread::threadInit() {
         cout << ": unable to open port to send activations "  << endl;
         return false;  // unable to open; let RFModule know so that it won't run
     }
-	if(!(Network::isConnected("/PMP/cmd/interface:o", "/psControl/interface:i"))){
+    if (!right_arm_joints_Current.open(getName("/rightArmJoints:i").c_str())) {
+        cout << ": unable to open port to send activations "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    if (!left_arm_joints_Current.open(getName("/leftArmJoints:i").c_str())) {
+        cout << ": unable to open port to send activations "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+    if (!torso_joints_Current.open(getName("/torsoJoints:i").c_str())) {
+        cout << ": unable to open port to send activations "  << endl;
+        return false;  // unable to open; let RFModule know so that it won't run
+    }
+
+    if(!(Network::isConnected("/PMP/cmd/interface:o", "/psControl/interface:i"))){
 		Network::connect("/PMP/cmd/interface:o", "/psControl/interface:i");
 	}
 	if(!(Network::isConnected("/PMP/gazeCoord:o", "/iKinGazeCtrl/xd:i"))){
@@ -165,7 +178,7 @@ bool PMPThread::threadInit() {
         // X/Y Position reached
         posi.open("position.txt");
         // Stores Output Gamma Function
-        wrL.open("GammaL.txt");
+        wrL.open("GammaDisc.txt");
         // Stores Solution in Joint angles
         wr_GamL.open("resultL.txt");
         // Output of Target Generator
@@ -181,10 +194,11 @@ bool PMPThread::threadInit() {
 #endif
     //initialization of the state of PMP (default state)
     GoalCodePMP  = 1;
-    BodyChain    = 2;
+    BodyChain    = 0;
     MSimExec     = 1;
     TrajType     = 4;
     WristO       =  0;
+	Wrist2		= 0;
     MiniGoal[0]  =  -300;  // target right arm x
     MiniGoal[1]  =  10;   // target right arm y
     MiniGoal[2]  =  25;
@@ -338,6 +352,18 @@ void PMPThread::setRobotName(string robName) {
 }
 
 void PMPThread::run() {
+	//InitializeJan();
+	//MiniGoal[0]=-300;
+ //   MiniGoal[1]=200;
+ //   MiniGoal[2]=200;
+ //   ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType);
+	///*MiniGoal[0]=-400;
+ //   MiniGoal[1]=150;
+ //   MiniGoal[2]=80;*/
+	//MiniGoal[0]=-400;
+ //   MiniGoal[1]=-100;
+ //   MiniGoal[2]=-150;
+ //   ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType);
 
 //testing the  yxz data accuracy ..lines for generating data
 /*    InitializeJan();
@@ -369,10 +395,17 @@ void PMPThread::run() {
 
 
 */
-//////////////////original code////////////////////////////////
+//    readCurrentJoints();
+////////////////////original code////////////////////////////////
+        printf("You can communicate with PMP with following VOCAB commands at rpc port /PMPreply:i \n");
+        printf("Type in a VOCAB command followed by numbers if needed \n");
+        printf("Choose action type - CACT 1 [simple reaching], 21 [reaching via a curve], 19 [initialize the robot] \n"); 
+        printf("Choose the Body Chain for action - BCHA 0 ([Right_arm+Torso], 1 (Left_arm+Torso], 2 [Both arms and torso]  \n");
+        printf(" Mode of Action Execution - MSIM 0 [Mental Simulation only], 1 [Send Motor Commands to Robot)]\n");   
+        printf(" Set Target Location - MICG (x y z) [specifiy z y z location in cm]\n");   
+        printf(" Command PMP to Reach - REA (after setting up above vocabs)\n"); 
+        printf("Waiting for your next Vocab Command \n");
     while (isStopping() != true) {
-
-		
 
 		if (PMPResponse.getInputCount()) {
 			if(!(Network::isConnected("/PMP/cmd/interface:o", "/psControl/interface:i"))){
@@ -386,43 +419,36 @@ void PMPThread::run() {
             Bottle ObsReq, ObsResp;
             Bottle readjoints;
 
-            //Obsreq will be used int eh future to get events formt eh Observer
-            //Bottle* inPC = Inp3D.read(true);
-
-            //double x = inPC->get(0).asDouble();
-            //double y = inPC->get(1).asDouble();
-            //double z = inPC->get(2).asDouble();
-            //=====================================================================================================
-
             bool ok  = false;
             bool rec = false; // is the command recognized?
-
+            float c1[3], c2[3];
+            
             PMPResponse.read(ObsReq,true);
-            printf("getting out from the blocking read \n");
 
             if(!ObsReq.isNull()) {
                 printf("%s \n",ObsReq.toString().c_str());
-                cout<<"ObsReq!=NULL"<<endl;
+                cout<<"Vocab message received"<<endl;
                 // request present
                 // reading the typology of the command first element
+				
                 int cmd = ObsReq.get(0).asVocab();
                 switch(cmd){
                 case COMMAND_VOCAB_CACT:{
                   rec = true;
-                  //Choice Act:1, 21, 19
+                  //Choice Act:1=reach, 21=curve, 19=initialize
                   printf("Goal Code PMP - choice act \n");
                   GoalCodePMP=ObsReq.get(1).asInt();
                   ok = true;
                 }break;
 
-/*                case COMMAND_VOCAB_BCHA:{
+               case COMMAND_VOCAB_BCHA:{
                   rec = true;
                   printf("Body Chain \n");
                   //Body Chain: 0,1,2
                   BodyChain=ObsReq.get(1).asInt();
                   ok = true;
                 }break;
-*/
+
                 case COMMAND_VOCAB_MSIM:{
                   rec = true;
                   printf(" MSIM : Mental Simulation\n");
@@ -446,26 +472,33 @@ void PMPThread::run() {
                   WristO=ObsReq.get(1).asDouble();
                   ok = true;
                 }break;
+	
+				case COMMAND_VOCAB_WRIS:{
+                  rec = true;
+                  printf("WRI2 :3rd Wrist joint Orientation \n");
+                  // wristO:orient: in angle degrees
+                  Wrist2=ObsReq.get(1).asDouble();
+                  ok = true;
+                }break;
 
                 case COMMAND_VOCAB_MICG:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
-                  double c1[3];
+                  
                   for(int i = 0; i < 3; i++)	{
 					c1[i] = Coord->get(i).asDouble();
 					cout << "MICG : Receiving micro goal from the Observer client" <<  c1[i] << endl;
                   }
-                  if (c1[1] < 0) {
-                    for(int i = 0; i < 3; i++)	{
-					    MiniGoal[6 + i] = c1[i];
-                     }
-                    BodyChain = 1;
-                  }
-                  else {
+                    //////setting micro goal MICG coordinates correctly
+                  if (BodyChain == 0){
                     for(int i = 0; i < 3; i++)	{
 					    MiniGoal[i] = c1[i];
                     }
-                    BodyChain = 0;
+                  }
+				  if (BodyChain == 1) {
+                    for(int i = 0; i < 3; i++)	{
+					    MiniGoal[6 + i] = c1[i];
+                     }  
                   }
                   ok = true;
                 }break;
@@ -474,67 +507,46 @@ void PMPThread::run() {
                 case COMMAND_VOCAB_OBST:{
                   rec = true;
                   Bottle* Coord = ObsReq.get(1).asList();
-                  double c1[3];
                   for(int i = 0; i < 3; i++)	{
-					c1[i] = Coord->get(i).asDouble();
-					cout << "OBST : Receiving trajectory point from the Observer client" <<  c1[i] << endl;
+					c2[i] = Coord->get(i).asDouble();
+					cout << "OBST : Receiving trajectory point from the Observer client" <<  c2[i] << endl;
                   }
-                  if (c1[1] < 0) {
+                ////////////////////setting via point  OBST coordinates correctly
+                  if (BodyChain == 0) {
                     for(int i = 0; i < 3; i++)	{
-					    MiniGoal[9 + i] = c1[i];
-                     }
-                    BodyChain = 1;
-                  }
-                  else {
-                    for(int i = 0; i < 3; i++)	{
-					    MiniGoal[3+i] = c1[i];
+					    MiniGoal[3+i] = c2[i];
                     }
-                    BodyChain = 0;
+                  }
+				  if (BodyChain == 1) {
+                    for(int i = 0; i < 3; i++)	{
+					    MiniGoal[9 + i] = c2[i];
+                     }
                   }
                   ok = true;
                 }break;
-
-
-
-/*                case COMMAND_VOCAB_ORIG:{
-                  rec = true;
-                  Bottle* Coord = ObsReq.get(1).asList();
-                  for(int i = 0; i < 3; i++)	{
-					MiniGoal[3 + i] = Coord->get(i).asDouble();
-					cout << "ORIG : Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
-                  }
-                  ok = true;
-                }break;
-
-                case COMMAND_VOCAB_OLEF:{
-                  rec = true;
-                  Bottle* Coord = ObsReq.get(1).asList();
-                  for(int i = 0; i < 3; i++)	{
-					MiniGoal[9 + i] = Coord->get(i).asDouble();
-					cout << "OLEF:Receiving micro goal from the Observer client" <<  VTGSIN[i] << endl;
-                  }
-                  ok = true;
-                }break;
-*/
                 case COMMAND_VOCAB_REA :{
+					InitializeJan();
 					ObsReq.clear();
                   rec = true;
                   XmitGreen=0;
+				                    
+
                   //placing the arm close to the destination...
                   if((GoalCodePMP == GoalCodePMP_DISC)||(GoalCodePMP == GoalCodePMP_CONT))	{
 					cout << "REA : request to Reach Target received from Client" << endl;
 					//InitializeJan(); //moved to threadInit
 				    ResPM = VTGS(MiniGoal,GoalCodePMP,BodyChain,MSimExec,WristO,TrajType);
 					cout << "Response from PMP:" << ResPM << endl;
-					int XmitGreen=0;
+                    readCurrentJoints();
+					XmitGreen=0;
 					if(ResPM==1)   {
                       cout << "Seems Doable::motor commands generated" << endl;
 					//  cin >> XmitGreen;
-					/*  if(XmitGreen==1){
-					  MessagePassT();
-					  Time::delay(2);
-                      MessagePassR();
-					  }*/
+					//  if(XmitGreen==1){
+					  //MessagePassT();
+					  //Time::delay(2);
+                      //MessagePassR();
+					  //}
                       XmitGreen=1;
                       ResPM=0;
 					}
@@ -543,7 +555,7 @@ void PMPThread::run() {
 
                    	ResPM=0;
                    	cout << "INIT : Request for Robot Initialization received from Client" << endl;
-                   	initiCubUp();
+                   	initiCubUp(WristO);
                    	if (MSimExec == 1) {
                       if (cmdInterfacePort.getOutputCount()) {
 
@@ -551,21 +563,21 @@ void PMPThread::run() {
                         //cmdInterfacePort.setStrict();
                         //Send output commands in a bottle to motor interface
                         cmdInterfacePassT();       // torso
-						Time::delay(3);
+						Time::delay(2);
                         cmdInterfacePassR();       // right arm
-						Time::delay(6);
+						Time::delay(3);
 						cmdInterfacePassL();       // left arm
-						Time::delay(6);
+						Time::delay(3);
                         //cmdInterfacePassRhand();   // right hand
                        // cmdInterfacePassL();       // left arm
                       //  cmdInterfacePassLhand();   // left hand
                       }
                       else {
                         //forcing to the rpc port of the controller
-                        //MessagePassT();
-                        //MessagePassR();
-                        //MessagePassL();
-						  printf("Not able to find or connect to PostureControl ports\n");
+                        MessagePassT();
+                        MessagePassR();
+                        MessagePassL();
+						  printf("WARNING: Sending motor commands with no PostureControl\n");
                       }
                     }
                   }
@@ -592,8 +604,8 @@ void PMPThread::run() {
                     ObsResp.addDouble(ang10);// right arm
                   }
                   if (BodyChain == 1) {
-                    ObsResp.addDouble(ang1);
-                    ObsResp.addDouble(ang2);
+                    ObsResp.addDouble(-ang1);
+                    ObsResp.addDouble(-ang2);
                     ObsResp.addDouble(ang3); //torso
                     ObsResp.addDouble(ang4L);
                     ObsResp.addDouble(ang5L);
@@ -626,52 +638,6 @@ void PMPThread::run() {
                 else {
                   ObsResp.addVocab(COMMAND_VOCAB_OK);
                 }
-
-
-                /*
-				cout<< "Received microgoal VOCAB ID from Client:Observer" <<cmd<<endl;
-			    ResPM=0;
-				*/
-
-                //*************************************************************************************
-
-
-
-                //**********************************************************************************************
-                //cout << "Sending out Result of requested Primitive behaviour to Client Observer" << endl;
-                /*
-                ObsResp.addDouble(221);
-                ObsResp.addDouble(ResPM);
-                for(int i=0;i<3;i++)	{
-                    ObsResp.addDouble(X_pos[i]);
-                }
-                for(int i=0;i<3;i++)	{
-                    ObsResp.addDouble(X_posL[i]);
-                }
-                ObsResp.addDouble(ang1);
-                ObsResp.addDouble(ang2);
-                ObsResp.addDouble(ang3); //torso
-                ObsResp.addDouble(ang4);
-                ObsResp.addDouble(ang5);
-                ObsResp.addDouble(ang6);
-                ObsResp.addDouble(ang7);
-                ObsResp.addDouble(ang8);
-                ObsResp.addDouble(ang9);
-                ObsResp.addDouble(ang10);// right arm
-                ObsResp.addDouble(angCup);
-                ObsResp.addDouble(ang4L);
-                ObsResp.addDouble(ang5L);
-                ObsResp.addDouble(ang6L);
-                ObsResp.addDouble(ang7L);
-                ObsResp.addDouble(ang8L);
-                ObsResp.addDouble(ang9L);
-                ObsResp.addDouble(ang10L);
-                ObsResp.addDouble(angCupL);//left arm
-
-                PMPResponse.reply(ObsResp);
-                Time::delay(3);
-                /*/
-
             }
             else {
                 cout<<"null request"<<endl;
@@ -941,7 +907,7 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     meanJan[1] =  0.0000;
     meanJan[2] =  0.0000;
     meanJan[3] = -0.7854;
-    meanJan[4] =  0.0000;
+    meanJan[4] =  0.35;
     meanJan[5] =  0.7098;
     meanJan[6] =  0.9730;
     meanJan[7] =  1.600;
@@ -953,7 +919,7 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     Joint_Field[1]=(meanJan[1]-Jan[1]) * J1H; //0.000041; //0.52 / Modified in June at Crete
     Joint_Field[2]=(meanJan[2]-Jan[2]) * J2H;     //1.8
     Joint_Field[3]=(meanJan[3]-Jan[3]) * J3H;   //4.5 //0.95
-    Joint_Field[4]=(meanJan[4]-Jan[4]) * J4H; //J3H
+    Joint_Field[4]=(meanJan[4]-Jan[4]) * 400; //J3H
     Joint_Field[5]=(meanJan[5]-Jan[5]) * J5H;  //5; // Multiply by Joint compliance
     Joint_Field[6]=(meanJan[6]-Jan[6]) * J6H;  //0.041; //0.52 / Modified in June at Crete
     Joint_Field[7]=(meanJan[7]-Jan[7]) * 400;    //75;  //1.8
@@ -980,8 +946,11 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
        		jvelo=jvelo+(JacT[a][n]*ff[n]);
 		}
 //    	Jvel[a]=0.002*(jvelo+Joint_Field[a]);
-        if((a==0)||(a==1)){
+        if((a==0)){
            Jvel[a]=KOMP_WAISZT*(jvelo+Joint_Field[a]);
+        }
+		if((a==1)){
+           Jvel[a]=0;//KOMP_WAISZT1*(jvelo+Joint_Field[a]);
         }
     	if(a==2){
            Jvel[a]=KOMP_WAISZT2*(jvelo+Joint_Field[a]);
@@ -1064,7 +1033,7 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     meanJan[1] =  0.0000;
     meanJan[2] =  0.0000;
     meanJan[3] = -0.7854;
-    meanJan[4] =  0.0000;
+    meanJan[4] =  0.35;
     meanJan[5] =  0.7098;
     meanJan[6] =  0.9730;
     meanJan[7] =  1.600;
@@ -1076,7 +1045,7 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
     Joint_Field[1]=(meanJan[1]-JanL[1]) * J1H; //0.000041; //0.52 / Modified in June at Crete
     Joint_Field[2]=(meanJan[2]-JanL[2]) * J2H;     //1.8
     Joint_Field[3]=(meanJan[3]-JanL[3]) * J3H;   //4.5 //0.95
-    Joint_Field[4]=(meanJan[4]-JanL[4]) * J4H; //J3H
+    Joint_Field[4]=(meanJan[4]-JanL[4]) * 400; //J3H
     Joint_Field[5]=(meanJan[5]-JanL[5]) * J5H;  //5; // Multiply by Joint compliance
     Joint_Field[6]=(meanJan[6]-JanL[6]) * J6H;  //0.041; //0.52 / Modified in June at Crete
     Joint_Field[7]=(meanJan[7]-JanL[7]) * 400;    //75;  //1.8
@@ -1106,8 +1075,11 @@ void PMPThread::computeNeuralJacobian(double* JacobIn, double* JanIn) {
 		}
 //    	Jvel[a+10]=0.002*(jvelo+Joint_Field[a]);
 
-        if((a==0)||(a==1)){
+        if((a==0)){
            Jvel[a+10]=KOMP_WAISZT*(jvelo+Joint_Field[a]);
+        }
+		if((a==1)){
+           Jvel[a+10]=0;//KOMP_WAISZT1*(jvelo+Joint_Field[a])
         }
     	if(a==2){
            Jvel[a+10]=KOMP_WAISZT2*(jvelo+Joint_Field[a]);
@@ -1619,7 +1591,7 @@ void PMPThread::InitializeJan()	 {	// init for normal reaching
 	z_iniL = 380;
 */
     Jan[0]=0;
-    Jan[1]=-0.09;
+    Jan[1]=0;
     Jan[2]=0.01;
     Jan[3]=-0.73;// -0.6981
     Jan[4]=0.27;
@@ -1641,7 +1613,7 @@ void PMPThread::InitializeJan()	 {	// init for normal reaching
     janini9=0.52;
 
     JanL[0]=0;
-    JanL[1]=-0.09;
+    JanL[1]=0;
     JanL[2]=0.01;
     JanL[3]=-0.73;// -0.6981
     JanL[4]=0.27;
@@ -1676,6 +1648,43 @@ void PMPThread::InitializeJan()	 {	// init for normal reaching
 
 };
 
+void PMPThread::readCurrentJoints(){
+
+    if(!(Network::isConnected("/icub/torso/state:o","/PMP/torsoJoints:i"))){
+	    Network::connect("/icub/torso/state:o", "/PMP/torsoJoints:i");
+    }
+    if(!(Network::isConnected("/icub/right_arm/state:o","/PMP/rightArmJoints:i"))){
+	    Network::connect("/icub/right_arm/state:o", "/PMP/rightArmJoints:i");
+    }
+    if(!(Network::isConnected("/icub/left_arm/state:o","/PMP/leftArmJoints:i"))){
+	    Network::connect("/icub/left_arm/state:o", "/PMP/leftArmJoints:i");
+    }
+    double jointsCurr[10];
+    if (torso_joints_Current.getInputCount())
+	{
+		Bottle* torsoJoints = torso_joints_Current.read(true);
+        for (int i=0;i<3;i++){
+		     jointsCurr[i]= torsoJoints->get(i).asDouble();
+             cout <<" "<<jointsCurr[i];
+             jointsCurr[i]=3.14159*(jointsCurr[i]/180);
+        }
+    }
+
+    if (right_arm_joints_Current.getInputCount())
+	{
+		Bottle* rightJoints = right_arm_joints_Current.read(true);
+        for (int i=0;i<7;i++){
+		     jointsCurr[i+3]= rightJoints->get(i).asDouble();
+             cout <<" "<<jointsCurr[i+3];
+             jointsCurr[i+3]=3.14159*(jointsCurr[i+3]/180);
+        }
+    }
+
+    double *nFK = forward_Kinematics(jointsCurr,10); // Joint Angles to Positions 3>>>>>2
+    cout <<"Forward model "<<endl;
+	cout <<"X coordinate is "<<*(nFK)<<"Y is "<<*(nFK+1)<<"Z is "<<*(nFK+2)<<endl;
+        
+}
 
 void PMPThread::PandP() {	//is no longer used but is an old example of simple  pick and place with grasp and release functioanlity
 
@@ -1689,7 +1698,7 @@ void PMPThread::PandP() {	//is no longer used but is an old example of simple  p
         //Sleep(5000);
         GraspR();
         //Sleep(10000);
-        initiCubUp();
+        initiCubUp(76);
         MessagePassR();
         //Sleep(5000);
         MiniGoal[0]=PlacX; MiniGoal[1]=PlacY; MiniGoal[2]=PlacZ; MiniGoal[6]=0; MiniGoal[7]=0; MiniGoal[8]=0;
@@ -1701,7 +1710,7 @@ void PMPThread::PandP() {	//is no longer used but is an old example of simple  p
         CubRelease();
         MessagePassR();
         //Sleep(5000);
-        initiCubUp();
+        initiCubUp(76);
         MessagePassR();
         //Sleep(5000);
         //Sleep(50000); //optional
@@ -1714,7 +1723,7 @@ void PMPThread::PandP() {	//is no longer used but is an old example of simple  p
         //Sleep(5000);
         GraspL();
         //Sleep(10000);
-        initiCubUp();
+        initiCubUp(76);
         MessagePassL();
         //Sleep(5000);
         MiniGoal[0]=0; MiniGoal[1]=0; MiniGoal[2]=0; MiniGoal[6]=PlacX; MiniGoal[7]=PlacY; MiniGoal[8]=PlacZ;
@@ -1726,7 +1735,7 @@ void PMPThread::PandP() {	//is no longer used but is an old example of simple  p
         CubRelease();
         MessagePassL();
         //Sleep(5000);
-        initiCubUp();
+        initiCubUp(76);
         MessagePassL();
         //Sleep(5000);
         //Sleep(10000); //optional
@@ -1786,14 +1795,14 @@ int PMPThread::FrameGoal()	{
 
 };
 
-int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, double Wrist,int TrajT)	{
+int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, double Wrist, int TrajT)	{
 
     int time;
     double Gam;
     double fin[3];
     double finL[3];
     int n=3;
-    bool retvalue=false,leftMove=false,rightMove=false;
+    int retvalue=0;
     //###########################################################################################################################//
     // ****************************************** DISCRETE ACTION *************************************************************//
     //################################################################
@@ -1869,7 +1878,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         for(time=0;time<ITERATION;time++) {	// 2000 incremental steps of delta 0.005
 
         	Gam=GammaDisc(time);
-            wr << time << "    " << Gam << endl;
+            wrL << time << "    " << Gam << endl;
 
             //  ====================Target Generation //=========================
             if((HandAct==BodyTorsoArm_RIGHT)||(HandAct==BodyTorsoArm_BOTH))	{
@@ -1950,7 +1959,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	ang7=rad2degree*Jan[6];
     	ang8=Wrist; //this must be wrist
     	ang9=rad2degree*Jan[8];
-    	ang10=rad2degree*Jan[9];
+    	ang10=Wrist2;//rad2degree*Jan[9];
     	angCup=51;
     	ang4L=rad2degree*JanL[3];
     	ang5L=rad2degree*JanL[4];
@@ -1958,7 +1967,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	ang7L=rad2degree*JanL[6];
     	ang8L=Wrist; //this must be wrist
     	ang9L=rad2degree*JanL[8];
-    	ang10L=rad2degree*JanL[9];//
+    	ang10L=Wrist2;//rad2degree*JanL[9];//
     	angCupL=48;
 
         printf("\n JOINT ANGLE: RIGHT and LEFT \n");
@@ -1977,11 +1986,11 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
                 	if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))>=70))	{
 
-                    	//retvalue=0;
+                    	retvalue=0;
                         printf("\n\n Target Unreachable");
                     }
                     if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))<70))	{
-                        //retvalue=1;
+                        retvalue=1;
                     }
 
                 }
@@ -1995,12 +2004,12 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
                     if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))>=70)) {
 
-                    	//retvalue=0;
+                    	retvalue=0;
                     	printf("\n\n Target Unreachable");
                     }
                     if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))<70))	{
 
-                        //retvalue=1;
+                        retvalue=1;
                     }
                 }
                 //MessageDevDriverT();
@@ -2016,12 +2025,12 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
                     if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))>=70))	{
 
-                        //retvalue = false;
+                        retvalue = 0;
                         printf("\n\n Target Unreachable");
                     }
                     if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))<70)) {
 
-                    	//retvalue =  true;
+                    	retvalue =  1;
                     	//rightMove = true;
                     	/*
                     	MessagePassR();
@@ -2033,17 +2042,23 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 						if (cmdInterfacePort.getOutputCount()) {
 							gazeControl(X_pos[0],X_pos[1],X_pos[2]);
 							cmdInterfacePassT();
-							Time::delay(5);
+							Time::delay(2);
 							cmdInterfacePassR();
-							Time::delay(10);
+							Time::delay(3);
 						}
 						else
 						{
-							printf("not able to find or connect postureControl");
+                            MessagePassT();
+                            MessagePassR();						
+                            printf("WARNING: Sending motor commands with no PostureControl\n");
 						}
                     	// here message to francescos module must be generated
                     }
                 }
+				else
+				{
+					printf("\nPose not safe using calculated joint angles\n");
+				}
                 //MessageDevDriverT();
                 //MessageDevDriverR();
                 //cout<< "message passed to right arm driver"<<endl;
@@ -2055,12 +2070,12 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
                     if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))>=70)) {
 
-                        //retvalue=false;
+                        retvalue=0;
                         printf("\n\n Target Unreachable");
                     }
                     if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))<70)) {
 
-                        //retvalue = true;
+                        retvalue = 1;
                         //leftMove = true;
                         /*
                 		MessagePassL();
@@ -2072,18 +2087,25 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 						if (cmdInterfacePort.getOutputCount()) {
 							gazeControl(X_posL[0],-X_posL[1],X_posL[2]);
 							cmdInterfacePassT();
-							Time::delay(5);
+							Time::delay(2);
 							cmdInterfacePassL();
-							Time::delay(10);
+							Time::delay(3);
 						}
 						else
 						{
-							printf("not able to find or connect postureControl");
+                            MessagePassT();
+                            MessagePassL();
+							printf("WARNING: Sending motor commands with no PostureControl\n");
 						}
                         // here message to francescos module must be generated
 
                     }
                 }
+				else
+				{
+
+					printf("\n Pose not safe using calculated joint angles\n");
+				}
                 //MessageDevDriverT();
                 //MessageDevDriverL();
                 //cout<< "message passed to Left arm driver"<<endl;
@@ -2141,6 +2163,13 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     	y_iniICL=y_iniL;
     	z_iniICL=z_iniL;
 
+		double prevLoc[3],prevLocL[3];/////This is used for distance measurement instead of time%dividen for sending commands to robot
+		prevLoc[0]=x_ini;
+		prevLoc[1]=y_ini;
+		prevLoc[2]=z_ini;
+		prevLocL[0]=x_iniL;
+		prevLocL[1]=y_iniL;
+		prevLocL[2]=z_iniL;
     	//printf("\n\n FINAL ICON %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",x_iniIC,y_iniIC,z_iniIC,x_iniICL,y_iniICL,z_iniICL);
     	//Sleep(5000);
 		x_fin2=MiniGoal[0]; //Final Position X
@@ -2164,7 +2193,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 		printf("\n Targets left arm");
     	printf("\n \n %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",x_fin2L,-(y_fin2L),z_fin2L,x_fin1L,-(y_fin1L),z_fin1L);
 
-		Interpret(2,0,1,1); //Initialize trajectory formation parameters
+		Interpret(4,0,1,1); //Initialize trajectory formation parameters
 
     	for(time=0;time<ITERATION;time++) {	// 2000 incremental steps of delta 0.005
 
@@ -2186,7 +2215,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
       			csi_dot1=0;
      		}
        		Gam=GamA+GamB;
-       		wr << time << "    " << Gam << endl;
+       		wr << time<<"\t"<< GamA<<"\t"<<GamB<<"\t"<<Gam<<"\t"<<csi_dot<<"\t"<<csi_dot1<< endl;
         	//fprintf(wr,"\n  %d \t  %f \t  %f \t  %f \t  %f \t  %f",time,GamA,GamB,Gam,csi_dot,csi_dot1); /// v.txt has values of Gamma and time
 
     		double inter_x1=((x_fin1-x_ini)*GamA);
@@ -2248,6 +2277,28 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     			wr_Gam << Jan[0] << "  " << Jan[1]<< "  " << Jan[2]<< "  " << Jan[3]<< "  " << Jan[4]<< "  " << Jan[5]<< "  " << Jan[6]<< "  " << Jan[7]<< "  " << Jan[8]<< "  " << Jan[9]<< "  " << JanL[3]<< "  " << JanL[4]<< "  " << JanL[5]<< "  " << JanL[6]<< "  " << JanL[7]<< "  " << JanL[8]<< "  " << JanL[9] <<endl;
 			}
     		//printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],-(X_posL[1]),X_posL[2]);
+			
+///////////////////ploy x y z on yarpscope
+			if (cmdEndEffectorPort.getOutputCount() >0) {
+				Bottle & PlotPoints = cmdEndEffectorPort.prepare();
+				PlotPoints.clear();
+				PlotPoints.addDouble(Gam);
+				if (HandAct==0){
+					PlotPoints.addDouble( X_pos[0]);
+					PlotPoints.addDouble( X_pos[1]);
+					PlotPoints.addDouble( X_pos[2]);
+					//PlotPoints.addDouble(sqrt(pow(X_pos[0]-x_ini,2)+pow(X_pos[1]-y_ini,2)+pow(X_pos[2]-z_ini,2)));
+				}
+				if (HandAct==1){
+					PlotPoints.addDouble(X_posL[0]);
+					PlotPoints.addDouble(-X_posL[1]);
+					PlotPoints.addDouble(X_posL[2]);
+					//PlotPoints.addDouble(sqrt(pow(X_posL[0]-x_iniL,2)+pow(X_posL[1]-y_iniL,2)+pow(X_posL[2]-z_iniL,2)));
+				}
+				cmdEndEffectorPort.write(true);
+				Time::delay(0.02);
+			}
+/////////////////////////////////////
 
     		if(MSim==MSim_SIMULATION)  {
 
@@ -2257,12 +2308,12 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
         	            if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))>=70)) {
 
-        	                //retvalue=0;
+        	                retvalue=0;
         	                printf("\n\n Target Unreachable");
         	            }
         	            if((sqrt(pow(X_pos[0]-fin[0],2)+ pow(X_pos[1]-fin[1],2)+ pow(X_pos[2]-fin[2],2))<70)) {
 
-        	                //retvalue=1;
+        	                retvalue=1;
         	            }
 
         	        }
@@ -2276,26 +2327,25 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
         	            if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))>=70))  {
 
-        	                //retvalue=0;
+        	                retvalue=0;
         	                printf("\n\n Target Unreachable");
         	            }
         	            if((sqrt(pow(X_posL[0]-finL[0],2)+ pow(X_posL[1]-finL[1],2)+ pow(X_posL[2]-finL[2],2))<70)) {
 
-        	                //retvalue=1;
+        	                retvalue=1;
         	            }
         	        }
         	        //MessageDevDriverT();
         	        //MessageDevDriverR();
         	    }
         	}
-
+			
      		if(MSim==MSim_MOVEMENT)	{
         	    if((HandAct==BodyTorsoArm_RIGHT) || (HandAct==BodyTorsoArm_BOTH))  {
         	       // MOVEMENT RIGHT MOVEMENT
-        	        if(((time%dividen)==0)&&(time>0)) {
-
-
-
+					double disMeasure = sqrt(pow(X_pos[0]-prevLoc[0],2)+ pow(X_pos[1]-prevLoc[1],2)+ pow(X_pos[2]-prevLoc[2],2));
+        	        if(((time%dividen)==0)&&(time>0)&&(disMeasure>20)) {
+					
     					ang1=rad2degree*Jan[0];
     					ang2=rad2degree*Jan[1];
     					ang3=rad2degree*Jan[2];
@@ -2316,14 +2366,14 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
     					ang9L=rad2degree*JanL[8];
     					ang10L=rad2degree*JanL[9];
      					angCupL=36;
-   						// printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
+   						printf("\n  %.1f, \t  %.1f, \t %.1f ,\t %.1f ,\t %.1f ,\t %.1f, \t  %.1f, \t %.1f ,\t %.1f ,\t %.1f\n",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
     					//printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
      					//printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],X_posL[1],X_posL[2]);
         	            //MessageDevDriverT();
         	            //MessageDevDriverR();
         	            if(((ang4>-99)&&(ang4<-15))&&((ang5>9)&&(ang5<100))) {
 
-        	                //retvalue =  true;
+        	                retvalue =  1;
         	                /*
         	                MessagePassT();
         	                //Sleep(2000);
@@ -2335,20 +2385,29 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 							if (cmdInterfacePort.getOutputCount()) {
 								gazeControl(X_pos[0],X_pos[1],X_pos[2]);
 								cmdInterfacePassR();
-								Time::delay(10);
+								Time::delay(3);
 								cmdInterfacePassT();
-								Time::delay(5);
+								Time::delay(2);
 							}
 							else
 							{
-								printf("\n not able to find or connect postureControl \n");
+								MessagePassT();
+                                MessagePassR();
+                                printf("WARNING: Sending motor commands with no PostureControl\n");
 							}
 							
         	                Proprioceptive[0]=X_pos[0];
         	                Proprioceptive[1]=X_pos[1];
 							Proprioceptive[2]=X_pos[2];
-							printf("\n\n Proprioceptive prediction  %f \t %f \t %f \t",Proprioceptive[0],Proprioceptive[1],Proprioceptive[2]);
+							printf(" Proprioceptive prediction  %f \t %f \t %f\n",Proprioceptive[0],Proprioceptive[1],Proprioceptive[2]);
+							prevLoc[0]=X_pos[0];
+							prevLoc[1]=X_pos[1];
+							prevLoc[2]=X_pos[2];
         	            }
+						else
+						{
+							printf("\nPose not safe using calculated joint angles\n");
+						}
         	            if((time%(3*dividen))==0) {
 
 							//int loopV=V1.colSegMainR();
@@ -2360,10 +2419,9 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 
         	    if((HandAct==BodyTorsoArm_LEFT) || (HandAct==BodyTorsoArm_BOTH)) {
         	         //MOVEMENT LEFT MOVEMENT
-        	        if(((time%dividen)==0)&&(time>0)) {
-
-
-
+					double disMeasure = sqrt(pow(X_posL[0]-prevLocL[0],2)+ pow(X_posL[1]-prevLocL[1],2)+ pow(X_posL[2]-prevLocL[2],2));
+        	        if(((time%dividen)==0)&&(time>0)&&(disMeasure>20)) {
+					
         	            ang1=rad2degree*Jan[0];
         	            ang2=rad2degree*Jan[1];
         	            ang3=rad2degree*Jan[2];
@@ -2384,14 +2442,14 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
         	            ang9L=rad2degree*JanL[8];
         	            ang10L=rad2degree*JanL[9];
         	            angCupL=36;
-        	            //	printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
-        	            //	printf("\n  %d, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
+        	            //	printf("\n  %.1f, \t  %d, \t %d ,\t %d ,\t %d ,\t %d, \t  %d, \t %d ,\t %d ,\t %d",ang1,ang2,ang3,ang4,ang5, ang6,ang7,ang8,ang9,ang10);
+        	            printf("\n  %.1f, \t  %.1f, \t %.1f ,\t %.1f ,\t %.1f ,\t %.1f, \t  %.1f, \t %.1f ,\t %.1f ,\t %.1f\n",-ang1,-ang2,ang3,ang4L,ang5L,ang6L,ang7L,ang8L,ang9L,ang10L);
 
         	            //  printf("\n\n FINAL SOLUTION  %f, \t  %f, \t %f \t %f, \t  %f, \t %f ",X_pos[0],X_pos[1],X_pos[2],X_posL[0],X_posL[1],X_posL[2]);
         	            //MessageDevDriverT();
         	            //MessageDevDriverL();
             	        if(((ang4L>-99)&&(ang4L<-15))&&((ang5L>9)&&(ang5L<100))) {
-            	            //retvalue = true;
+            	            retvalue = 1;
             	            //leftMove = true;
             	            /*
             	            MessagePassT();
@@ -2404,19 +2462,28 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 							if (cmdInterfacePort.getOutputCount()) {
 								gazeControl(X_posL[0],-X_posL[1],X_posL[2]);
 								cmdInterfacePassL();
-								Time::delay(10);
+								Time::delay(3);
 								cmdInterfacePassT();
-								Time::delay(5);
+								Time::delay(2);
 							}
 							else
 							{
-								printf("\n not able to find or connect postureControl \n");
+                                MessagePassT();
+                                MessagePassL();
+								printf("WARNING: Sending motor commands with no PostureControl\n");
 							}
             	            Proprioceptive[0]=X_posL[0];
             	            Proprioceptive[1]=-X_posL[1];
 							Proprioceptive[2]=X_posL[2];
-            	            printf("\n\n Proprioceptive prediction  %f \t %f \t %f \t",Proprioceptive[0],Proprioceptive[1],Proprioceptive[2]);
+            	            printf("Proprioceptive prediction  %f \t %f \t %f \n",Proprioceptive[0],Proprioceptive[1],Proprioceptive[2]);
+							prevLocL[0]=X_posL[0];
+							prevLocL[1]=X_posL[1];
+							prevLocL[2]=X_posL[2];
             	        }
+						else
+						{
+							printf("\nPose not safe using calculated joint angles\n");
+						}
 
             	        if((time%(3*dividen))==0) {
             	            {
@@ -2433,7 +2500,7 @@ int PMPThread::VTGS(double *MiniGoal, int ChoiceAct, int HandAct,int MSim, doubl
 	//code with motor commands to robot was here
 
 
-    return 1;
+    return retvalue;
 };
 
 void PMPThread::Interpret(int CCode,int PtCode,double AmplificationX,double AmplificationZ)
@@ -2459,8 +2526,11 @@ void PMPThread::Interpret(int CCode,int PtCode,double AmplificationX,double Ampl
                 if(CCode==4)//C
                 {
                 x_off1=(60)*AmplificationX;z_off1=(-50)*AmplificationZ;x_off2=0*AmplificationX;z_off2=(-100)*AmplificationZ;
-                KXA=10;	KXB=1; 	KYA=1; 	KYB=10; TSEC=1000; STARTini=1;dividen=300; KXAL=10;	KXBL=1; 	KYAL=1; 	KYBL=10;
-                }
+                //KXA=10;	KXB=1; 	KYA=1; 	KYB=10; TSEC=1000; STARTini=1;dividen=300; KXAL=10;	KXBL=1; 	KYAL=1; 	KYBL=10;// this was original..bump in x y in iCub's old frame of ref: Ajaz
+				//KXA=1;	KXB=10; 	KYA=10; 	KYB=1; TSEC=1000; STARTini=1;dividen=300; KXAL=1;	KXBL=10; 	KYAL=10; 	KYBL=1;//KXAL=2;	KXBL=6; 	KYAL=6; 	KYBL=2; //Ajaz
+                //KXA=8;	KXB=10; 	KYA=3; 	KYB=5; TSEC=1000; STARTini=1;dividen=30; KXAL=4;	KXBL=4; 	KYAL=8; 	KYBL=10;//me
+				 KXA=8;	KXB=10; 	KYA=3; 	KYB=5; TSEC=1000; STARTini=1;dividen=5; KXAL=3;	KXBL=5; 	KYAL=8; 	KYBL=8;//with vishuu
+				}
                 if(CCode==11)//St Line
                 {
                 x_off1=0;z_off1=(-100)*AmplificationZ;x_off2=0;z_off2=(-100)*AmplificationZ;
@@ -3223,7 +3293,7 @@ void PMPThread::MessageDevDriverT()
     Bottle& outBot1 = cmdRight_armPort.prepare();   // Get the object
     outBot1.clear();
     outBot1.addString("set"); // put "set" command in the bottle
-    outBot1.addString("poss"); // put "pos" command in the bottle
+    outBot1.addString("pos"); // put "pos" command in the bottle
     Bottle& listBot = outBot1.addList();
     listBot.addDouble(ang4);
     listBot.addDouble(ang5+3);
@@ -3232,19 +3302,10 @@ void PMPThread::MessageDevDriverT()
     listBot.addDouble(ang8);
     listBot.addDouble(ang9);
     listBot.addDouble(ang10);
-   listBot.addDouble(angCup);
-    listBot.addDouble(angT1);
-    listBot.addDouble(angT2);
-    listBot.addDouble(angT3);
-    listBot.addDouble(angI1);
-    listBot.addDouble(angI2);
-    listBot.addDouble(angM1);
-    listBot.addDouble(angM2);
-    listBot.addDouble(angRP);
 
     printf("Writing bottle right arm (%s)\n",outBot1.toString().c_str());
     cmdRight_armPort.write();
-    Time::delay(2);
+    Time::delay(5);
 };
 
 void PMPThread::MessagePassL()
@@ -3253,7 +3314,7 @@ void PMPThread::MessagePassL()
      Bottle& outBot2 = cmdLeft_armPort.prepare();   // Get the object
      outBot2.clear();
      outBot2.addString("set"); // put "set" command in the bottle
-     outBot2.addString("poss"); // put "pos" command in the bottle
+     outBot2.addString("pos"); // put "pos" command in the bottle
      Bottle& listBot1 = outBot2.addList();
      listBot1.addDouble(ang4L);
      listBot1.addDouble(ang5L);
@@ -3262,19 +3323,9 @@ void PMPThread::MessagePassL()
      listBot1.addDouble(ang8L);
      listBot1.addDouble(ang9L);
      listBot1.addDouble(ang10L);
-     listBot1.addDouble(angCupL);
-     listBot1.addDouble(angTL1);
-     listBot1.addDouble(angTL2);
-     listBot1.addDouble(angTL3);
-     listBot1.addDouble(angIL1);
-     listBot1.addDouble(angIL2);
-     listBot1.addDouble(angML1);
-     listBot1.addDouble(angML2);
-     listBot1.addDouble(angRPL);
      printf("Writing bottle left arm (%s)\n",outBot2.toString().c_str());
      cmdLeft_armPort.write();
-     //Time::delay(2);
-    // Sleep(3000);
+     Time::delay(5);
 
  };
 
@@ -3284,7 +3335,7 @@ void PMPThread::MessagePassT()
     Bottle& outBot3 = cmdTorsoPort.prepare();   // Get the object
     outBot3.clear();
     outBot3.addString("set"); // put "set" command in the bottle
-    outBot3.addString("poss"); // put "pos" command in the bottle
+    outBot3.addString("pos"); // put "pos" command in the bottle
     Bottle& listBot2 = outBot3.addList();
     listBot2.addDouble(ang1);
     listBot2.addDouble(1*ang2);
@@ -3292,8 +3343,7 @@ void PMPThread::MessagePassT()
 
     printf("\n\n Writing bottle torso (%s)\n",outBot3.toString().c_str());
     cmdTorsoPort.write();                       // Now send i
-    Time::delay(2);
-    //Sleep(1000);
+    Time::delay(5);
   };
 
 
@@ -3421,7 +3471,7 @@ void PMPThread::gazeControl(double x, double y, double z)
 
 
 
-void PMPThread::initiCubUp() {
+void PMPThread::initiCubUp(double wrio) {
  	ang1   = 0;
  	ang2   = 0;
  	ang3   = 0;
@@ -3430,7 +3480,7 @@ void PMPThread::initiCubUp() {
  	ang5   = 64;
  	ang6   = 14;
  	ang7   = 40;
- 	ang8   = 76;
+ 	ang8   = wrio;
  	ang9   = 0;
  	ang10  = 0;
 	
@@ -3438,7 +3488,7 @@ void PMPThread::initiCubUp() {
  	ang5L=64;
  	ang6L=14;
  	ang7L=40;
- 	ang8L=76;
+ 	ang8L=wrio;
  	ang9L=0;
  	ang10L=0;
  	//angCupL=48;
@@ -3815,14 +3865,17 @@ void PMPThread::Kompliance(int TagK)	{
         printf ("\n Initiating System Dynamics \n");*/
 		//COPIED FROM tagK==1 change in ITERATION only
 		printf ("Adjusting Compliances 0 \n");
-        KFORCE=0.0094;//0.06;//0.005 // 0.0094
+        KFORCE=0.094;//0.06;//0.005 // 0.0094
 		ITERATION=4000;
 		RAMP_KONSTANT=0.0015;
 		t_dur=5;
 		KOMP_JANG=0.0009;
-		KOMP_WAISZT=0.0001;
+		KOMP_WAISZT=0.0005;
+		KOMP_WAISZT1=0.0001;
 		//KOMP_WAISZT3=0.00002
 		KOMP_WAISZT2=0.0009;
+		 //KOMP_WAISZT   = 0.000003;
+        //KOMP_WAISZT2  = 0.000003;
 		J0H=800;//200; //400 //800
         J1H=0.52;
 		J2H=400; //1 //400;
@@ -3850,16 +3903,17 @@ void PMPThread::Kompliance(int TagK)	{
 		RAMP_KONSTANT=0.005;
 		t_dur=5;
 		KOMP_JANG=0.0009;
-		KOMP_WAISZT=0.0001;
+		KOMP_WAISZT=0.001;//0.0001;
+		KOMP_WAISZT1=0;
 		//KOMP_WAISZT3=0.00002
-		KOMP_WAISZT2=0.0009;
-		J0H=800;//200; //400 //800
+		KOMP_WAISZT2=0.0009;//0.0009;
+		J0H=1;//200; //400 //800
         J1H=0.52;
 		J2H=400; //1 //400;
 		J3H=20; //4.5 //1 //20;
         J4H=1; //4.5
-        J5H=1;//200; //1
-        J6H=0.41;//200; //0.041;
+        J5H=50;//200; //1
+        J6H=50;//200; //0.041;
 		J7H=1;//400; //1
 		J8H=500; //1
 		J9H=500; //1

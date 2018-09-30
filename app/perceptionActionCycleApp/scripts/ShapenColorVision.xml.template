@@ -1,0 +1,111 @@
+<application>
+<authors>
+    <author email="ajaz.bhat@iit.it">Ajaz Bhat</author>
+</authors>
+<name>ShapenColorVision</name>
+<dependencies>
+  <port>/icub/camcalib/left/out</port>
+  <port>/icub/camcalib/right/out</port>
+</dependencies>
+
+
+<module>
+  <name>blockDetector</name>
+  <parameters>--name /leftDetector </parameters>
+  <tag>leftDetector</tag>
+  <node>icub14</node>
+</module>
+<module>
+  <name>blockDetector</name>
+  <parameters>--name /rightDetector </parameters>
+  <tag>rightDetector</tag>
+  <node>icub14</node>
+</module>
+
+<module>
+    <name>colorVision</name>
+    <parameters>--name /colorVisionLeft --model model.txt --colormap colormap.txt</parameters>
+    <tag>colorVisionLeft</tag>
+    <node>icub14</node>
+</module>
+<module>
+    <name>colorVision</name>
+    <parameters>--name /colorVisionRight --model model.txt --colormap colormap.txt</parameters>
+    <tag>colorVisionRight</tag>
+    <node>icub14</node>
+</module>
+
+
+<module>
+    <name>yarpview</name>
+    <parameters>--name /shapeImageLeft --x 000 --y 000  --RefreshTime 33</parameters>
+    <node>icub14</node>
+    <tag>shapeImageLeft</tag>
+</module>
+<module>
+    <name>yarpview</name>
+    <parameters>--name /shapeImageRight --x 400 --y 000  --RefreshTime 33</parameters>
+    <tag>shapeImageRight</tag>
+    <node>icub14</node>
+</module>
+
+<module>
+    <name>yarpview</name>
+    <parameters>--name /colorImageLeft --x 000 --y 400  --RefreshTime 33</parameters>
+    <node>icub14</node>
+    <tag>colorImageLeft</tag>
+</module>
+<module>
+    <name>yarpview</name>
+    <parameters>--name /colorImageRight --x 400 --y 400  --RefreshTime 33</parameters>
+    <tag>colorImageRight</tag>
+    <node>icub14</node>
+</module>
+
+
+
+
+<connection>
+    <from>/icub/camcalib/left/out</from>
+    <to>/colorVisionLeft/imagePortRTL</to>
+    <protocol>mcast</protocol>
+</connection>
+<connection>
+    <from>/icub/camcalib/right/out</from>
+    <to>/colorVisionRight/imagePortRTL</to>
+    <protocol>mcast</protocol>
+</connection>
+<connection>
+  <from>/icub/camcalib/left/out</from>
+  <to>/leftDetector/img:i</to>
+  <protocol>mcast</protocol>
+</connection>
+<connection>
+  <from>/icub/camcalib/right/out</from>
+  <to>/rightDetector/img:i</to>
+  <protocol>mcast</protocol>
+</connection>
+
+<connection>
+    <from>/leftDetector/img:o</from>
+    <to>/shapeImageLeft</to>
+    <protocol>udp</protocol>
+</connection>
+<connection>
+    <from>/rightDetector/img:o</from>
+    <to>/shapeImageRight</to>
+    <protocol>udp</protocol>
+</connection>
+<connection>
+    <from>/colorVisionLeft/img:o</from>
+    <to>/colorImageLeft</to>
+    <protocol>udp</protocol>
+</connection>
+<connection>
+    <from>/colorVisionRight/img:o</from>
+    <to>/colorImageRight</to>
+    <protocol>udp</protocol>
+</connection>
+
+
+</application>
