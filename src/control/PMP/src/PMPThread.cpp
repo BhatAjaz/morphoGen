@@ -3293,7 +3293,7 @@ void PMPThread::MessageDevDriverT()
     Bottle& outBot1 = cmdRight_armPort.prepare();   // Get the object
     outBot1.clear();
     outBot1.addString("set"); // put "set" command in the bottle
-    outBot1.addString("pos"); // put "pos" command in the bottle
+    outBot1.addString("poss"); // put "pos" command in the bottle
     Bottle& listBot = outBot1.addList();
     listBot.addDouble(ang4);
     listBot.addDouble(ang5+3);
@@ -3302,7 +3302,15 @@ void PMPThread::MessageDevDriverT()
     listBot.addDouble(ang8);
     listBot.addDouble(ang9);
     listBot.addDouble(ang10);
-
+    listBot.addDouble(angCup);
+    listBot.addDouble(angT1);
+    listBot.addDouble(angT2);
+    listBot.addDouble(angT3);
+    listBot.addDouble(angI1);
+    listBot.addDouble(angI2);
+    listBot.addDouble(angM1);
+    listBot.addDouble(angM2);
+    listBot.addDouble(angRP);
     printf("Writing bottle right arm (%s)\n",outBot1.toString().c_str());
     cmdRight_armPort.write();
     Time::delay(5);
@@ -3314,7 +3322,7 @@ void PMPThread::MessagePassL()
      Bottle& outBot2 = cmdLeft_armPort.prepare();   // Get the object
      outBot2.clear();
      outBot2.addString("set"); // put "set" command in the bottle
-     outBot2.addString("pos"); // put "pos" command in the bottle
+     outBot2.addString("poss"); // put "pos" command in the bottle
      Bottle& listBot1 = outBot2.addList();
      listBot1.addDouble(ang4L);
      listBot1.addDouble(ang5L);
@@ -3323,6 +3331,15 @@ void PMPThread::MessagePassL()
      listBot1.addDouble(ang8L);
      listBot1.addDouble(ang9L);
      listBot1.addDouble(ang10L);
+     listBot1.addDouble(angCupL);
+     listBot1.addDouble(angTL1);
+     listBot1.addDouble(angTL2);
+     listBot1.addDouble(angTL3);
+     listBot1.addDouble(angIL1);
+     listBot1.addDouble(angIL2);
+     listBot1.addDouble(angML1);
+     listBot1.addDouble(angML2);
+     listBot1.addDouble(angRPL);
      printf("Writing bottle left arm (%s)\n",outBot2.toString().c_str());
      cmdLeft_armPort.write();
      Time::delay(5);
@@ -3335,7 +3352,7 @@ void PMPThread::MessagePassT()
     Bottle& outBot3 = cmdTorsoPort.prepare();   // Get the object
     outBot3.clear();
     outBot3.addString("set"); // put "set" command in the bottle
-    outBot3.addString("pos"); // put "pos" command in the bottle
+    outBot3.addString("poss"); // put "pos" command in the bottle
     Bottle& listBot2 = outBot3.addList();
     listBot2.addDouble(ang1);
     listBot2.addDouble(1*ang2);
